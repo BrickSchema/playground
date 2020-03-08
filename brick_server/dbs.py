@@ -4,17 +4,19 @@ import pdb
 import json
 
 import redis
+from mongoengine import connect as mongo_connect
 
 #from brick_data.timeseries import BrickTimeseries
 from brick_data.sparql import BrickSparqlAsync
 from brick_data.common import TS_DB, BRICK_DB
 from brick_data.queryprocessor.querysynthesizer import TimescaledbSynthesizer
 from brick_server.extensions.lockmanager import LockManager
+import asyncpg
 
 from .configs import configs
 from .interfaces import DummyActuation, BrickTimeseries, AsyncpgTimeseries
 
-#
+
 lockmanager_configs = configs['lockmanager']
 lock_manager = LockManager(lockmanager_configs['host'],
                            lockmanager_configs['port'],
@@ -40,7 +42,10 @@ ts_db = AsyncpgTimeseries(brick_ts_configs['dbname'],
                           brick_ts_configs['host'],
                           brick_ts_configs['port'],
                           )
-asyncio.ensure_future(ts_db.init())
+try:
+    asyncio.ensure_future(ts_db.init())
+except asyncpg.exceptions.DuplicateTableError:
+    print('Timescale tabels have been already created.')
 
 def get_brick_db():
     return brick_sparql
