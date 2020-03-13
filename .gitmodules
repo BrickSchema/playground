@@ -1,0 +1,3 @@
+[submodule "brick-server-minimal"]
+	path = brick-server-minimal
+	url = git@gitlab.com:jbkoh/brick-server-minimal.git
