@@ -4,14 +4,15 @@ import requests
 
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi_utils.cbv import cbv
-from fastapi import Depends, Header, HTTPException, Body, Query, Path, Form
+from fastapi import Depends, Header, HTTPException, Body, Query, Path, Form, APIRouter
 #from fastapi.responses import PlainTextResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.responses import HTMLResponse, RedirectResponse, PlainTextResponse
 from starlette.requests import Request
 
 from ..configs import configs
-from .authorization import FRONTEND_APP, oauth, _get_id_token_user, authenticated, _jwt_pub_key, create_jwt_token
+from .authorization import FRONTEND_APP, oauth, _get_id_token_user, authenticated, authorized_frontend
+from .authorization import _jwt_pub_key, create_jwt_token, parse_jwt_token
 from .models import TokensResponse, TokenResponse
 from ..dummy_frontend import loggedin_frontend
 from ..exceptions import DoesNotExistError
@@ -37,8 +38,8 @@ def get_jwt_pubkey():
                  tags=['Auth'],
                  )
 async def get_login_via_google(request: Request):
-    redirect_url = auth_base_url + '/is_registered'
-    res = await oauth.google.authorize_redirect(request, redirect_url)
+    redirect_uri = auth_base_url + '/is_registered'
+    res = await oauth.google.authorize_redirect(request, redirect_uri)
     return res
 
 @auth_router.get('/is_registered',
@@ -61,21 +62,16 @@ async def get_is_registered(request: Request):
         user_doc = get_doc(User, userid=user['email'])
         redirect_uri = loggedin_frontend
         app_token_str = create_jwt_token(user_id=user['email'],
-                                         app_name='frontend',
+                                         app_name=FRONTEND_APP,
                                          ).decode('utf-8')
         redirect_uri += '?app_token=' + app_token_str
+        bp()
         return RedirectResponse(redirect_uri)
     except DoesNotExistError:
         request.session['access_token'] = token
         profile = (await oauth.google.get('userinfo', token=token)).json()
-        user_registration = {
-            'email': profile['email'],
-            'name': profile['name'],
-        }
-        request.session['user_registration'] = user_registration
         redirect_uri = auth_base_url + '/register?name={0}&email={1}'.format(profile['name'], profile['email'])
         return RedirectResponse(redirect_uri)
-        #return RedirectResponse('https://bd-testbed.ucsd.edu:9000/dummy-frontend/register?' + 'name=' + profile['name'] + '&email=' + profile['email'])
 
 @auth_router.get('/logincallback') # NOTE: Dummy function
 async def get_authorize(request: Request):
@@ -86,17 +82,18 @@ async def get_authorize(request: Request):
 
 @cbv(auth_router)
 class AppTokensRouter(object):
+
     @auth_router.post('/app_tokens',
                       status_code=200,
                       tags=['Auth'],
                       )
-    #@authenticated TODO: implement this
-    async def gen_token(#request: Request,
-                        app_name: str = Query(None,
+    @authorized_frontend
+    async def gen_token(self,
+                        app_name: str = Query('',
                                               description='The name of an app the user needs to generate a token for'),
                         token: HTTPAuthorizationCredentials = jwt_security_scheme,
                         ) -> TokenResponse:
-        user_id = parse_jwt_token(token)['user_id']
+        user_id = parse_jwt_token(token.credentials)['user_id']
         app_token_str = create_jwt_token(app_name=app_name)
         app_token = AppToken(user=user_id,
                              token=app_token_str,
@@ -110,8 +107,8 @@ class AppTokensRouter(object):
                      tags=['Auth'],
                      response_model=TokensResponse,
                      )
-    #@authenticated
-    async def get_tokens(#request: Request,
+    @authorized_frontend
+    async def get_tokens(self,
                          token: HTTPAuthorizationCredentials = jwt_security_scheme,
                          ) -> TokensResponse:
         #user = await _get_id_token_user(request) TODO
@@ -140,6 +137,7 @@ async def post_register_user(request: Request,
                              is_admin: bool=Form(False, description='Designate if the user is going to be an admin or not.'),
                              ):
     # TODO: Check if is_admin is allowed somwehow. (Maybe endorsed by the first admin or check the number of admins in the database and allow only one.
+    bp()
     token = request.session['access_token']
     oauth_user = await oauth.google.parse_id_token(request, token)
     profile = (await oauth.google.get('userinfo', token=token)).json()
@@ -157,4 +155,8 @@ async def post_register_user(request: Request,
                     registration_time=arrow.get().datetime
                     )
     new_user.save()
-    return RedirectResponse(loggedin_frontend)
+    app_token_str = create_jwt_token(user_id=profile['email'],
+                                     app_name=FRONTEND_APP,
+                                     ).decode('utf-8')
+    redirect_uri = loggedin_frontend + '?app_token=' + app_token_str
+    return RedirectResponse(redirect_uri)
