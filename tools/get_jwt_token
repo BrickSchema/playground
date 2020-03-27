@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+import json
+import time
+import sys
+import jwt
+sys.path.append("./brick-server-minimal")
+
+from brick_server.auth.authorization import create_jwt_token
+
+with open('configs/configs.json', 'r') as fp:
+    configs = json.load(fp)
+
+with open(configs['auth']['jwt']['privkey_path'], 'r') as fp:
+    _jwt_priv_key = fp.read()
+with open(configs['auth']['jwt']['pubkey_path'], 'r') as fp:
+    _jwt_pub_key = fp.read()
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        token_lifetime = int(sys.argv[1])
+        print(token_lifetime)
+    else:
+        token_lifetime = 3600
+    print(create_jwt_token(user_id='admin',
+                           app_name='brickserver_frontend',
+                           token_lifetime=token_lifetime,
+                           ).decode('utf-8'))
+    #print(create_jwt_token(3600*24*365).decode('utf-8'))

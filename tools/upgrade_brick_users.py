@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+import sys
+sys.path.append("./brick-server-minimal")
+sys.path.append("./")
+
+from brick_server.models import User as BrickUser
+from playground.models import User
+
+for user in BrickUser.objects():
+    print('previously: {0}'.format(user.to_mongo()))
+    user_info = {k: v for k, v in user.to_mongo().items()
+                 if k not in ['_cls', '_id']}
+    user_info['id'] = user.id
+    new_user = User(**user_info)
+    user.delete()
+    new_user.save()
+    print('now: {0}'.format(new_user.to_mongo()))

@@ -3,6 +3,7 @@ ansible/
 configs/
 docker-compose.yml
 run_*
+playground-src
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
