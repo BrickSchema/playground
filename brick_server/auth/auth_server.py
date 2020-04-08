@@ -16,7 +16,7 @@ from .authorization import _jwt_pub_key, create_jwt_token, parse_jwt_token
 from .models import TokensResponse, TokenResponse
 from ..dummy_frontend import loggedin_frontend
 from ..exceptions import DoesNotExistError
-from ..models import get_doc, User, AppToken
+from ..models import get_doc, get_docs, User, AppToken
 from ..services.models import jwt_security_scheme, IsSuccess
 
 from pdb import set_trace as bp
@@ -117,10 +117,12 @@ class AppTokensRouter(object):
                         ) -> TokenResponse:
         user_id = parse_jwt_token(token.credentials)['user_id']
         app_token_str = create_jwt_token(app_name=app_name)
-        app_token = AppToken(user=user_id,
+        user = get_doc(User, userid=user_id)
+        app_token = AppToken(user=user,
                              token=app_token_str,
                              name=app_name,
                              )
+        app_token.save()
         payload = parse_jwt_token(app_token_str)
         return TokenResponse(token=app_token_str, exp=payload['exp'], name=app_name)
 
@@ -134,7 +136,8 @@ class AppTokensRouter(object):
                          token: HTTPAuthorizationCredentials = jwt_security_scheme,
                          ) -> TokensResponse:
         #user = await _get_id_token_user(request) TODO
-        user = parse_jwt_token(token)['user_id']
+        user_id = parse_jwt_token(token)['user_id']
+        user = get_doc(User, userid=user_id)
         app_tokens = []
         for app_token in get_docs(AppToken, user=user):
             payload = parse_jwt_token(app_token.token)
