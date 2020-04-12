@@ -3,6 +3,11 @@ from mongoengine import Document, StringField, DictField, ReferenceField, ListFi
 from brick_server.models import User as BrickUser
 
 
+class MarketApp(Document):
+    name = StringField(required=True, unique=True)
+    description = StringField()
+    permission_templates = DictField(DictField())
+    token_lifetime = IntField(default=3600)
 
 class App(Document):
     name = StringField(required=True, unique=True)

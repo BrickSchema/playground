@@ -18,7 +18,7 @@ from fastapi_utils.inferring_router import InferringRouter
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.requests import Request
 
-from brick_server.exceptions import MultipleObjectsFoundError
+from brick_server.exceptions import MultipleObjectsFoundError, AlreadyExistsError
 from brick_server.services.models import jwt_security_scheme, IsSuccess
 from brick_server.auth.authorization import authorized_frontend
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
@@ -116,7 +116,7 @@ class Apps():
                    ):
         existing_apps = App.objects(name=manifest.name)
         if existing_apps:
-            raise MultipleObjectsFoundError(App, manifest.name)
+            raise AlreadyExistsError(App, manifest.name)
         jwt_payload = parse_jwt_token(token.credentials)
         app_id = gen_uuid()
         app = App(name = manifest.name,

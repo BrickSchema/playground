@@ -16,6 +16,7 @@ QUERY_BASE = API_BASE + '/rawqueries'
 DATA_BASE = API_BASE + '/data'
 ACTUATION_BASE = API_BASE + '/actuation'
 APP_BASE = API_BASE + '/apps'
+MARKETAPP_BASE = API_BASE + '/market_apps'
 
 
 default_headers = {
