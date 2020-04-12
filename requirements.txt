@@ -21,6 +21,6 @@ requests
 uvicorn
 Werkzeug
 git+https://github.com/jbkoh/brick_data.git@master
-#httpx
+httpx==0.12.0
 itsdangerous
 pytest-env
