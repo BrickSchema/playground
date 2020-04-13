@@ -13,5 +13,5 @@ permission_templates:
     target_variables:
       - ?point
     permission_type: AWRO
-callback_url: https://bd-testbed.ucsd.edu:9001/apps/bacnet_driver
+callback_url: https://bd-datas2.ucsd.edu:9001/apps/bacnet_driver
 lifetime: 6months

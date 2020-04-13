@@ -6,9 +6,11 @@ import arrow
 sys.path.append("./brick-server-minimal")
 sys.path.append("./")
 
-from brick_server.models import User
+from brick_server.auth.authorization import FRONTEND_APP
+from playground.models import App, User
 
-if not User.objects(user_id='admin'):
+users = User.objects(userid='admin')
+if not users:
     user = User(
         userid='admin',
         name='admin',
@@ -16,5 +18,22 @@ if not User.objects(user_id='admin'):
         is_approved=True,
         registration_time=arrow.get().datetime,
         email='dummy@example.commm',
+        installed_apps=[],
     )
+    user.save()
+else:
+    user = users[0]
+
+apps = App.objects(name=FRONTEND_APP)
+if not apps:
+    app = App(
+        name=FRONTEND_APP,
+        app_id=FRONTEND_APP,
+    )
+    app.save()
+else:
+    app = apps[0]
+
+if app not in user.installed_apps:
+    user.installed_apps.append(app)
     user.save()

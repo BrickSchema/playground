@@ -16,6 +16,6 @@ permission_templates:
       - W
       - R
       - O
-callback_url: https://bd-testbed.ucsd.edu:8000/apps/bacnet_driver
+callback_url: https://bd-datas2.ucsd.edu:8000/apps/bacnet_driver
 app_lifetime: 31449600
 token_lifetime: 31449600

@@ -25,6 +25,6 @@ def check_permissions(entity_ids, user, app, permission_required):
 
 def evaluate_app_user(action_type, target_ids, *args, **kwargs):
     jwt_payload = parse_jwt_token(kwargs['token'].credentials)
-    app = get_doc(App, app_name=jwt_payload['app_name'])
+    app = get_doc(App, name=jwt_payload['app_id'])
     user  = get_doc(User, userid=jwt_payload['user_id'])
     check_permissions(target_ids, user, app, action_type)
