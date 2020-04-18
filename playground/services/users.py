@@ -23,36 +23,37 @@ from brick_server.services.models import jwt_security_scheme, IsSuccess
 from brick_server.auth.authorization import authorized_frontend
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
 from brick_server.configs import configs
+from brick_server.models import get_doc
 #from ..dependencies import get_brick_db, dependency_supplier
 
-from .models import AppResponse, AppManifest, ActivationRequest
+from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps
 from .models import app_name_desc, user_id_desc
-from ..models import App # TODO: Change naming conventino for mongodb models
+from ..models import App, User # TODO: Change naming conventino for mongodb models
 
 
 user_router = InferringRouter('users')
 
 @cbv(user_router)
-class UserApps(Resource):
+class UserApps:
 
-    @user_router.get('/{user_id}/apps',
+    @user_router.get('/',
                     status_code=200,
                     description='View apps that user activated.',
-                    #response_model=AppResponse,
+                    response_model=ActivatedApps,
                     tags=['Users'],
                     )
     #@authorized #TODO: Reimplement the authentication mechanism
     def get(self,
-            user_id: str = Path(..., description=user_id_desc),
+            #user_id: str = Path(..., description=user_id_desc),
             token: HTTPAuthorizationCredentials = jwt_security_scheme,
             ):
-        user = get_doc(User, userid=user_id)
-        resp = {
-            'activated_apps': [app.name for app in user.activated_apps]
-        }
-        return resp, 200
+        jwt_payload = parse_jwt_token(token.credentials)
+        user = get_doc(User, userid=jwt_payload['user_id'])
+        resp = ActivatedApps(activated_apps=[app.name for app in user.activated_apps])
 
-    @user_router.get('/{user_id}/apps',
+        return resp
+
+    @user_router.post('/',
                     status_code=200,
                     description='Activate an app for the user.',
                     #response_model=AppResponse,
@@ -60,13 +61,15 @@ class UserApps(Resource):
                     )
     #@authenticated #TODO: Reimplement the authentication mechanism
     def post(self,
-             user_id: str = Path(..., description=user_id_desc),
+             #user_id: str = Path(..., description=user_id_desc),
              activation_req: ActivationRequest = Body(...),
+             token: HTTPAuthorizationCredentials = jwt_security_scheme,
              ):
-        user = get_doc(User, userid=user_id)
+        jwt_payload = parse_jwt_token(token.credentials)
+        user = get_doc(User, userid=jwt_payload['user_id'])
         app_name = activation_req.app_name
         app = get_doc(App, name=app_name)
-        if app.app_id in user.activated_apps:
+        if app_name in user.activated_apps:
             raise AlreadyExistsError(App, app_name)
         app_id = app.app_id
         # TODO: I think this is not necessary. Remove below later.

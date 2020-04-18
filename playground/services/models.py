@@ -14,6 +14,9 @@ user_id_desc = 'The ID of an user for the request'
 class ActivationRequest(BaseModel):
     app_name: str
 
+class ActivatedApps(BaseModel):
+    activated_apps: List[str]
+
 class PermissionTemplate(BaseModel):
     queries: List[Dict[str, str]]
     common_variables: List[List[str]]

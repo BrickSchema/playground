@@ -22,6 +22,7 @@ if __name__ == '__main__':
     else:
         token_lifetime = 3600
     print(create_jwt_token(user_id='admin',
+                           app_name='brickserver_frontend',
                            token_lifetime=token_lifetime,
                            ).decode('utf-8'))
     #print(create_jwt_token(3600*24*365).decode('utf-8'))

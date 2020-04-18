@@ -20,5 +20,5 @@ def test_get_activated_user():
     manifest = yaml.load(open('examples/data/app_manifests/sample_app.yaml'))
     resp = requests.get(USER_APP + '/', headers=headers)
     assert resp.status_code in [200]
-    assert manifest['name'] == resp.json()['activated_apps']
+    assert manifest['name'] in resp.json()['activated_apps']
 

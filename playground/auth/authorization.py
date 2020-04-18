@@ -4,13 +4,15 @@ from brick_server.models import get_doc
 from ..models import App, User
 
 
+SEP = '^#$%'
+
 def make_permission_key(user_id, app_name, entity_id):
     return user_id + SEP + app_name + SEP + entity_id
 
 
 def check_permissions(entity_ids, user, app, permission_required):
     for entity_id in entity_ids:
-        perm_key = make_permission_key(user.userid, app.app_name, entity_id)
+        perm_key = make_permission_key(user.userid, app.name, entity_id)
         perm = r.get(perm_key)
         if perm is None:
             raise exceptions.Unauthorized('The token does not have any permission over {0}'.format(entity_id))
