@@ -41,4 +41,4 @@ class App(Document):
     permission_lifetime = IntField(default=36000)
 
 class User(BrickUser):
-    installed_apps = ListField(ReferenceField(App), default=[])
+    activated_apps = ListField(ReferenceField(App), default=[])

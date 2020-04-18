@@ -8,7 +8,11 @@ from fastapi import Security
 app_name_desc = 'An application\'s name'
 app_id_desc = 'The identifier of the app'
 perm_templates_desc = 'TODO'
+user_id_desc = 'The ID of an user for the request'
 
+
+class ActivationRequest(BaseModel):
+    app_name: str
 
 class PermissionTemplate(BaseModel):
     queries: List[Dict[str, str]]
