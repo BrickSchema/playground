@@ -25,7 +25,7 @@ from brick_server.auth.authorization import auth_scheme, parse_jwt_token, author
 from brick_server.configs import configs
 #from ..dependencies import get_brick_db, dependency_supplier
 
-from .models import AppResponse, AppManifest
+from .models import AppResponse, AppManifest, ActivationRequest
 from .models import app_name_desc, user_id_desc
 from ..models import App # TODO: Change naming conventino for mongodb models
 
