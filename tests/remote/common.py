@@ -6,9 +6,9 @@ import pytest
 BRICK_VERSION = '1.0.3'
 BRICK = Namespace(f'https://brickschema.org/schema/{BRICK_VERSION}/Brick#')
 
-HOSTNAME = 'https://bd-datas2.ucsd.edu'
 #HOSTNAME = 'https://bd-datas2.ucsd.edu'
-#HOSTNAME = 'http://bd-datas2.ucsd.edu:8000'
+#HOSTNAME = 'https://bd-datas2.ucsd.edu'
+HOSTNAME = 'https://bd-testbed.ucsd.edu:8000'
 #HOSTNAME = ''
 API_BASE = HOSTNAME + '/brickapi/v1'
 ENTITY_BASE = API_BASE + '/entities'

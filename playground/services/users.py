@@ -32,7 +32,7 @@ from ..models import App # TODO: Change naming conventino for mongodb models
 
 user_router = InferringRouter('users')
 
-@cbv(user)
+@cbv(user_router)
 class UserApps(Resource):
 
     @user_router.get('/{user_id}/apps',
