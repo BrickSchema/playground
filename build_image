@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+git clone git@gitlab.com:jbkoh/playground.git playground-src
+cd playground-src
+git pull
+git submodule update --init --recursive --remote
+cd ..
+docker build . -t jbkoh/playground:0.1
+
