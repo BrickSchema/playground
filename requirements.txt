@@ -26,3 +26,4 @@ itsdangerous
 pytest-env
 docker
 grpcio
+protobuf
