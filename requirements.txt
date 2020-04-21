@@ -25,5 +25,6 @@ httpx==0.12.0
 itsdangerous
 pytest-env
 docker
-grpcio
 protobuf
+grpcio
+aiofiles

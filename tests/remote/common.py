@@ -17,12 +17,15 @@ DATA_BASE = API_BASE + '/data'
 ACTUATION_BASE = API_BASE + '/actuation'
 APP_BASE = API_BASE + '/apps'
 MARKETAPP_BASE = API_BASE + '/market_apps'
-USER_APP = API_BASE + '/user_apps'
+USER_APP_BASE = API_BASE + '/user_apps'
 AUTH_BASE = HOSTNAME + '/auth'
+APP_STATIC_BASE = API_BASE + '/appstatic'
 
 default_headers = {
     "Authorization": "Bearer " + os.environ['JWT_TOKEN']
 }
+
+app_manifest = 'examples/data/app_manifests/app1.yaml'
 
 
 def authorize_headers(headers={}):

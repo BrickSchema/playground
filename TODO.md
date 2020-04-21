@@ -4,8 +4,8 @@
 
 
 ### 4/18/2020
-1. App staging
+1. ~~App staging~~
     1. (App approval)
-2. App install / instantiation / activation
+2. ~~App install / instantiation / activation~~
 4. App login
 5. App hosting (/appweb)

@@ -83,7 +83,6 @@ class AppByName:
         app_doc.update(**updates)
         return 'Success', 201
 
-
 @cbv(app_router)
 class Apps():
 

@@ -69,7 +69,7 @@ class UserApps:
         user = get_doc(User, userid=jwt_payload['user_id'])
         app_name = activation_req.app_name
         app = get_doc(App, name=app_name)
-        if app_name in user.activated_apps:
+        if app in user.activated_apps:
             raise AlreadyExistsError(App, app_name)
         app_id = app.app_id
         # TODO: I think this is not necessary. Remove below later.

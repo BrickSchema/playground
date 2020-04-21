@@ -2,14 +2,26 @@
 from shlex import split
 import docker
 from docker.errors import APIError
-from .redis_instance import redis_db
 from ..iptables_manager import iptables_manager
+from ..dbs import get_app_management_redis_db
+from pdb import set_trace as bp
 
 
 docker_client = docker.from_env()
 
+redis_db = get_app_management_redis_db()
+#TODO: Think about how to use injection model
+#TODO: Think about how to use asyncio. (aioredis)
 
-def register_app(app_name:str, ver:str, src_dir:str, start_cmd:str, build_env:str, port:int or None = None, build_cmd:str = '') -> None:
+
+def register_app(app_name:str,
+                 ver:str,
+                 src_dir:str,
+                 start_cmd:str,
+                 build_env:str,
+                 port:int or None = None,
+                 build_cmd:str = '',
+                 ) -> None:
 	"""
 	Register an new app or update an existing app as runnable docker images.
 
@@ -132,9 +144,13 @@ def spawn_app(app_name:str, user_id:str, arguments:str = '') -> str:
 	try:
 		print("run container")
 		docker_client.containers.run(image=app_name, command=arguments, detach=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_name)
-	except APIError as e:
-		print(e)
-		return ''
+	except Exception as e:
+		aaa = e
+		bp()
+
+	#except APIError as e:
+#		print(e)
+#		return ''
 	# docker_client.containers.run(image=app_name, command=arguments, stdin_open=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_id)
 
 	# create corresponding iptables chain based on container iid
