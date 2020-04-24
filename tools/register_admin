@@ -18,7 +18,7 @@ if not users:
         is_approved=True,
         registration_time=arrow.get().datetime,
         email='dummy@example.commm',
-        installed_apps=[],
+        activated_apps=[],
     )
     user.save()
 else:
