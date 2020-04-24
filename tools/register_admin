@@ -34,6 +34,6 @@ if not apps:
 else:
     app = apps[0]
 
-if app not in user.installed_apps:
-    user.installed_apps.append(app)
+if app not in user.activated_apps:
+    user.activated_apps.append(app)
     user.save()

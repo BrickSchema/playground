@@ -14,7 +14,7 @@ def test_activate_new_app():
     assert resp.status_code in [200, 409]
 
 
-def test_get_activated_user():
+def test_get_activated_user_apps():
     headers = authorize_headers()
     manifest = yaml.load(open(app_manifest))
     resp = requests.get(USER_APP_BASE + '/', headers=headers)
