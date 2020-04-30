@@ -9,10 +9,10 @@ sys.path.append("./")
 from brick_server.auth.authorization import FRONTEND_APP
 from playground.models import App, User
 
-users = User.objects(userid='admin')
+users = User.objects(user_id='admin')
 if not users:
     user = User(
-        userid='admin',
+        user_id='admin',
         name='admin',
         is_admin=True,
         is_approved=True,

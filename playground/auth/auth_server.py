@@ -39,17 +39,17 @@ class LoginPerApp():
                   ):
         # print("enter login per hosted app")
         jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(User, userid=jwt_payload['user_id'])
+        user = get_doc(User, user_id=jwt_payload['user_id'])
         app = get_doc(App, name=app_name)
         assert app in user.activated_apps # authorization
 
         app_token = create_jwt_token(app_name=app.name,
-                                     user_id=user.userid,
+                                     user_id=user.user_id,
                                      token_lifetime=app.token_lifetime,
                                      )
         redirect_url = app.callback_url + '?app_token=' + app_token.decode("utf-8")
-        #container_name = app_management.spawn_app(app_name, user.userid.replace('@', 'at'))
-        container_name = app_name + "-" + user.userid # TODO: this is for dev. use the above line.
+        #container_name = app_management.spawn_app(app_name, user.user_id.replace('@', 'at'))
+        container_name = app_name + "-" + user.user_id # TODO: this is for dev. use the above line.
         if container_name == '': #TODO: update the return value to None. or raise Execption
             print("app not found")
             raise DoesNotExistError(App, app_name)
