@@ -117,9 +117,9 @@ class Apps():
         if existing_apps:
             raise AlreadyExistsError(App, manifest.name)
         jwt_payload = parse_jwt_token(token.credentials)
-        app_id = gen_uuid()
+        #app_id = gen_uuid()
         app = App(name = manifest.name,
-                  app_id = app_id,
+                  app_id = manifest.name,
                   description = manifest.description,
                   callback_url = manifest.callback_url,
                   app_expires_at = time.time() + manifest.app_lifetime,
