@@ -21,6 +21,7 @@ from ..iptables_manager import iptables_manager
 from ..dbs import get_app_management_redis_db
 from ..services.models import app_name_desc
 from ..models import App, User
+from .models import AppLoginResponse
 
 
 @cbv(auth_router)
@@ -28,15 +29,15 @@ class LoginPerApp():
     redis_db: StrictRedis = Depends(get_app_management_redis_db)
 
     @auth_router.get('/app_login/{app_name}',
-                    status_code=302,
+                    status_code=200,
                     description='TODO: Login point of a user for the app. This will redirect the user to Google login process. Once the login is done, the user will be redirected bck to `REDIRECT_URL + /<app_name>`.',
-                    response_class=RedirectResponse,
+                    response_model=AppLoginResponse,
                     tags=['Apps'],
                     )
     def app_login(self,
                   app_name: str = Path(..., description=app_name_desc),
                   token: HTTPAuthorizationCredentials = jwt_security_scheme,
-                  ):
+                  ) -> AppLoginResponse:
         # print("enter login per hosted app")
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
@@ -47,8 +48,6 @@ class LoginPerApp():
                                      user_id=user.user_id,
                                      token_lifetime=app.token_lifetime,
                                      )
-        redirect_url = app.callback_url + '?app_token=' + app_token.decode("utf-8")
-        #container_name = app_management.spawn_app(app_name, user.user_id.replace('@', 'at'))
         container_name = app_name + "-" + user.user_id # TODO: this is for dev. use the above line.
         if container_name == '': #TODO: update the return value to None. or raise Execption
             print("app not found")
@@ -59,4 +58,6 @@ class LoginPerApp():
         #                                   "tcp", # TODO: Make it configurable.
         #                                   "5001"
         #                                   )
-        return RedirectResponse(redirect_url, status_code=302)
+        return AppLoginResponse(redirect_url=app.callback_url,
+                                app_token=app_token.decode('utf-8'),
+                                )
