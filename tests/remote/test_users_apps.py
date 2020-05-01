@@ -28,7 +28,7 @@ def test_login_per_app():
                         headers=headers,
                         allow_redirects=False,
                         )
-    assert resp.status_code == 302
-    assert '?app_token=' in resp.headers['location']
+    assert resp.status_code == 200
+    assert resp.json()['app_token']
 
 

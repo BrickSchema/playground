@@ -43,13 +43,13 @@ def get_app_admins(*args, **kwargs):
 class MarketAppsRoute():
 
     @marketapp_router.get('/',
-                     status_code=200,
-                     description='List all apps . (Not implemented yet)',
-                     )
+                          status_code=200,
+                          description='List all apps . (Not implemented yet)',
+                          )
     @authenticated
     async def get(self,
-            token: HTTPAuthorizationCredentials = jwt_security_scheme,
-            ):
+                  token: HTTPAuthorizationCredentials = jwt_security_scheme,
+                  ):
         market_apps = get_docs(MarketApp)
         res = {'market_apps': [app.name for app in market_apps]}
         return res

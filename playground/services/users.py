@@ -48,7 +48,7 @@ class UserApps:
             token: HTTPAuthorizationCredentials = jwt_security_scheme,
             ):
         jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(User, userid=jwt_payload['user_id'])
+        user = get_doc(User, user_id=jwt_payload['user_id'])
         resp = ActivatedApps(activated_apps=[app.name for app in user.activated_apps])
 
         return resp
@@ -66,7 +66,7 @@ class UserApps:
              token: HTTPAuthorizationCredentials = jwt_security_scheme,
              ):
         jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(User, userid=jwt_payload['user_id'])
+        user = get_doc(User, user_id=jwt_payload['user_id'])
         app_name = activation_req.app_name
         app = get_doc(App, name=app_name)
         if app in user.activated_apps:
