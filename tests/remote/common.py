@@ -1,4 +1,5 @@
 import os
+import requests
 from copy import deepcopy
 from rdflib import Namespace
 import pytest
@@ -31,3 +32,12 @@ app_manifest = 'examples/data/app_manifests/app1.yaml'
 def authorize_headers(headers={}):
     headers.update(default_headers)
     return headers
+
+def requests_get(*args, **kwargs):
+    return requests.get(*args, **kwargs, verify=False)
+
+def requests_post(*args, **kwargs):
+    return requests.post(*args, **kwargs, verify=False)
+
+def requests_delete(*args, **kwargs):
+    return requests.delete(*args, **kwargs, verify=False)
