@@ -23,6 +23,7 @@ from brick_server.services.models import jwt_security_scheme, IsSuccess
 from brick_server.auth.authorization import authorized_frontend
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
 from brick_server.configs import configs
+from brick_server.models import get_doc
 #from ..dependencies import get_brick_db, dependency_supplier
 
 from .models import AppResponse, AppManifest
@@ -78,7 +79,6 @@ class AppByName:
              app_modification: AppResponse = Body(...),
              token: HTTPAuthorizationCredentials = jwt_security_scheme,
              ):
-        bp()
         # TODO: Is it ever used?
         updates = {'set__' + k: v for k, v in app_modeification.dict().items()}
         app_doc = get_doc(App, name=app_name)
@@ -119,7 +119,6 @@ class Apps():
         if existing_apps:
             raise AlreadyExistsError(App, manifest.name)
         jwt_payload = parse_jwt_token(token.credentials)
-        app_doc = get_doc(App, name=manifest.name)
         app = App(name = manifest.name,
                   app_id = manifest.name,
                   description = manifest.description,
