@@ -78,6 +78,8 @@ class AppByName:
              app_modification: AppResponse = Body(...),
              token: HTTPAuthorizationCredentials = jwt_security_scheme,
              ):
+        bp()
+        # TODO: Is it ever used?
         updates = {'set__' + k: v for k, v in app_modeification.dict().items()}
         app_doc = get_doc(App, name=app_name)
         app_doc.update(**updates)
@@ -117,7 +119,7 @@ class Apps():
         if existing_apps:
             raise AlreadyExistsError(App, manifest.name)
         jwt_payload = parse_jwt_token(token.credentials)
-        #app_id = gen_uuid()
+        app_doc = get_doc(App, name=manifest.name)
         app = App(name = manifest.name,
                   app_id = manifest.name,
                   description = manifest.description,

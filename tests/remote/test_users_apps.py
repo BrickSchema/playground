@@ -7,6 +7,11 @@ from .common import USER_APP_BASE, authorize_headers, BRICK, AUTH_BASE, app_mani
 from .data import znt_id
 
 
+def test_deactivate_all_apps():
+    headers = authorize_headers()
+    resp = requests.delete(USER_APP_BASE + '/', headers=headers)
+    assert resp.status_code == 200
+
 def test_activate_new_app():
     headers = authorize_headers()
     manifest = yaml.load(open(app_manifest))
