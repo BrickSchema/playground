@@ -82,7 +82,7 @@ class UserApps:
              #user_id: str = Path(..., description=user_id_desc),
              activation_req: ActivationRequest = Body(...),
              token: HTTPAuthorizationCredentials = jwt_security_scheme,
-             ):
+             ) -> IsSuccess:
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
         app_name = activation_req.app_name
@@ -103,4 +103,4 @@ class UserApps:
 #                    register_permission(user_id, app, rsc, perm_type)
         user.activated_apps.append(app)
         user.save()
-        return 'Success', 201
+        return IsSucecss(reason='Already activated')
