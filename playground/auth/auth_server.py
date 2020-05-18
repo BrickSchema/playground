@@ -32,14 +32,14 @@ class LoginPerApp():
     @auth_router.get('/app_login/{app_name}',
                     status_code=200,
                     description='TODO: Login point of a user for the app. This will redirect the user to Google login process. Once the login is done, the user will be redirected bck to `REDIRECT_URL + /<app_name>`.',
-                    response_model=AppLoginResponse,
+                    #response_model=AppLoginResponse,
                     tags=['Apps'],
                     )
     def app_login(self,
                   app_name: str = Path(..., description=app_name_desc),
                   token: HTTPAuthorizationCredentials = jwt_security_scheme,
                   external: bool = False,
-                  ) -> AppLoginResponse:
+                  ):
         # print("enter login per hosted app")
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
@@ -60,10 +60,15 @@ class LoginPerApp():
         #                                   "tcp", # TODO: Make it configurable.
         #                                   "5001"
         #                                   )
-        with open(f'static/{app_name}/index.html', 'r') as fp: # TODO: Preload this into memory
-            resp = HTMLResponse(fp.read())
-        resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
-        return resp
+        if not external:
+            with open(f'static/{app_name}/index.html', 'r') as fp: # TODO: Preload this into memory
+                resp = HTMLResponse(fp.read())
+            resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
+            return resp
+        else:
+            resp = RedirectResponse(app.callback_url)
+            resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
+            return resp
         #return AppLoginResponse(redirect_url=app.callback_url,
         #                        app_token=app_token.decode('utf-8'),
         #                        )
