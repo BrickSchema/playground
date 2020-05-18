@@ -33,6 +33,6 @@ def test_login_per_app():
                         allow_redirects=False,
                         )
     assert resp.status_code == 200
-    assert resp.json()['app_token']
+    assert resp.cookies['app_token']
 
 
