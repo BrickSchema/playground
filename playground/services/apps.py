@@ -17,6 +17,7 @@ from fastapi import Depends, Header, HTTPException, Body, Query, Path
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.requests import Request
+from starlette.responses import HTMLResponse
 
 from brick_server.exceptions import MultipleObjectsFoundError, AlreadyExistsError
 from brick_server.services.models import jwt_security_scheme, IsSuccess
@@ -103,6 +104,75 @@ class Apps():
                 app['callback_url'] = app_doc.callback_url
             apps.append(app)
         res = {'apps': apps}
+        return res
+
+    @app_router.post('/',
+                     status_code=200,
+                     description='Stage an app',
+                     response_model=IsSuccess,
+                     )
+    @authorized_frontend
+    async def post(self,
+                   manifest: AppManifest,
+                   token: HTTPAuthorizationCredentials = jwt_security_scheme,
+                   ):
+        existing_apps = App.objects(name=manifest.name)
+        if existing_apps:
+            raise AlreadyExistsError(App, manifest.name)
+        jwt_payload = parse_jwt_token(token.credentials)
+        app = App(name = manifest.name,
+                  app_id = manifest.name,
+                  description = manifest.description,
+                  callback_url = manifest.callback_url,
+                  app_expires_at = time.time() + manifest.app_lifetime,
+                  token_lifetime = manifest.token_lifetime,
+                  installer = jwt_payload['user_id'],
+                  )
+        app.save()
+
+        for perm_name in app.permission_templates.keys():
+            # TODO
+            #app.approvals[perm_name] = []
+            #app.pending_approvals[perm_name] = []
+            pass
+        #request_app_approval(app)
+        app.save()
+
+        return IsSuccess()
+
+
+
+@cbv(app_router)
+class AppStatic():
+    @app_router.get('/{app_name}/static/{paths:path}',
+                    status_code=200,
+                    )
+    def get_static(self,
+                   app_name: str=Path(..., description='TODO'),
+                   paths: str = Path(..., description='TODO'),
+                   #app_token: str = Cookie(...),
+                   ):
+        #TODO Check Cookie
+        #TODO: parse paths andread and return the right HTMLResponse
+        with open('static/' + paths, 'r') as fp:
+            resp = HTMLResponse(fp.read())
+        # TODO: Activate this
+        #resp.set_cookie(key='app_token', value=app_token)
+        return resp
+
+
+@cbv(app_router)
+class AppApi():
+    @app_router.get('/{app_name}/api/{paths:path}',
+                     status_code=200,
+                     description='List all apps . (Not implemented yet)',
+                     )
+    def get(self,
+            request: Request,
+            app_name: str=Path(..., description='TODO'),
+            #app_token: str = Cookie(...), TODO: Eanble this
+            ):
+        #TODO: parse request and call the corresponding API
         return res
 
     @app_router.post('/',

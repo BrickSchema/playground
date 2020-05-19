@@ -103,4 +103,4 @@ class UserApps:
 #                    register_permission(user_id, app, rsc, perm_type)
         user.activated_apps.append(app)
         user.save()
-        return IsSucecss(reason='Already activated')
+        return IsSuccess(reason='Already activated')

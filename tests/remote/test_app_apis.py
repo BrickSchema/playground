@@ -9,5 +9,11 @@ from .data import znt_id
 
 def test_get_app_api():
     url = APP_BASE + '/app1/api/test'
-    resp = requests_get(url)
+    params = {
+        'test': 'TEST',
+    }
+    headers = {
+        'testheader': 'HeaderTest',
+    }
+    resp = requests_get(url, params=params, headers=headers)
     bp()
