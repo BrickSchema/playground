@@ -61,10 +61,13 @@ class LoginPerApp():
         #                                   "5001"
         #                                   )
         if not external:
-            with open(f'static/{app_name}/index.html', 'r') as fp: # TODO: Preload this into memory
-                resp = HTMLResponse(fp.read())
-            resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
-            return resp
+            #TODO: configure API_BASE
+            redirect_url = API_BASE + '/apps/{app_name}/static/index.html?app_token=' + app_token.decode('utf-8')
+            return redirect_url
+
+            #with open(f'static/{app_name}/index.html', 'r') as fp: # TODO: Preload this into memory
+            #    resp = HTMLResponse(fp.read())
+            #resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
         else:
             resp = RedirectResponse(app.callback_url)
             resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))

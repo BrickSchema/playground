@@ -13,7 +13,7 @@ import arrow
 import rdflib
 from rdflib import RDF, URIRef
 from fastapi_utils.cbv import cbv
-from fastapi import Depends, Header, HTTPException, Body, Query, Path
+from fastapi import Depends, Header, HTTPException, Body, Query, Path, Cookie
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.requests import Request
@@ -150,14 +150,29 @@ class AppStatic():
     def get_static(self,
                    app_name: str=Path(..., description='TODO'),
                    paths: str = Path(..., description='TODO'),
-                   #app_token: str = Cookie(...),
+                   app_token: str = Cookie(...),
                    ):
-        #TODO Check Cookie
         #TODO: parse paths andread and return the right HTMLResponse
-        with open('static/' + paths, 'r') as fp:
-            resp = HTMLResponse(fp.read())
-        # TODO: Activate this
-        #resp.set_cookie(key='app_token', value=app_token)
+        if is_index:
+            # TODO: Check if token is inside the cookie.
+            #          TODO: Validate Token in the cookie
+            # TODO: else:
+            #          TODO: Validate Token retrieved from the path
+            #          TODO: Set Token in the cookie
+            pass
+        else:
+            #TODO: Validate the Token
+            #TODO: Maybe update the token
+            pass
+
+        # TODO: If file does not exist, return an error.
+
+        resp = FileResponse('static/' + paths)
+        #with open('static/' + paths, 'r') as fp:
+        #    if filetype == HTML:
+        #        resp = HTMLResponse(fp.read())
+        #    else:
+                #resp = FileResponse
         return resp
 
 
