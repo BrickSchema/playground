@@ -1,4 +1,5 @@
 from pdb import set_trace as bp
+import os
 import time
 from copy import deepcopy
 from uuid import uuid4
@@ -17,9 +18,9 @@ from fastapi import Depends, Header, HTTPException, Body, Query, Path, Cookie
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.requests import Request
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, FileResponse
 
-from brick_server.exceptions import MultipleObjectsFoundError, AlreadyExistsError
+from brick_server.exceptions import MultipleObjectsFoundError, AlreadyExistsError, DoesNotExistError, NotAuthorizedError
 from brick_server.services.models import jwt_security_scheme, IsSuccess
 from brick_server.auth.authorization import authorized_frontend
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
@@ -29,7 +30,7 @@ from brick_server.models import get_doc
 
 from .models import AppResponse, AppManifest
 from .models import app_name_desc
-from ..models import App # TODO: Change naming conventino for mongodb models
+from ..models import App, User # TODO: Change naming conventino for mongodb models
 
 
 app_router = InferringRouter('apps')
@@ -144,35 +145,38 @@ class Apps():
 
 @cbv(app_router)
 class AppStatic():
-    @app_router.get('/{app_name}/static/{paths:path}',
+    @app_router.get('/{app_name}/static/{path:path}',
                     status_code=200,
                     )
     def get_static(self,
                    app_name: str=Path(..., description='TODO'),
-                   paths: str = Path(..., description='TODO'),
-                   app_token: str = Cookie(...),
+                   path: str = Path(..., description='TODO'),
+                   app_token: str = Cookie(None),
+                   app_token_query: str = Query(None),
                    ):
         #TODO: parse paths andread and return the right HTMLResponse
-        if is_index:
-            # TODO: Check if token is inside the cookie.
-            #          TODO: Validate Token in the cookie
-            # TODO: else:
-            #          TODO: Validate Token retrieved from the path
-            #          TODO: Set Token in the cookie
-            pass
-        else:
-            #TODO: Validate the Token
-            #TODO: Maybe update the token
-            pass
+        path_splits = [item for item in os.path.split(path) if item]
+        if not app_token and not app_token_query:
+            raise HTTPException(status_code=400,
+                                detail='An `app_token` should be given either in cookie or as a query parameter.',
+                                )
+        if not app_token and app_token_query:
+            app_token = app_token_query
+        payload = parse_jwt_token(app_token) #TODO: Change app_id to app_name later
+        target_app = payload['app_id']
+        if app_name != target_app:
+            raise NotAuthorizedError(detail='The given app token is not for the target app')
+        user = get_doc(User, user_id=payload['user_id'])
+        app = get_doc(App, name=app_name)
+        if app not in user.activated_apps:
+            raise NotAuthorizedError(detail='The user have not installed the app')
 
-        # TODO: If file does not exist, return an error.
-
-        resp = FileResponse('static/' + paths)
-        #with open('static/' + paths, 'r') as fp:
-        #    if filetype == HTML:
-        #        resp = HTMLResponse(fp.read())
-        #    else:
-                #resp = FileResponse
+        filepath = 'static/' + app_name + '/' + path
+        if not os.path.exists(filepath):
+            raise DoesNotExistError('File', filepath)
+        resp = FileResponse(filepath)
+        # TODO: Update app_token if it is about to expire.
+        resp.set_cookie(key='app_token', value=app_token)
         return resp
 
 

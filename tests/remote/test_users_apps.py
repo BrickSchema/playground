@@ -52,11 +52,4 @@ def test_login_per_app_internal():
                         allow_redirects=False,
                         )
     assert resp.status_code == 200
-    assert resp.cookies['app_token']
-
-
-
-def test_get_app_static():
-    url = APP_BASE + '/app1/static/app1/child/me.html'
-    resp = requests_get(url)
-    bp()
+    assert resp.text

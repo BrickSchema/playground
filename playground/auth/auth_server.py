@@ -7,7 +7,7 @@ from fastapi_utils.cbv import cbv
 from fastapi import Depends, Header, HTTPException, Body, Query, Path
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi.security import HTTPAuthorizationCredentials
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, Response
 from starlette.requests import Request
 
 from brick_server.auth.auth_server import auth_router
@@ -61,13 +61,9 @@ class LoginPerApp():
         #                                   "5001"
         #                                   )
         if not external:
-            #TODO: configure API_BASE
-            redirect_url = API_BASE + '/apps/{app_name}/static/index.html?app_token=' + app_token.decode('utf-8')
-            return redirect_url
-
-            #with open(f'static/{app_name}/index.html', 'r') as fp: # TODO: Preload this into memory
-            #    resp = HTMLResponse(fp.read())
-            #resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
+            redirect_url = f'/brickapi/v1/apps/{app_name}/static/index.html?app_token_query=' + app_token.decode('utf-8')
+            resp = Response(content=redirect_url)
+            return resp
         else:
             resp = RedirectResponse(app.callback_url)
             resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))

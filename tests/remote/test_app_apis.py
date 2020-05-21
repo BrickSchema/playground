@@ -16,4 +16,3 @@ def test_get_app_api():
         'testheader': 'HeaderTest',
     }
     resp = requests_get(url, params=params, headers=headers)
-    bp()
