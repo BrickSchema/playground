@@ -7,7 +7,11 @@ from brick_server.models import User as BrickUser
 from playground.models import User
 
 for user in BrickUser.objects():
-    new_user = User(**user.to_mongo())
+    print('previously: {0}'.format(user.to_mongo()))
+    user_info = {k: v for k, v in user.to_mongo().items()
+                 if k not in ['_cls', '_id']}
+    user_info['id'] = user.id
+    new_user = User(**user_info)
     user.delete()
     new_user.save()
-    #activated_apps = ListField(ReferenceField(App), default=[])
+    print('now: {0}'.format(new_user.to_mongo()))

@@ -53,6 +53,24 @@ class UserApps:
 
         return resp
 
+    @user_router.delete('/',
+                        status_code=200,
+                        description='Deactivate all the apps for this user (for development)',
+                        response_model=IsSuccess,
+                        tags=['Users'],
+                        )
+    #@authorized #TODO: Reimplement the authentication mechanism
+    def delete(self,
+               #user_id: str = Path(..., description=user_id_desc),
+               token: HTTPAuthorizationCredentials = jwt_security_scheme,
+               ):
+        jwt_payload = parse_jwt_token(token.credentials)
+        user = get_doc(User, user_id=jwt_payload['user_id'])
+        user.activated_apps = []
+        user.save()
+
+        return IsSuccess()
+
     @user_router.post('/',
                     status_code=200,
                     description='Activate an app for the user.',
@@ -64,7 +82,7 @@ class UserApps:
              #user_id: str = Path(..., description=user_id_desc),
              activation_req: ActivationRequest = Body(...),
              token: HTTPAuthorizationCredentials = jwt_security_scheme,
-             ):
+             ) -> IsSuccess:
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
         app_name = activation_req.app_name
@@ -85,4 +103,4 @@ class UserApps:
 #                    register_permission(user_id, app, rsc, perm_type)
         user.activated_apps.append(app)
         user.save()
-        return 'Success', 201
+        return IsSuccess(reason='Already activated')

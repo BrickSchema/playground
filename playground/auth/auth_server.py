@@ -7,6 +7,7 @@ from fastapi_utils.cbv import cbv
 from fastapi import Depends, Header, HTTPException, Body, Query, Path
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi.security import HTTPAuthorizationCredentials
+from starlette.responses import HTMLResponse, Response
 from starlette.requests import Request
 
 from brick_server.auth.auth_server import auth_router
@@ -31,13 +32,14 @@ class LoginPerApp():
     @auth_router.get('/app_login/{app_name}',
                     status_code=200,
                     description='TODO: Login point of a user for the app. This will redirect the user to Google login process. Once the login is done, the user will be redirected bck to `REDIRECT_URL + /<app_name>`.',
-                    response_model=AppLoginResponse,
+                    #response_model=AppLoginResponse,
                     tags=['Apps'],
                     )
     def app_login(self,
                   app_name: str = Path(..., description=app_name_desc),
                   token: HTTPAuthorizationCredentials = jwt_security_scheme,
-                  ) -> AppLoginResponse:
+                  external: bool = False,
+                  ):
         # print("enter login per hosted app")
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
@@ -60,4 +62,14 @@ class LoginPerApp():
                                           "tcp", # TODO: Make it configurable.
                                           "5001"
                                           )
-        return RedirectResponse(redirect_url, status_code=302)
+        if not external:
+            redirect_url = f'/brickapi/v1/apps/{app_name}/static/index.html?app_token_query=' + app_token.decode('utf-8')
+            resp = Response(content=redirect_url)
+            return resp
+        else:
+            resp = RedirectResponse(app.callback_url)
+            resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
+            return resp
+        #return AppLoginResponse(redirect_url=app.callback_url,
+        #                        app_token=app_token.decode('utf-8'),
+        #                        )
