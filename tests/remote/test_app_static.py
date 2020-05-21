@@ -15,17 +15,7 @@ def test_get_app_static():
     resp = requests_get(url, cookies={'app_token': os.environ['JWT_TOKEN']})
     assert resp.status_code == 401
 
-    app1_token = create_jwt_token(app_name='app1').decode('utf-8')
-    with get_session() as session:
-        resp = session.get(url, cookies={'app_token': app1_token})
-        assert resp.status_code == 200
-        assert resp.text
-        assert resp.cookies['app_token']
-        resp = session.get(url)
-        assert resp.status_code == 200
-        assert resp.text
-        assert resp.cookies['app_token']
-
+    # Put the token into the URL first. You will get this token from LoginPerApp api first.
     with get_session() as session:
         url = APP_BASE + '/app1/static/index.html'
         authorized_url = url + '?app_token_query=' + app1_token
@@ -37,3 +27,16 @@ def test_get_app_static():
         assert resp.status_code == 200
         assert resp.text
         assert resp.cookies['app_token']
+
+    # Token is already in the cookie
+    app1_token = create_jwt_token(app_name='app1').decode('utf-8')
+    with get_session() as session:
+        resp = session.get(url, cookies={'app_token': app1_token})
+        assert resp.status_code == 200
+        assert resp.text
+        assert resp.cookies['app_token']
+        resp = session.get(url)
+        assert resp.status_code == 200
+        assert resp.text
+        assert resp.cookies['app_token']
+
