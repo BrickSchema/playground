@@ -50,7 +50,6 @@ class LoginPerApp():
                                      user_id=user.user_id,
                                      token_lifetime=app.token_lifetime,
                                      )
-        redirect_url = app.callback_url + '?app_token=' + app_token.decode("utf-8")
         container_name = app_management.spawn_app(app_name, user.userid.replace('@', 'at'))
         # container_name = app_name + "-" + user.userid # TODO: this is for dev. use the above line.
         if container_name == '': #TODO: update the return value to None. or raise Execption
