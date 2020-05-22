@@ -9,6 +9,9 @@ from .data import znt_id
 
 def test_stage_app():
     headers = authorize_headers()
-    manifest = yaml.load(open(app_manifest))
-    resp = requests_post(APP_BASE + '/', json=manifest, headers=headers)
+    body = {
+        'app_name': 'bacnet_driver',
+        'app_lifetime': 15552000, # 6 months
+    }
+    resp = requests_post(APP_BASE + '/', json=body, headers=headers)
     assert resp.status_code in [200, 409]

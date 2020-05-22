@@ -28,9 +28,9 @@ from brick_server.configs import configs
 from brick_server.models import get_doc
 #from ..dependencies import get_brick_db, dependency_supplier
 
-from .models import AppResponse, AppManifest
+from .models import AppResponse, AppManifest, AppStageRequest
 from .models import app_name_desc
-from ..models import App, User # TODO: Change naming conventino for mongodb models
+from ..models import App, User, MarketApp # TODO: Change naming conventino for mongodb models
 
 
 app_router = InferringRouter('apps')
@@ -76,11 +76,11 @@ class AppByName:
                      description='modify metadata of the app.',
                      )
     @authorized
-    def stage_app(self,
-             app_name: str = Path(..., description=app_name_desc),
-             app_modification: AppResponse = Body(...),
-             token: HTTPAuthorizationCredentials = jwt_security_scheme,
-             ):
+    def modify_staged_app(self,
+                  app_name: str = Path(..., description=app_name_desc),
+                  app_modification: AppResponse = Body(...),
+                  token: HTTPAuthorizationCredentials = jwt_security_scheme,
+                  ):
         # TODO: Is it ever used?
         updates = {'set__' + k: v for k, v in app_modeification.dict().items()}
         app_doc = get_doc(App, name=app_name)
@@ -113,22 +113,26 @@ class Apps():
                      response_model=IsSuccess,
                      )
     @authorized_frontend
-    async def post(self,
-                   manifest: AppManifest,
+    async def stage_app(self,
+                   stage_request: AppStageRequest = Body(...),
                    token: HTTPAuthorizationCredentials = jwt_security_scheme,
                    ):
-        existing_apps = App.objects(name=manifest.name)
-        if existing_apps:
-            raise AlreadyExistsError(App, manifest.name)
         jwt_payload = parse_jwt_token(token.credentials)
-        app = App(name = manifest.name,
-                  app_id = manifest.name,
-                  description = manifest.description,
-                  callback_url = manifest.callback_url,
-                  app_expires_at = time.time() + manifest.app_lifetime,
-                  token_lifetime = manifest.token_lifetime,
-                  installer = jwt_payload['user_id'],
-                  )
+        #TODO: Check is_admin
+
+        app_name = stage_request.app_name
+        existing_apps = App.objects(name=app_name)
+        if existing_apps:
+            raise AlreadyExistsError(App, app_name)
+        market_app = get_doc(MarketApp, name=app_name)
+        app = App(
+            name=market_app.name,
+            app_id = market_app.name,
+            description = market_app.description,
+            app_expires_at = time.time() + stage_request.app_lifetime,
+            token_lifetime = market_app.token_lifetime,
+            installer = jwt_payload['user_id'],
+        )
         app.save()
 
         for perm_name in app.permission_templates.keys():
@@ -140,7 +144,6 @@ class Apps():
         app.save()
 
         return IsSuccess()
-
 
 
 @cbv(app_router)
@@ -194,36 +197,3 @@ class AppApi():
         #TODO: parse request and call the corresponding API
         return res
 
-    @app_router.post('/',
-                     status_code=200,
-                     description='Stage an app',
-                     response_model=IsSuccess,
-                     )
-    @authorized_frontend
-    async def post(self,
-                   manifest: AppManifest,
-                   token: HTTPAuthorizationCredentials = jwt_security_scheme,
-                   ):
-        existing_apps = App.objects(name=manifest.name)
-        if existing_apps:
-            raise AlreadyExistsError(App, manifest.name)
-        jwt_payload = parse_jwt_token(token.credentials)
-        app = App(name = manifest.name,
-                  app_id = manifest.name,
-                  description = manifest.description,
-                  callback_url = manifest.callback_url,
-                  app_expires_at = time.time() + manifest.app_lifetime,
-                  token_lifetime = manifest.token_lifetime,
-                  installer = jwt_payload['user_id'],
-                  )
-        app.save()
-
-        for perm_name in app.permission_templates.keys():
-            # TODO
-            #app.approvals[perm_name] = []
-            #app.pending_approvals[perm_name] = []
-            pass
-        #request_app_approval(app)
-        app.save()
-
-        return IsSuccess()

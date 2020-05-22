@@ -26,17 +26,35 @@ from brick_server.configs import configs
 from brick_server.models import get_doc
 #from ..dependencies import get_brick_db, dependency_supplier
 
-from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps
+from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps, UserResponse
 from .models import app_name_desc, user_id_desc
 from ..models import App, User # TODO: Change naming conventino for mongodb models
 
 
 user_router = InferringRouter('users')
 
-#@cbc(user_router)
-#class UserResource:
-#    @user_router
-#    passj
+@cbv(user_router)
+class UserResource:
+    @user_router.get('/',
+                     status_code=200,
+                     description='Get User info',
+                     response_model=UserResponse,
+                     tags=['Users'],
+                     )
+    def get_user_info(self,
+                      token: HTTPAuthorizationCredentials = jwt_security_scheme,
+                      ):
+        jwt_payload = parse_jwt_token(token.credentials)
+        user = get_doc(User, user_id=jwt_payload['user_id'])
+        return UserResponse(
+            name=user.name,
+            user_id=user.user_id,
+            email=user.email,
+            is_admin=user.is_admin,
+            is_approved=user.is_approved,
+            activated_apps=[app.name for app in user.activated_apps],
+            registration_time=arrow.get(user.registration_time).datetime
+        )
 
 @cbv(user_router)
 class UserApps:
@@ -47,11 +65,9 @@ class UserApps:
                     response_model=ActivatedApps,
                     tags=['Users'],
                     )
-    #@authorized #TODO: Reimplement the authentication mechanism
     def get_activated_apps(self,
-            #user_id: str = Path(..., description=user_id_desc),
-            token: HTTPAuthorizationCredentials = jwt_security_scheme,
-            ):
+                           token: HTTPAuthorizationCredentials = jwt_security_scheme,
+                           ):
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
         resp = ActivatedApps(activated_apps=[app.name for app in user.activated_apps])

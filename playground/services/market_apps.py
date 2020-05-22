@@ -19,14 +19,14 @@ from fastapi.security import HTTPAuthorizationCredentials
 from starlette.requests import Request
 
 from brick_server.exceptions import MultipleObjectsFoundError
-from brick_server.models import get_docs
+from brick_server.models import get_docs, get_doc
 from brick_server.services.models import jwt_security_scheme, IsSuccess
 from brick_server.auth.authorization import authorized_frontend, authenticated
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
 from brick_server.configs import configs
 #from ..dependencies import get_brick_db, dependency_supplier
 
-from .models import AppResponse, AppManifest
+from .models import AppResponse, AppManifest, MarketAppResponse
 from .models import app_name_desc
 from ..models import MarketApp, App # TODO: Change naming conventino for mongodb models
 
@@ -47,9 +47,27 @@ class MarketAppsRoute():
                           description='List all apps . (Not implemented yet)',
                           )
     @authenticated
-    async def get(self,
-                  token: HTTPAuthorizationCredentials = jwt_security_scheme,
-                  ):
+    async def get_market_apps(self,
+                              token: HTTPAuthorizationCredentials = jwt_security_scheme,
+                              ):
+        #TODO: Check if admin
         market_apps = get_docs(MarketApp)
         res = {'market_apps': [app.name for app in market_apps]}
         return res
+
+    @marketapp_router.get('/{app_name}',
+                          status_code=200,
+                          description='Get the detail of an app',
+                          )
+    @authenticated
+    async def get_market_app(self,
+                       app_name: str = Path(..., description='The name of the app'),
+                       token: HTTPAuthorizationCredentials = jwt_security_scheme,
+                       ):
+        app = get_doc(MarketApp, name=app_name)
+        return MarketAppResponse(
+            name=app.name,
+            description=app.description,
+            permission_templates=app.permission_templates
+        )
+
