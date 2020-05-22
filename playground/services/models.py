@@ -74,3 +74,9 @@ class MarketAppResponse(BaseModel):
     name: str = Field(..., description=app_name_desc)
     description: str = Field(..., description=app_desc_desc)
     permission_templates: PermissionTemplates = Field(..., description=perm_templates_desc)
+
+class AppApprovalRequest(BaseModel):
+    app_name: str = Field(..., description=app_name_desc)
+
+class PendingApprovalsResponse(BaseModel):
+    admins: List[str]

@@ -17,7 +17,8 @@ from .auth.authorization import evaluate_app_user
 from .auth.auth_server import auth_router
 from .services.apps import app_router
 from .services.market_apps import marketapp_router
-from .services.users import user_router as user_app_router
+from .services.users import user_router as user_router
+from .services.admins import admin_router
 
 update_dependency_supplier('auth_logic', evaluate_app_user)
 
@@ -35,7 +36,8 @@ app.add_middleware(SessionMiddleware, secret_key=os.urandom(24))
 
 app.include_router(app_router, prefix='/brickapi/v1/apps')
 app.include_router(marketapp_router, prefix='/brickapi/v1/market_apps')
-app.include_router(user_app_router, prefix='/brickapi/v1/user')
+app.include_router(user_router, prefix='/brickapi/v1/user')
 app.include_router(auth_router, prefix='/auth')
+app.include_router(admin_router, prefix='/brickapi/v1/admin')
 
 app.mount("/brickapi/v1/appstatic", StaticFiles(directory="static"), name="static")
