@@ -33,17 +33,22 @@ from ..models import App, User # TODO: Change naming conventino for mongodb mode
 
 user_router = InferringRouter('users')
 
+#@cbc(user_router)
+#class UserResource:
+#    @user_router
+#    passj
+
 @cbv(user_router)
 class UserApps:
 
-    @user_router.get('/',
+    @user_router.get('/apps',
                     status_code=200,
                     description='View apps that user activated.',
                     response_model=ActivatedApps,
                     tags=['Users'],
                     )
     #@authorized #TODO: Reimplement the authentication mechanism
-    def get(self,
+    def get_activated_apps(self,
             #user_id: str = Path(..., description=user_id_desc),
             token: HTTPAuthorizationCredentials = jwt_security_scheme,
             ):
@@ -53,17 +58,17 @@ class UserApps:
 
         return resp
 
-    @user_router.delete('/',
+    @user_router.delete('/apps',
                         status_code=200,
                         description='Deactivate all the apps for this user (for development)',
                         response_model=IsSuccess,
                         tags=['Users'],
                         )
     #@authorized #TODO: Reimplement the authentication mechanism
-    def delete(self,
-               #user_id: str = Path(..., description=user_id_desc),
-               token: HTTPAuthorizationCredentials = jwt_security_scheme,
-               ):
+    def deactivate_all_apps(self,
+                            #user_id: str = Path(..., description=user_id_desc),
+                            token: HTTPAuthorizationCredentials = jwt_security_scheme,
+                            ):
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
         user.activated_apps = []
@@ -71,7 +76,7 @@ class UserApps:
 
         return IsSuccess()
 
-    @user_router.post('/',
+    @user_router.post('/apps',
                     status_code=200,
                     description='Activate an app for the user.',
                     #response_model=AppResponse,

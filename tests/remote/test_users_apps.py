@@ -8,20 +8,20 @@ from .data import znt_id
 
 def test_deactivate_all_apps():
     headers = authorize_headers()
-    resp = requests_delete(USER_APP_BASE + '/', headers=headers)
+    resp = requests_delete(USER_APP_BASE, headers=headers)
     assert resp.status_code == 200
 
 def test_activate_new_app():
     headers = authorize_headers()
     manifest = yaml.load(open(app_manifest))
-    resp = requests_post(USER_APP_BASE + '/', json={'app_name': manifest['name']}, headers=headers)
+    resp = requests_post(USER_APP_BASE, json={'app_name': manifest['name']}, headers=headers)
     assert resp.status_code in [200, 409]
 
 
 def test_get_activated_user_apps():
     headers = authorize_headers()
     manifest = yaml.load(open(app_manifest))
-    resp = requests_get(USER_APP_BASE + '/', headers=headers)
+    resp = requests_get(USER_APP_BASE, headers=headers)
     assert resp.status_code in [200]
     assert manifest['name'] in resp.json()['activated_apps']
 

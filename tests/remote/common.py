@@ -26,7 +26,7 @@ DATA_BASE = API_BASE + '/data'
 ACTUATION_BASE = API_BASE + '/actuation'
 APP_BASE = API_BASE + '/apps'
 MARKETAPP_BASE = API_BASE + '/market_apps'
-USER_APP_BASE = API_BASE + '/user_apps'
+USER_APP_BASE = API_BASE + '/user/apps'
 AUTH_BASE = HOSTNAME + '/auth'
 APP_STATIC_BASE = API_BASE + '/appstatic'
 
