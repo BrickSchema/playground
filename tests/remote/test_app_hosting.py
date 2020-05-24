@@ -11,7 +11,7 @@ from .data import znt_id
 
 def test_stage_app():
     headers = authorize_headers() #TODO This should use a specific app token.
-    manifest = yaml.load(open(app_manifest))
+    manifest = yaml.full_load(open(app_manifest))
     app_name = manifest['name']
     resp = requests_get(APP_STATIC_BASE + '/' + app_name + '/index.html',
                          json=manifest,

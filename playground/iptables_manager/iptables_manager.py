@@ -5,7 +5,7 @@ from . import iptables_manager_pb2_grpc
 from . import iptables_manager_pb2
 
 # open a gRPC channel
-channel = grpc.insecure_channel('localhost:50051')
+channel = grpc.insecure_channel('host.docker.internal:50051')
 
 # create a stub (client)
 stub = iptables_manager_pb2_grpc.IptablesManagerStub(channel)

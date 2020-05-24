@@ -14,3 +14,13 @@ else
   openssl rsa -in /app/configs/jwtRS256.key -pubout -outform PEM -out /app/configs/jwtRS256.key.pub
   echo "JWT private and public keys are created."
 fi
+
+# obtain host ip
+HOST_DOMAIN="host.docker.internal"
+# ping -q -c1 $HOST_DOMAIN > /dev/null 2>&1
+# if [ $? -ne 0 ]; then
+# can't use the above scripts because caller has set -e
+echo "Search for Host IP"
+HOST_IP=$(ip route | awk 'NR==1 {print $3}')
+echo "Host IP is" $HOST_IP
+echo "$HOST_IP\t$HOST_DOMAIN" >> /etc/hosts
