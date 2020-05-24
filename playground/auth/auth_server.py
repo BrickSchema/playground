@@ -50,16 +50,17 @@ class LoginPerApp():
                                      user_id=user.user_id,
                                      token_lifetime=app.token_lifetime,
                                      )
-        container_name = app_name + "-" + user.user_id # TODO: this is for dev. use the above line.
+        container_name = app_management.spawn_app(app_name, user.userid.replace('@', 'at'))
+        # container_name = app_name + "-" + user.userid # TODO: this is for dev. use the above line.
         if container_name == '': #TODO: update the return value to None. or raise Execption
             print("app not found")
             raise DoesNotExistError(App, app_name)
         #TODO: Activate below.
-        #iptables_manager.grant_host_access(app_management.get_container_id(container_name),
-        #                                   redis_db.get(container_name), # TODO: make it injection.
-        #                                   "tcp", # TODO: Make it configurable.
-        #                                   "5001"
-        #                                   )
+        iptables_manager.grant_host_access(app_management.get_container_id(container_name),
+                                          self.redis_db.get(container_name), # TODO: make it injection.
+                                          "tcp", # TODO: Make it configurable.
+                                          "5001"
+                                          )
         if not external:
             redirect_url = f'/brickapi/v1/apps/{app_name}/static/index.html?app_token_query=' + app_token.decode('utf-8')
             resp = Response(content=redirect_url)

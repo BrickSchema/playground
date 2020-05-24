@@ -146,7 +146,8 @@ def spawn_app(app_name:str, user_id:str, arguments:str = '') -> str:
 		docker_client.containers.run(image=app_name, command=arguments, detach=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_name)
 	except Exception as e:
 		aaa = e
-		bp()
+		# bp()
+		return ''
 
 	#except APIError as e:
 #		print(e)
