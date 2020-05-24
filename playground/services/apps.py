@@ -1,6 +1,8 @@
 from pdb import set_trace as bp
 import os
 import time
+import requests
+from redis import StrictRedis
 from copy import deepcopy
 from uuid import uuid4
 def gen_uuid():
@@ -18,7 +20,7 @@ from fastapi import Depends, Header, HTTPException, Body, Query, Path, Cookie
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, FileResponse
+from starlette.responses import HTMLResponse, FileResponse, Response
 
 from brick_server.exceptions import MultipleObjectsFoundError, AlreadyExistsError, DoesNotExistError, NotAuthorizedError
 from brick_server.services.models import jwt_security_scheme, IsSuccess
@@ -31,6 +33,8 @@ from brick_server.models import get_doc
 from .models import AppResponse, AppManifest, AppStageRequest
 from .models import app_name_desc
 from ..models import App, User, MarketApp # TODO: Change naming conventino for mongodb models
+from ..app_management.app_management import get_cname, stop_container
+from ..dbs import get_app_management_redis_db
 
 
 app_router = InferringRouter('apps')
@@ -182,18 +186,56 @@ class AppStatic():
         resp.set_cookie(key='app_token', value=app_token)
         return resp
 
+EXCLUDED_HEADERS = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
 
 @cbv(app_router)
 class AppApi():
-    @app_router.get('/{app_name}/api/{paths:path}',
+    caddr_db: StrictRedis = Depends(get_app_management_redis_db)
+
+    @app_router.get('/{app_name}/api/{path:path}',
                      status_code=200,
                      description='List all apps . (Not implemented yet)',
                      )
-    def get(self,
+    async def app_api_get(self,
             request: Request,
+            path: str = Path(..., description='TODO'),
             app_name: str=Path(..., description='TODO'),
-            #app_token: str = Cookie(...), TODO: Eanble this
+            app_token: str = Cookie(...), # TODO: Eanble this
             ):
-        #TODO: parse request and call the corresponding API
-        return res
+        token_payload = parse_jwt_token(app_token)
+        assert token_payload['app_id'] == app_name
+        user_id = token_payload["user_id"]
+        user = get_doc(User, user_id=user_id)
+
+        cname = get_cname(app_name, user_id)
+        container_ip = self.caddr_db.get(cname)
+        if path == "exit": #TODO: find a better naming convention.
+            print("stopping " + cname)
+            stop_container(cname)
+            return IsSuccess()
+
+        if container_ip:
+            container_url = 'http://' + container_ip + ':5000/' # TODO: Configure the port
+        else:
+            raise DoesNotExistError('Container', cname)
+
+        dest = container_url + '/' + path
+        request_data = await request.body()
+        api_resp = requests.request(
+            method=request.method,
+            url=dest,
+            #url=request.url.replace(request.host_url, container_url).replace(request.path, '/'+path),
+            headers={key: value for key, value in request.headers.items() if key != 'Host'},
+            data=request_data,
+            cookies=request.cookies,
+            allow_redirects=False,
+        )
+        headers = {name: value for name, value in api_resp.raw.headers.items()
+                   if name.lower() not in EXCLUDED_HEADERS}
+
+        resp = Response(api_resp.content,
+                        status_code=api_resp.status_code,
+                        headers=headers,
+                        )
+        return resp
 
