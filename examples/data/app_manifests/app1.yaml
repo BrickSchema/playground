@@ -11,11 +11,6 @@ permission_templates:
       - - ?point
     target_variables:
       - ?point
-    permission_type:
-      - A
-      - W
-      - R
-      - O
+    permission_type: AWRO
 app_lifetime: 31449600
 token_lifetime: 31449600
-callback_url: https://bd-testbed.ucsd.edu:8000/appweb/app1/

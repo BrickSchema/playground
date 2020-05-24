@@ -13,7 +13,7 @@ from starlette.requests import Request
 from brick_server.auth.auth_server import auth_router
 from brick_server.auth.authorization import create_jwt_token
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
-from brick_server.exceptions import DoesNotExistError
+from brick_server.exceptions import DoesNotExistError, AlreadyExistsError
 from brick_server.services.models import jwt_security_scheme, IsSuccess
 from brick_server.models import get_doc
 
@@ -27,7 +27,7 @@ from .models import AppLoginResponse
 
 @cbv(auth_router)
 class LoginPerApp():
-    redis_db: StrictRedis = Depends(get_app_management_redis_db)
+    caddr_db: StrictRedis = Depends(get_app_management_redis_db)
 
     @auth_router.get('/app_login/{app_name}',
                     status_code=200,
@@ -50,17 +50,23 @@ class LoginPerApp():
                                      user_id=user.user_id,
                                      token_lifetime=app.token_lifetime,
                                      )
-        container_name = app_management.spawn_app(app_name, user.userid.replace('@', 'at'))
-        # container_name = app_name + "-" + user.userid # TODO: this is for dev. use the above line.
-        if container_name == '': #TODO: update the return value to None. or raise Execption
-            print("app not found")
-            raise DoesNotExistError(App, app_name)
-        #TODO: Activate below.
+        try:
+            container_name = app_management.spawn_app(app_name, user.user_id.replace('@', 'at'))
+        except Exception as e:
+            container_name = '{app_name}-{user_id}'.format(app_name=app_name, user_id=user.user_id.replace('@', 'at'))
+            if f'Conflict. The container name "/{container_name}"' in str(e):
+                #TODO: Add a info logging
+                pass
+            else:
+                raise e
+
+        """ #TODO: Activate below.
         iptables_manager.grant_host_access(app_management.get_container_id(container_name),
-                                          self.redis_db.get(container_name), # TODO: make it injection.
+                                          self.caddr_db.get(container_name), # TODO: make it injection.
                                           "tcp", # TODO: Make it configurable.
                                           "5001"
                                           )
+        """
         if not external:
             redirect_url = f'/brickapi/v1/apps/{app_name}/static/index.html?app_token_query=' + app_token.decode('utf-8')
             resp = Response(content=redirect_url)
