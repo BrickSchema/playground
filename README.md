@@ -9,3 +9,6 @@
 `docker network connect isolated_nw playground`
 
 Update user from the frontend to Playground using `tools/upgrade_brick_users.py`
+
+- Activate all the apps per user manually: `tools/install_apps_for_user $USER_ID`
+
