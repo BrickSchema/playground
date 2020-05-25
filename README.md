@@ -7,3 +7,5 @@
 
 
 `docker network connect isolated_nw playground`
+
+Update user from the frontend to Playground using `tools/upgrade_brick_users.py`

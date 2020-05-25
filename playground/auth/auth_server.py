@@ -53,9 +53,10 @@ class LoginPerApp():
         try:
             container_name = app_management.spawn_app(app_name, user.user_id.replace('@', 'at'))
         except Exception as e:
-            container_name = '{app_name}-{user_id}'.format(app_name=app_name, user_id=user.user_id)
+            container_name = '{app_name}-{user_id}'.format(app_name=app_name, user_id=user.user_id.replace('@', 'at'))
             if f'Conflict. The container name "/{container_name}"' in str(e):
-                raise AlreadyExistsError('Container', container_name)
+                #TODO: Add a info logging
+                pass
             else:
                 raise e
 
