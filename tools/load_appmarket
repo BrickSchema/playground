@@ -12,6 +12,7 @@ from playground.models import MarketApp
 from brick_server.models import get_doc
 
 market_app_yamls = ['examples/market_apps/sample_app.yaml',
+                    'examples/data/app_manifests/app1.yaml'
                     ]
 
 for market_app_yaml in market_app_yamls:
