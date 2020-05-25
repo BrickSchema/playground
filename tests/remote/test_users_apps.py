@@ -42,7 +42,7 @@ def test_get_activated_user_apps():
 
 def test_login_per_app_internal():
     headers = authorize_headers()
-    manifest = yaml.load(open(app_manifest))
+    manifest = yaml.full_load(open(app_manifest))
     params = {
         'external': False
     }

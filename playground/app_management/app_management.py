@@ -13,6 +13,7 @@ caddr_db = get_app_management_redis_db()
 #TODO: Think about how to use injection model
 #TODO: Think about how to use asyncio. (aioredis)
 
+
 def get_cname(app_name, user_id):
     return app_name + "-" + user_id.replace('@', 'at')
 
@@ -145,16 +146,12 @@ def spawn_app(app_name:str, user_id:str, arguments:str = '') -> str:
     # subprocess.run(["docker", "run"]+parameters+["--name", container_id, app_name]+arguments)
 
     docker_client.containers.run(image=app_name, command=arguments, detach=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_name)
-    #except APIError as e:
-#       print(e)
-#       return ''
     # docker_client.containers.run(image=app_name, command=arguments, stdin_open=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_id)
 
     # create corresponding iptables chain based on container iid
-    """ TODO: activate this
     iptables_manager.create_chain(get_container_id(container_name))
-    # create entry in database
-    """
+    
+	# create entry in database
     caddr_db.set(container_name, get_container_ip(container_name))
     return container_name
 
@@ -182,10 +179,8 @@ def stop_container(container_name:str) -> None:
     """
     if not isinstance(container_name, str):
         raise TypeError("container name is expected to be str")
-    # subprocess.run(["docker", "stop", container_id])
     docker_client.containers.get(container_name).stop()
-    # TODO: Enable below
-    #iptables_manager.delete_chain(get_container_id(container_name))
+    iptables_manager.delete_chain(get_container_id(container_name))
     caddr_db.delete(container_name)
 
 
