@@ -22,5 +22,8 @@ HOST_DOMAIN="host.docker.internal"
 # can't use the above scripts because caller has set -e
 echo "Search for Host IP"
 HOST_IP=$(ip route | awk 'NR==1 {print $3}')
+# ip route del default
+# HOST_IP=$(ip route | grep eth1 | awk 'NR==1 {print $1}' | sed 's=0/16=1=g')
+# ip route add default via $HOST_IP
 echo "Host IP is" $HOST_IP
 echo "$HOST_IP\t$HOST_DOMAIN" >> /etc/hosts
