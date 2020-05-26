@@ -55,3 +55,11 @@ if [ $RET -eq 1 ]; then
 elif [ $RET -eq 0 ]; then
     echo "Rule 'DOCKER-USER -i docker1 -p tcp --match multiport -d $PLAYGROUND_IP --dport 32768:60999 -j ACCEPT' already exists."
 fi
+iptables -C DOCKER-USER -i docker1 -p tcp --match multiport -s $PLAYGROUND_IP --sport 32768:60999 -j ACCEPT
+RET=$?
+if [ $RET -eq 1 ]; then
+    echo "Create new rule."
+    iptables -I DOCKER-USER -i docker1 -p tcp --match multiport -s $PLAYGROUND_IP --sport 32768:60999 -j ACCEPT
+elif [ $RET -eq 0 ]; then
+    echo "Rule 'DOCKER-USER -i docker1 -p tcp --match multiport -s $PLAYGROUND_IP --sport 32768:60999 -j ACCEPT' already exists."
+fi
