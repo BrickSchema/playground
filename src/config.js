@@ -1,1 +1,1 @@
-export const LOGIN_URL = 'https://bd-testbed.ucsd.edu:5000/api/log';
+export const LOGIN_URL = 'https://bd-datas3.ucsd.edu:5000/api/log';

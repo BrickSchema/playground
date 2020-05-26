@@ -11,9 +11,9 @@ PORT = 9002
 APP = 'testapp'
 
 REDIRECT_URI = '/oauth2callback'
-AUTH_URL = 'https://bd-testbed.ucsd.edu:{0}/api/v1/auth/login/{1}'.format(PORT, APP)
+AUTH_URL = 'https://bd-datas3.ucsd.edu:{0}/api/v1/auth/login/{1}'.format(PORT, APP)
 
-API_URL = 'https://bd-testbed.ucsd.edu:{0}/api/v1'.format(PORT)
+API_URL = 'https://bd-datas3.ucsd.edu:{0}/api/v1'.format(PORT)
 
 with open('jwtRS256.key.pub', 'r') as fp:
     jwt_public_key = fp.read()

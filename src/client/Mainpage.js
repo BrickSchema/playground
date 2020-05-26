@@ -8,6 +8,8 @@ import {Responsive} from 'semantic-ui-react';
 import PropTypes from "prop-types";
 import Account from './components/Account/Account'
 import { Redirect } from "react-router-dom";
+import { useCookies } from 'react-cookie';
+
 
 class DesktopContainer extends Component {
   render() {
@@ -130,7 +132,8 @@ class Main extends Component {
 
     loginRedirect = () => {
       if (window.location.search !== "") {
-        this.sessionSet("user_token", window.location.search.slice(19))
+        const [cookies] = useCookies(['app_token'])
+        this.sessionSet("user_token", cookies.app_token)
       }
       let user_token = this.sessionGet("user_token")
       if(user_token === null) {
@@ -138,7 +141,7 @@ class Main extends Component {
         return <Redirect to='/' />
       }
       else if(!this.state.redirect){
-	axios.get('/api/redirected', {
+	axios.get('/api/v1/appapi/Genie/api/redirected', {
 		params: {
 			user_access_token: user_token
 		}
@@ -252,7 +255,7 @@ class Main extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if(this.state.user_email !== prevState.user_email) {
-      axios.get('/api/room', {
+      axios.get('/api/v1/appapi/Genie/api/room', {
 	  params: {
 		  user_email: this.state.user_email.data
 	  }

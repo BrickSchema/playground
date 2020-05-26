@@ -40,7 +40,7 @@ class Dashboard extends Component {
 
     componentDidUpdate(prevProps, prevState) {
       if(this.props.user_email !== prevProps.user_email) {
-	axios.get('/api/room', {
+	axios.get('/api/v1/appapi/Genie/api/room', {
 	  params: {
 		  user_email: this.props.user_email.data
 	  }

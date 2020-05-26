@@ -11,6 +11,7 @@
     "jwt-decode": "^2.2.0",
     "npm": "^6.9.0",
     "react": "^16.8.6",
+    "react-cookie": "^4.0.3",
     "react-dom": "^16.8.6",
     "react-input-slider": "^5.0.8",
     "react-live-clock": "^3.1.0",

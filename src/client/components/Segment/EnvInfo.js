@@ -117,7 +117,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.get('/api/point/energy/' + roomkey, {
+    axios.get('/api/v1/appapi/Genie/api/point/energy/' + roomkey, {
     	params: {
 		user_email: user_email.data,
         headers: getBrickHeaders,
@@ -141,7 +141,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.get("/api/point/temp/" + roomkey, {
+    axios.get("/api/v1/appapi/Genie/api/point/temp/" + roomkey, {
     	params: {
 		  user_email: user_email.data
         },

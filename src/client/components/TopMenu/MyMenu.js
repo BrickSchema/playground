@@ -15,7 +15,7 @@ class MyPage extends Component {
     else if(value === 'sign-out') {
       localStorage.clear();
       sessionStorage.clear();
-      axios.get('/api/logout')
+      axios.get('/api/v1/appapi/Genie/api/logout')
         .then(() => {
 		this.setState({ redir: true })
 	})

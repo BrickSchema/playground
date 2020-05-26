@@ -184,7 +184,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.get('/api/point/status/' + roomkey, {
+    axios.get('/api/v1/appapi/Genie/api/point/status/' + roomkey, {
       params: {
 		user_email: user_email.data
 	  },
@@ -209,7 +209,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.get('/api/point/setpoint/' + roomkey, {
+    axios.get('/api/v1/appapi/app1/Genie/point/setpoint/' + roomkey, {
    	  params: {
 		user_email: user_email.data
 	  },
@@ -237,7 +237,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.post('/api/point/status/' + roomkey, { value: status }, {
+    axios.post('/api/v1/appapi/Genie/api/point/status/' + roomkey, { value: status }, {
 	    params: {
 	    	user_email: user_email.data
 	    },
@@ -258,7 +258,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.post('/api/point/setpoint/' + roomkey, { value: temp }, {
+    axios.post('/api/v1/appapi/Genie/api/point/setpoint/' + roomkey, { value: temp }, {
    	  params: {
 		user_email: user_email.data
 	  },

@@ -4,12 +4,14 @@ import './index.css';
 import App from './App';
 import { Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
+import { CookiesProvider } from 'react-cookie';
 
 const history = createBrowserHistory();
 
 ReactDOM.render((
     <Router history={history}>
-        <App />
+        <CookiesProvider>
+            <App />
+        </CookiesProvider>
     </Router>
 ), document.getElementById('root'));
-
