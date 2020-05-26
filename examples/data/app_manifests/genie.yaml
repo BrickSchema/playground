@@ -1,0 +1,16 @@
+name: genie
+description: A dummy app1
+permission_templates:
+  all_points:
+    queries:
+      - brickdb: >
+          select ?point where {
+            ?point a/rdfs:subClassOf* brick:Point.
+          }
+    common_variables:
+      - - ?point
+    target_variables:
+      - ?point
+    permission_type: AWRO
+app_lifetime: 31449600
+token_lifetime: 31449600
