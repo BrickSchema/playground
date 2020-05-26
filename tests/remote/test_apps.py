@@ -25,7 +25,7 @@ def test_stage_app1():
     resp = requests_post(APP_BASE + '/', json=body, headers=headers)
     assert resp.status_code in [200, 409]
 
-def test_stage_app1():
+def test_stage_genie():
     headers = authorize_headers()
     body = {
         'app_name': 'genie',
