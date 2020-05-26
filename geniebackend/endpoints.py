@@ -20,13 +20,10 @@ mock_prefix = 'ebu3b:EBU3B_Rm_'
 
 production = False
 
-REDIRECT_URI = '/oauth2callback'
-
 app = Flask(__name__)
 app.debug = True
 app.secret_key = os.urandom(24)
 CORS(app)
-
 
 
 @app.route('/')
@@ -73,20 +70,6 @@ def get_userid():
     res = requests.get(url, headers={'Authorization': authorization})
     user_email = res.json()
     return user_email
-
-@app.route(REDIRECT_URI)
-def authorized():
-    raise exceptions.NotImplemented('This should not be reached.')
-    resp = google.authorized_response()
-    if resp is None:
-        return 'Access denied: reason=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description']
-        )
-    session['google_token'] = (resp['access_token'], '')
-    me = google.get('userinfo')
-    return jsonify({"data": me.data})
-
 
 
 @app.route("/api/room", methods=["GET"])

@@ -12,13 +12,10 @@ from .configs import config
 
 API_URL = config['brickapi']['API_URL']
 bs_url = config['brickapi']['API_URL']
-upload_url = bs_url + '/entities/upload'
 sparql_url = bs_url + '/rawqueries/sparql'
 entity_url = bs_url + '/entities'
-user_url = bs_url + '/user'
-app_url = bs_url + '/apps'
+user_url = bs_url + '/user' #TODO: This should be updated.
 ts_url = bs_url + '/data/timeseries'
-auth_url = bs_url + '/auth'
 actuation_url = bs_url + '/actuation'
 
 brick_prefix = config['brick']['brick_prefix']
@@ -96,7 +93,7 @@ def query_data(uuid, app_token):
     if data:
         data.sort(key=lambda d:d[1], reverse=True)
         return data[0][2]
-    else: 
+    else:
         return None
 
 
@@ -119,7 +116,7 @@ def query_entity_tagset(uuid, jwt_token):
     if resp.status_code == 401:
         raise exceptions.Unauthorized()
     if resp.status_code != 200:
-        return None    
+        return None
     return resp.json()["type"]
 
 
