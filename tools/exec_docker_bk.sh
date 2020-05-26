@@ -17,8 +17,8 @@ docker create --name playground \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD:/app \
     -e ENABLE_SSL=true \
-    -e CERTFILE="/etc/letsencrypt/live/bd-datas3.ucsd.edu/fullchain.pem" \
-    -e KEYFILE="/etc/letsencrypt/live/bd-datas3.ucsd.edu/privkey.pem" \
+    -e CERTFILE="/etc/letsencrypt/live/bd-testbed.ucsd.edu/fullchain.pem" \
+    -e KEYFILE="/etc/letsencrypt/live/bd-testbed.ucsd.edu/privkey.pem" \
     --entrypoint /app/docker/start-reload.sh \
     --privileged=true \
     jbkoh/playground:0.1
