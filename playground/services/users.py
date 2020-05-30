@@ -71,6 +71,7 @@ class UserApps:
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
         resp = ActivatedApps(activated_apps=[app.name for app in user.activated_apps])
+        bp()
 
         return resp
 
