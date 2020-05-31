@@ -9,7 +9,7 @@ class MarketApp(Document):
     permission_templates = DictField(DictField())
     token_lifetime = IntField(default=3600)
 
-class App(Document):
+class StagedApp(Document):
     name = StringField(required=True, unique=True)
     description = StringField()
     app_id = StringField(required=True, unique=True)
@@ -41,4 +41,4 @@ class App(Document):
     permission_lifetime = IntField(default=36000)
 
 class User(BrickUser):
-    activated_apps = ListField(ReferenceField(App), default=[])
+    activated_apps = ListField(ReferenceField(StagedApp), default=[])

@@ -19,5 +19,6 @@ if __name__ == '__main__':
     user = get_doc(User, user_id=user_id)
     for app_name in app_names:
         app = get_doc(App, name=app_name)
-        user.activated_apps.append(app)
+        if app not in user.activated_apps:
+            user.activated_apps.append(app)
     user.save()
