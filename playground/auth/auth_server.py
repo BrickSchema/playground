@@ -21,7 +21,7 @@ from ..app_management import app_management
 from ..iptables_manager import iptables_manager
 from ..dbs import get_app_management_redis_db
 from ..services.models import app_name_desc
-from ..models import App, User
+from ..models import StagedApp, User
 from .models import AppLoginResponse
 
 
@@ -40,10 +40,9 @@ class LoginPerApp():
                   token: HTTPAuthorizationCredentials = jwt_security_scheme,
                   external: bool = False,
                   ):
-        # print("enter login per hosted app")
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
-        app = get_doc(App, name=app_name)
+        app = get_doc(StagedApp, name=app_name)
         assert app in user.activated_apps # authorization
 
         app_token = create_jwt_token(app_name=app.name,
@@ -55,16 +54,16 @@ class LoginPerApp():
         except Exception as e:
             container_name = '{app_name}-{user_id}'.format(app_name=app_name, user_id=user.user_id.replace('@', 'at'))
             if f'Conflict. The container name "/{container_name}"' in str(e):
-                #TODO: Add a info logging
+                print(e)
                 pass
             else:
                 raise e
 
         iptables_manager.grant_host_access(app_management.get_container_id(container_name),
-                                          self.caddr_db.get(container_name), # TODO: make it injection.
-                                          "tcp", # TODO: Make it configurable.
-                                          "5001"
-                                          )
+                                           self.caddr_db.get(container_name),
+                                           "tcp", # TODO: Make it configurable.
+                                           "5001"
+                                           )
 
         if not external:
             redirect_url = f'/brickapi/v1/apps/{app_name}/static/index.html?app_token_query=' + app_token.decode('utf-8')

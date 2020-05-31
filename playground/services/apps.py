@@ -32,7 +32,7 @@ from brick_server.models import get_doc
 
 from .models import AppResponse, AppManifest, AppStageRequest
 from .models import app_name_desc
-from ..models import App, User, MarketApp # TODO: Change naming conventino for mongodb models
+from ..models import StagedApp, User, MarketApp # TODO: Change naming conventino for mongodb models
 from ..app_management.app_management import get_cname, stop_container
 from ..dbs import get_app_management_redis_db
 
@@ -41,7 +41,7 @@ app_router = InferringRouter('apps')
 
 def get_app_admins(*args, **kwargs):
     app_name = kwargs['app_name']
-    app_doc = get_doc(App, name=app_name)
+    app_doc = get_doc(StagedApp, name=app_name)
     return app_doc.admins
 
 @cbv(app_router)
@@ -58,7 +58,7 @@ class AppByName:
             app_name: str = Path(..., description=app_name_desc),
             token: HTTPAuthorizationCredentials = jwt_security_scheme,
             ):
-        app_doc = get_doc(App, name=app_name)
+        app_doc = get_doc(StagedApp, name=app_name)
         return app_doc
 
 
@@ -71,7 +71,7 @@ class AppByName:
             app_name: str = Path(..., description=app_name_desc),
             token: HTTPAuthorizationCredentials = jwt_security_scheme,
             ):
-        app_doc = get_doc(App, name=app_name)
+        app_doc = get_doc(StagedApp, name=app_name)
         app_doc.delete()
         return IsSuccess()
 
@@ -87,7 +87,7 @@ class AppByName:
                   ):
         # TODO: Is it ever used?
         updates = {'set__' + k: v for k, v in app_modeification.dict().items()}
-        app_doc = get_doc(App, name=app_name)
+        app_doc = get_doc(StagedApp, name=app_name)
         app_doc.update(**updates)
         return 'Success', 201
 
@@ -103,7 +103,7 @@ class Apps():
             ):
         apps = []
         raise Exception('Not implemented')
-        for app_doc in App.objects():
+        for app_doc in StagedApp.objects():
             app = {k: app_doc[k] for k in ['name', 'description']}
             if user_id in app_doc.admins:
                 app['callback_url'] = app_doc.callback_url
@@ -125,11 +125,11 @@ class Apps():
         #TODO: Check is_admin
 
         app_name = stage_request.app_name
-        existing_apps = App.objects(name=app_name)
+        existing_apps = StagedApp.objects(name=app_name)
         if existing_apps:
-            raise AlreadyExistsError(App, app_name)
+            raise AlreadyExistsError(StagedApp, app_name)
         market_app = get_doc(MarketApp, name=app_name)
-        app = App(
+        app = StagedApp(
             name=market_app.name,
             app_id = market_app.name,
             description = market_app.description,
@@ -174,7 +174,7 @@ class AppStatic():
         if app_name != target_app:
             raise NotAuthorizedError(detail='The given app token is not for the target app')
         user = get_doc(User, user_id=payload['user_id'])
-        app = get_doc(App, name=app_name)
+        app = get_doc(StagedApp, name=app_name)
         if app not in user.activated_apps:
             raise NotAuthorizedError(detail='The user have not installed the app')
 

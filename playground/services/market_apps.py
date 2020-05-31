@@ -28,16 +28,10 @@ from brick_server.configs import configs
 
 from .models import AppResponse, AppManifest, MarketAppResponse
 from .models import app_name_desc
-from ..models import MarketApp, App # TODO: Change naming conventino for mongodb models
+from ..models import MarketApp # TODO: Change naming conventino for mongodb models
 
 
 marketapp_router = InferringRouter('market_apps')
-
-def get_app_admins(*args, **kwargs):
-    app_name = kwargs['app_name']
-    app_doc = get_doc(App, name=app_name)
-    return app_doc.admins
-
 
 @cbv(marketapp_router)
 class MarketAppsRoute():

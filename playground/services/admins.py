@@ -28,7 +28,7 @@ from brick_server.models import get_doc
 
 from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps, UserResponse, AppApprovalRequest, PendingApprovalsResponse
 from .models import app_name_desc, user_id_desc
-from ..models import App, User # TODO: Change naming conventino for mongodb models
+from ..models import User # TODO: Change naming conventino for mongodb models
 
 
 admin_router = InferringRouter('admins')
