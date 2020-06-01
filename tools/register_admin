@@ -7,7 +7,7 @@ sys.path.append("./brick-server-minimal")
 sys.path.append("./")
 
 from brick_server.auth.authorization import FRONTEND_APP
-from playground.models import App, User
+from playground.models import StagedApp, User
 
 users = User.objects(user_id='admin')
 if not users:
@@ -24,9 +24,9 @@ if not users:
 else:
     user = users[0]
 
-apps = App.objects(name=FRONTEND_APP)
+apps = StagedApp.objects(name=FRONTEND_APP)
 if not apps:
-    app = App(
+    app = StagedApp(
         name=FRONTEND_APP,
         app_id=FRONTEND_APP,
     )

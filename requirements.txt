@@ -28,3 +28,4 @@ docker
 protobuf
 grpcio
 aiofiles
+pytest-ordering

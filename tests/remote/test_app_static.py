@@ -1,4 +1,5 @@
 from urllib.parse import quote_plus
+import pytest
 import os
 import yaml
 from pdb import set_trace as bp
@@ -7,6 +8,7 @@ from .common import USER_APP_BASE, authorize_headers, BRICK, AUTH_BASE, app_mani
 from .data import znt_id
 
 
+@pytest.mark.run(order=1100)
 def test_get_app_static():
     url = APP_BASE + '/app1/static/child/me.html'
     dummy_token = 'DUMMY_TOKEN'

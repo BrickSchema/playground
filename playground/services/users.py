@@ -28,7 +28,7 @@ from brick_server.models import get_doc
 
 from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps, UserResponse
 from .models import app_name_desc, user_id_desc
-from ..models import StagedApp, User # TODO: Change naming conventino for mongodb models
+from ..models import StagedApp, User
 
 
 user_router = InferringRouter('users')
@@ -100,6 +100,7 @@ class UserApps:
                      activation_req: ActivationRequest = Body(...),
                      token: HTTPAuthorizationCredentials = jwt_security_scheme,
                      ) -> IsSuccess:
+        bp()
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
         app_name = activation_req.app_name

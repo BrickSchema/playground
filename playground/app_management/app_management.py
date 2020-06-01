@@ -145,7 +145,14 @@ def spawn_app(app_name:str, user_id:str, arguments:str = '') -> str:
     # run the docker image in container
     # subprocess.run(["docker", "run"]+parameters+["--name", container_id, app_name]+arguments)
 
-    docker_client.containers.run(image=app_name, command=arguments, detach=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_name)
+    docker_client.containers.run(image=app_name,
+                                 command=arguments,
+                                 detach=True,
+                                 mem_limit='64m',
+                                 network='isolated_nw',
+                                 remove=True,
+                                 name=container_name,
+                                 )
     # docker_client.containers.run(image=app_name, command=arguments, stdin_open=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_id)
 
     # create corresponding iptables chain based on container iid
@@ -250,9 +257,5 @@ def get_container_id(container_name:str) -> str:
         the id in str
 
     """
-    try:
-        c = docker_client.containers.get(container_name)
-    except docker.errors as e:
-        print(e)
-        return ''
+    c = docker_client.containers.get(container_name)
     return c.id[:12]  # truncated id
