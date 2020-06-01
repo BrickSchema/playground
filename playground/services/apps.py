@@ -183,7 +183,7 @@ class AppStatic():
             raise DoesNotExistError('File', filepath)
         resp = FileResponse(filepath)
         # TODO: Update app_token if it is about to expire.
-        resp.set_cookie(key='app_token', value=app_token)
+        resp.set_cookie(key='app_token', value=app_token, path=app_name)
         return resp
 
 EXCLUDED_HEADERS = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
