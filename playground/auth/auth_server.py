@@ -71,7 +71,10 @@ class LoginPerApp():
             return resp
         else:
             resp = RedirectResponse(app.callback_url)
-            resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
+            resp.set_cookie(key='app_token',
+                            value=app_token.decode('utf-8'),
+                            path=app_name
+                            )
             return resp
         #return AppLoginResponse(redirect_url=app.callback_url,
         #                        app_token=app_token.decode('utf-8'),
