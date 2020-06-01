@@ -10,7 +10,7 @@ sys.path.append("./brick-server-minimal")
 sys.path.append("./")
 
 from brick_server.models import get_doc
-from playground.models import MarketApp, User, App
+from playground.models import MarketApp, User, StagedApp
 
 app_names = ['bacnet_driver', 'app1', 'genie']
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     user_id = sys.argv[1]
     user = get_doc(User, user_id=user_id)
     for app_name in app_names:
-        app = get_doc(App, name=app_name)
+        app = get_doc(StagedApp, name=app_name)
         if app not in user.activated_apps:
             user.activated_apps.append(app)
     user.save()
