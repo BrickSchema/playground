@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+import asyncio
+import json
+import yaml
+import time
+import sys
+from pdb import set_trace as bp
+import jwt
+from rdflib import URIRef
+sys.path.append("./brick-server-minimal")
+sys.path.append("./")
+
+from brick_server.models import get_doc
+from brick_server.dbs import brick_sparql_sync
+from playground.models import MarketApp, User, StagedApp
+
+
+def add_user_room(user, room):
+    brick_sparql_sync.add_triple(URIRef(user),
+                                 'brick:hasOffice',
+                                 URIRef(room)
+                                )
+
+if __name__ == '__main__':
+    user_id = sys.argv[1]
+    add_user_room(user_id, 'bldg:RM101')

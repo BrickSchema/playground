@@ -20,18 +20,43 @@ from starlette.requests import Request
 
 from brick_server.exceptions import MultipleObjectsFoundError, AlreadyExistsError
 from brick_server.services.models import jwt_security_scheme, IsSuccess
-from brick_server.auth.authorization import authorized_frontend
+from brick_server.services.models import relationships_desc
+from brick_server.auth.authorization import authorized_frontend, authenticated
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
 from brick_server.configs import configs
 from brick_server.models import get_doc
-#from ..dependencies import get_brick_db, dependency_supplier
+from brick_server.dependencies import get_brick_db
+from brick_server.dbs import BrickSparqlAsync
 
-from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps, UserResponse
+from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps, UserResponse, UserRelationshipsRequest
 from .models import app_name_desc, user_id_desc
 from ..models import StagedApp, User
 
 
 user_router = InferringRouter('users')
+
+@cbv(user_router)
+class UserRelationResource:
+    brick_db: BrickSparqlAsync = Depends(get_brick_db)
+
+    @user_router.post('/relationship',
+                      description='Update a user\'s relationship',
+                      response_model=IsSuccess,
+                      tags=['Users'],
+                      )
+    @authenticated
+    async def add_user_relation(self,
+                          relation_req: UserRelationshipsRequest = Body(..., description='TODO'),
+                          token:HTTPAuthorizationCredentials = jwt_security_scheme,
+                          ):
+        jwt_payload = parse_jwt_token(token.credentials)
+        user = get_doc(User, user_id=jwt_payload['user_id'])
+        #TODO: Interpret the graph
+        for p, o in relation_req.relationships:
+        # TODO: Verify p and o are valid
+            await self.brick_db.add_triple(URIRef(user.user_id), p, o)
+        return IsSuccess()
+
 
 @cbv(user_router)
 class UserResource:

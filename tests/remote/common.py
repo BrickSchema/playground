@@ -49,6 +49,9 @@ def requests_get(*args, **kwargs):
 def requests_post(*args, **kwargs):
     return requests.post(*args, **kwargs, verify=False)
 
+def requests_put(*args, **kwargs):
+    return requests.put(*args, **kwargs, verify=False)
+
 def requests_delete(*args, **kwargs):
     return requests.delete(*args, **kwargs, verify=False)
 

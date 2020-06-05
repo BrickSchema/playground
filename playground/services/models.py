@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from enum import Enum
 
+from brick_server.services.models import Relationships
+
 from fastapi import Security
 
 
@@ -80,3 +82,7 @@ class AppApprovalRequest(BaseModel):
 
 class PendingApprovalsResponse(BaseModel):
     admins: List[str]
+
+class UserRelationshipsRequest(Relationships):
+    graph: str = Field(None)
+
