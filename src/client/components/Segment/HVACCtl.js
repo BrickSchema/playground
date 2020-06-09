@@ -4,6 +4,8 @@ import { Grid, Icon, Header, Segment, Divider, Statistic, Button, Message } from
 import './Segment.css';
 import {getBrickHeaders} from '../BrickApi.js';
 import Slider from 'react-input-slider';
+import { BASE_API_URL } from '../../../config'
+
 
 const WarningObject = ({icon, color, title, mobile, msg}) => (
     <Segment  raised style={{minHeight: "204px"}} color="red">
@@ -184,7 +186,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.get('/api/v1/appapi/Genie/api/point/status/' + roomkey, {
+    axios.get(BASE_API_URL+'/api/point/status/' + roomkey, {
       params: {
 		user_email: user_email.data
 	  },
@@ -209,7 +211,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.get('/api/v1/appapi/app1/Genie/point/setpoint/' + roomkey, {
+    axios.get(BASE_API_URL+'/api/point/setpoint/' + roomkey, {
    	  params: {
 		user_email: user_email.data
 	  },
@@ -237,7 +239,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.post('/api/v1/appapi/Genie/api/point/status/' + roomkey, { value: status }, {
+    axios.post(BASE_API_URL+'/api/point/status/' + roomkey, { value: status }, {
 	    params: {
 	    	user_email: user_email.data
 	    },
@@ -258,7 +260,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.post('/api/v1/appapi/Genie/api/point/setpoint/' + roomkey, { value: temp }, {
+    axios.post(BASE_API_URL+'/api/point/setpoint/' + roomkey, { value: temp }, {
    	  params: {
 		user_email: user_email.data
 	  },

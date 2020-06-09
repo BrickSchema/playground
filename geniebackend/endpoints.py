@@ -23,6 +23,7 @@ production = False
 REDIRECT_URI = '/oauth2callback'
 
 app = Flask(__name__)
+app.debug = True
 app.secret_key = os.urandom(24)
 CORS(app)
 
@@ -48,19 +49,20 @@ def logout():
 @app.route('/api/redirected')
 def redirected():
     access_token = request.args['user_access_token']
-    body = {
-        'user_access_token': access_token,
-        'client_id': cid,
-        'client_secret': csec,
-    }
-    url = API_URL + '/auth/get_token'
-    resp = requests.post(url, json=body, verify=False)
-    session['app_token'] = resp.json()['token']
+    # body = {
+    #     'user_access_token': access_token,
+    #     'client_id': cid,
+    #     'client_secret': csec,
+    # }
+    # url = API_URL + '/auth/get_token'
+    # resp = requests.post(url, json=body, verify=False)
+    # session['app_token'] = resp.json()['token']
 
-    url = API_URL + '/auth/get_userid'
-    authorization = 'Bearer {0}'.format(session['app_token'])
+    url = API_URL + '/user'
+    authorization = 'Bearer {0}'.format(access_token)
     res = requests.get(url, headers={'Authorization': authorization}, verify=False)
-    user_email = res.json()
+    print("redirected", res.json())
+    user_email = res.json()['email']
     return user_email
 
 @app.route("/api/userid")
@@ -90,16 +92,19 @@ def authorized():
 @app.route("/api/room", methods=["GET"])
 def get_all_rooms():
     user_email = request.args['user_email']
+    jwt_token = request.headers['Authorization'].split(' ')[1]
+    authorization = 'Bearer {0}'.format(jwt_token)
     q = """
     select ?s where {{
-        #<{0}> user:hasOffice ?s.
+        <{0}> brick:hasOffice ?s.
         ?s rdf:type brick:HVAC_Zone .
     }}
     """.format(user_email)
-    resp = query_sparql(q)
+    resp = query_sparql(q, authorization)
     if resp == None:
         return json_response({'message': 'error'}, resp.status_code)
-    res = resp['tuples']
+    # print(resp)
+    res = resp['results']['bindings']
     rooms = iterate_extract(res, ebu3b_prefix) if res else []
     return json_response({'rooms': rooms})
 
@@ -107,12 +112,16 @@ def get_all_rooms():
 @app.route("/api/point/setpoint/<room>", methods=["GET"])
 def get_temp_setpoint(room):
     user_email = request.args['user_email']
-    uuid = get_temperature_setpoint(room, user_email)
-    app_token = session['app_token']
+    app_token = request.headers['Authorization'].split(' ')[1]
+    authorization = 'Bearer {0}'.format(app_token)
+    uuid = get_temperature_setpoint(room, user_email, authorization)
+    # app_token = session['app_token']
+    # uuid = bldg:BLDG_RM101_ZNT_SP
     if not uuid:
         return json_response({'value': None})
     try:
         value = query_data(uuid, app_token)
+        print('get_temp_setpoint value:', value)
         resp = json_response({'value': value})
     except exceptions.Unauthorized as e:
         resp = json_response({'value': None,
@@ -123,41 +132,55 @@ def get_temp_setpoint(room):
 @app.route("/api/point/setpoint/<room>", methods=["POST"])
 def set_temp_setpoint(room):
     user_email = request.args['user_email']
-    uuid = get_temperature_setpoint(room, user_email)
+    app_token = request.headers['Authorization'].split(' ')[1]
+    authorization = 'Bearer {0}'.format(app_token)
+    uuid = get_temperature_setpoint(room, user_email, authorization)
     if not uuid:
         return json_response({'value': None})
     req_data = request.get_json()
-    query_actuation(uuid, req_data['value'], session['app_token'])
+    query_actuation(uuid, req_data['value'], app_token)
     return json_response({'value': req_data['value']})
 
 
 @app.route("/api/point/temp/<room>", methods=["GET"])
 def get_room_temperature(room):
     user_email = request.args['user_email']
-    uuid = get_zone_temperature_sensor(room, user_email)
-    app_token = session['app_token']
+    app_token = request.headers['Authorization'].split(' ')[1]
+    authorization = 'Bearer {0}'.format(app_token)
+    uuid = get_zone_temperature_sensor(room, user_email, authorization)
+    # uuid = bldg:BLDG_RM101_ZN_T
+    if not uuid:
+        return json_response({'value': None})
+    # app_token = session['app_token']
     value = query_data(uuid, app_token)
+    print('get_room_temperature:', value)
     return json_response({'value': value})
 
 
 @app.route("/api/point/energy/<room>", methods=["GET"])
 def get_energy_usage(room):
     user_email = request.args['user_email']
-    uuid = get_thermal_power_sensor(room, user_email)
+    app_token = request.headers['Authorization'].split(' ')[1]
+    authorization = 'Bearer {0}'.format(app_token)
+    uuid = get_thermal_power_sensor(room, user_email, authorization)
+    # uuid = bldg:BLDG_RM101_MTR
     if not uuid:
         return json_response({'value': None})
-    app_token = session['app_token']
+    # app_token = session['app_token']
     value = query_data(uuid, app_token)
+    print('get_energy_usage:', value)
     return json_response({'value': value})
 
 
 @app.route("/api/point/status/<room>", methods=["GET"])
 def get_status(room):
     user_email = request.args['user_email']
-    uuid = get_occupancy_command(room, user_email)
+    app_token = request.headers['Authorization'].split(' ')[1]
+    authorization = 'Bearer {0}'.format(app_token)
+    uuid = get_occupancy_command(room, user_email, authorization)
     if not uuid:
         return json_response({'value': None})
-    app_token = session['app_token']
+    # app_token = session['app_token']
     try:
         value = query_data(uuid, app_token)
         resp = json_response({'value': value})
@@ -170,19 +193,23 @@ def get_status(room):
 @app.route("/api/point/status/<room>", methods=["POST"])
 def set_status(room):
     user_email = request.args['user_email']
-    uuid = get_occupancy_command(room, user_email)
+    app_token = request.headers['Authorization'].split(' ')[1]
+    authorization = 'Bearer {0}'.format(app_token)
+    uuid = get_occupancy_command(room, user_email, authorization)
+    # uuid = bldg:BLDG_RM101_ONOFF
     if not uuid:
         return json_response({'value': None})
     req_data = request.get_json()
     # 3 means on, 1 means off
-    resp = query_actuation(uuid, req_data['value'], session['app_token'])
+    resp = query_actuation(uuid, req_data['value'], app_token)
     return json_response({'value': req_data['value']})
 
 
 @app.route("/api/user", methods=["GET"])
 def get_current_user():
     user_email = request.args['user_email']
-    app_token = session['app_token']
+    # app_token = session['app_token']
+    app_token = request.headers['Authorization'].split(' ')[1]
     user = get_user(user_email, app_token)
     return json_response({'value': user})
 

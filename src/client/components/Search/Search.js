@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Grid, Dropdown, Segment, Divider, Icon, Button, Breadcrumb, List } from 'semantic-ui-react';
 import './Search.css';
+import { BASE_API_URL } from '../../../config'
+import {getBrickHeaders} from '../BrickApi.js';
+
 
 class Dashboard extends Component {
     state = {
@@ -40,10 +43,11 @@ class Dashboard extends Component {
 
     componentDidUpdate(prevProps, prevState) {
       if(this.props.user_email !== prevProps.user_email) {
-	axios.get('/api/v1/appapi/Genie/api/room', {
+	axios.get(BASE_API_URL+'/api/room', {
 	  params: {
-		  user_email: this.props.user_email.data
-	  }
+          user_email: this.props.user_email.data,
+      },
+      headers: getBrickHeaders()
 	})
 	  .then(res => {
 	      if(res != null) {

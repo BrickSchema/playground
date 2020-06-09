@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Dropdown } from 'semantic-ui-react';
 import { Redirect } from 'react-router-dom';
 import axios from 'axios';
+import { BASE_API_URL } from '../../../config'
+
 
 class MyPage extends Component {
   state = {
@@ -15,7 +17,7 @@ class MyPage extends Component {
     else if(value === 'sign-out') {
       localStorage.clear();
       sessionStorage.clear();
-      axios.get('/api/v1/appapi/Genie/api/logout')
+      axios.get(BASE_API_URL+'/api/logout')
         .then(() => {
 		this.setState({ redir: true })
 	})

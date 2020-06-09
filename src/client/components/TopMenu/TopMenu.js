@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router';
 import { Menu, Icon } from 'semantic-ui-react';
+import {getBrickHeaders} from '../BrickApi.js';
 import MyMenu from './MyMenu';
 import './TopMenu.css';
+import { BASE_API_URL } from '../../../config'
+
 
 class TopMenu extends Component {
   state = { activeItem: 'home', user: 'User' };
@@ -14,10 +17,11 @@ class TopMenu extends Component {
     const {user_email} = props
     if(user_email != null) {
       if(user_email !== state.user_email) { 
-	axios.get('/api/v1/appapi/Genie/api/user', {
+	axios.get(BASE_API_URL+'/api/user', {
 	    params: {
 		    user_email: user_email.data
-	    }
+      },
+      headers: getBrickHeaders()
 	})
 	    .then(res => {
 		if(res != null 

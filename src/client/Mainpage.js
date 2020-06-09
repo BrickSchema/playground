@@ -9,6 +9,8 @@ import PropTypes from "prop-types";
 import Account from './components/Account/Account'
 import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
+import { BASE_API_URL } from '../config'
+import {getBrickHeaders} from './components/BrickApi';
 
 
 class DesktopContainer extends Component {
@@ -131,20 +133,20 @@ class Main extends Component {
     }
 
     loginRedirect = () => {
-      if (window.location.search !== "") {
-        const [cookies] = useCookies(['app_token'])
-        this.sessionSet("user_token", cookies.app_token)
-      }
+      // const [cookies] = useCookies(['app_token'])
+      let cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)app_token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+      this.sessionSet("user_token", cookieValue)
       let user_token = this.sessionGet("user_token")
       if(user_token === null) {
 	this.setState({redirect: false})
         return <Redirect to='/' />
       }
       else if(!this.state.redirect){
-	axios.get('/api/v1/appapi/Genie/api/redirected', {
+	axios.get(BASE_API_URL+'/api/redirected', {
 		params: {
 			user_access_token: user_token
-		}
+    },
+    headers: getBrickHeaders()
 	})
           .then((res) => {
             localStorage.setItem('user_id', JSON.stringify(res))
@@ -255,15 +257,16 @@ class Main extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if(this.state.user_email !== prevState.user_email) {
-      axios.get('/api/v1/appapi/Genie/api/room', {
+      axios.get(BASE_API_URL+'/api/room', {
 	  params: {
-		  user_email: this.state.user_email.data
-	  }
-      })
-	.then(res => {
+      user_email: this.state.user_email.data,
+      // user_token: this.sessionGet("user_token")
+    },
+    headers: getBrickHeaders()
+      }).then(res => {
 	    if(res != null) {
-		const resp = res.data;
-		this.setState({ rooms: resp['rooms'] });
+        const resp = res.data;
+        this.setState({ rooms: resp['rooms'] });
 	    }
 	})
     }

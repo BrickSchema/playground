@@ -4,7 +4,7 @@
         "key": "/datadrive/synergy/repo/genie-brickified/genie_ssl.key"
     },
     "brickapi": {
-        "API_URL": "https://bd-datas3.ucsd.edu:9002/api/v1",
+        "API_URL": "https://bd-datas3.ucsd.edu:8000/brickapi/v1",
         "AUTH_URL": "{API_URL}/auth/login/genie-loc"
     },
     "google_oauth": {

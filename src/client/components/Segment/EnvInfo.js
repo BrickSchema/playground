@@ -4,6 +4,7 @@ import { Grid, Icon, Header, Segment, Divider, Statistic, Message } from 'semant
 import './Segment.css';
 import {getToken, getBrickHeaders} from '../BrickApi.js';
 import Bar from 'react-meter-bar';
+import { BASE_API_URL } from '../../../config'
 
 
 const WarningObject = ({icon, color, title, mobile}) => (
@@ -117,17 +118,18 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.get('/api/v1/appapi/Genie/api/point/energy/' + roomkey, {
+    axios.get(BASE_API_URL+'/api/point/energy/' + roomkey, {
     	params: {
 		user_email: user_email.data,
-        headers: getBrickHeaders,
-	}
+    },
+    headers: getBrickHeaders()
     })
         .then(res => {
             if(res != null 
                 && res.data != null 
                 && res.data['value'] != null) {
                 const resp = res.data;
+                console.log('energy usage', resp['value'].toFixed(2));
                 this.setState({ energy_value: resp['value'].toFixed(2),
                                 energy_error: false });
             }
@@ -141,7 +143,7 @@ class SegmentComponent extends Component {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
-    axios.get("/api/v1/appapi/Genie/api/point/temp/" + roomkey, {
+    axios.get(BASE_API_URL+'/api/point/temp/' + roomkey, {
     	params: {
 		  user_email: user_email.data
         },
@@ -152,6 +154,7 @@ class SegmentComponent extends Component {
                 && res.data != null 
                 && res.data['value'] != null) {
                 const resp = res.data;
+                console.log('temperature', resp['value'].toFixed(2));
                 this.setState({ temperature_value: resp['value'],
                                 temperature_error: false });
             }
