@@ -9,20 +9,30 @@ sys.path.append("./")
 from brick_server.auth.authorization import FRONTEND_APP
 from playground.models import StagedApp, User
 
-users = User.objects(user_id='admin')
+if len(sys.argv) == 2:
+    user_id = sys.argv[1]
+elif len(sys.argv) == 1:
+    user_id = 'admin'
+else:
+    raise Exception('too many parameters are given')
+
+
+users = User.objects(user_id=user_id)
 if not users:
     user = User(
-        user_id='admin',
-        name='admin',
+        user_id=user_id,
+        name=user_id,
         is_admin=True,
         is_approved=True,
         registration_time=arrow.get().datetime,
-        email='dummy@example.commm',
+        email=user_id,
         activated_apps=[],
     )
     user.save()
 else:
     user = users[0]
+    user.is_admin = True
+    user.save()
 
 apps = StagedApp.objects(name=FRONTEND_APP)
 if not apps:

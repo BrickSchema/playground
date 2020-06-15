@@ -24,17 +24,19 @@ from starlette.responses import HTMLResponse, FileResponse, Response
 
 from brick_server.exceptions import MultipleObjectsFoundError, AlreadyExistsError, DoesNotExistError, NotAuthorizedError
 from brick_server.services.models import jwt_security_scheme, IsSuccess
-from brick_server.auth.authorization import authorized_frontend
+from brick_server.auth.authorization import authorized_frontend, authenticated
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
 from brick_server.configs import configs
 from brick_server.models import get_doc
 #from ..dependencies import get_brick_db, dependency_supplier
 
-from .models import AppResponse, AppManifest, AppStageRequest
+from .models import AppResponse, AppManifest, AppStageRequest, AppNames
 from .models import app_name_desc
 from ..models import StagedApp, User, MarketApp # TODO: Change naming conventino for mongodb models
 from ..app_management.app_management import get_cname, stop_container
 from ..dbs import get_app_management_redis_db
+
+DEFAULT_ADMIN_ID = configs['app_management']['default_admin']
 
 
 app_router = InferringRouter('apps')
@@ -96,20 +98,13 @@ class Apps():
 
     @app_router.get('/',
                      status_code=200,
-                     description='List all apps . (Not implemented yet)',
+                     description='List all staged apps.',
                      )
+    @authorized_frontend
     def get(self,
             token: HTTPAuthorizationCredentials = jwt_security_scheme,
-            ):
-        apps = []
-        raise Exception('Not implemented')
-        for app_doc in StagedApp.objects():
-            app = {k: app_doc[k] for k in ['name', 'description']}
-            if user_id in app_doc.admins:
-                app['callback_url'] = app_doc.callback_url
-            apps.append(app)
-        res = {'apps': apps}
-        return res
+            ) -> AppNames:
+        return [app.name for app in StagedApp.objects()]
 
     @app_router.post('/',
                      status_code=200,
@@ -142,8 +137,8 @@ class Apps():
         for perm_name in app.permission_templates.keys():
             # TODO
             #app.approvals[perm_name] = []
-            #app.pending_approvals[perm_name] = []
-            pass
+            app.pending_approvals[perm_name] = [DEFAULT_ADMIN_ID] #TODO: This is only for debug. properly implement this later.
+
         #request_app_approval(app)
         app.save()
 
@@ -156,10 +151,12 @@ class AppStatic():
                     status_code=200,
                     )
     def get_static(self,
+                   request: Request,
                    app_name: str=Path(..., description='TODO'),
                    path: str = Path(..., description='TODO'),
                    app_token: str = Cookie(None),
                    app_token_query: str = Query(None),
+
                    ):
         #TODO: parse paths andread and return the right HTMLResponse
         path_splits = [item for item in os.path.split(path) if item]
@@ -183,7 +180,8 @@ class AppStatic():
             raise DoesNotExistError('File', filepath)
         resp = FileResponse(filepath)
         # TODO: Update app_token if it is about to expire.
-        resp.set_cookie(key='app_token', value=app_token, path=app_name)
+        resp.set_cookie(key='app_token', value=app_token, path='/brickapi/v1/apps/' + app_name)
+        #TODO: Find a way to get the path automatically
         return resp
 
 EXCLUDED_HEADERS = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']

@@ -23,5 +23,6 @@ def add_user_room(user, room):
                                 )
 
 if __name__ == '__main__':
+    print(sys.argv)
     user_id = sys.argv[1]
     add_user_room(user_id, 'bldg:RM101')
