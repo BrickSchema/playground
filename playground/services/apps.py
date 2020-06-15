@@ -131,13 +131,15 @@ class Apps():
             app_expires_at = time.time() + stage_request.app_lifetime,
             token_lifetime = market_app.token_lifetime,
             installer = jwt_payload['user_id'],
+            permission_templates = market_app.permission_templates,
         )
         app.save()
 
         for perm_name in app.permission_templates.keys():
             # TODO
             #app.approvals[perm_name] = []
-            app.pending_approvals[perm_name] = [DEFAULT_ADMIN_ID] #TODO: This is only for debug. properly implement this later.
+            pass
+        app.pending_approvals = [DEFAULT_ADMIN_ID] #TODO: This is only for debug. properly implement this later.
 
         #request_app_approval(app)
         app.save()

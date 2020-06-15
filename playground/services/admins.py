@@ -23,12 +23,12 @@ from brick_server.services.models import jwt_security_scheme, IsSuccess
 from brick_server.auth.authorization import authorized_frontend, authorized_admin
 from brick_server.auth.authorization import auth_scheme, parse_jwt_token, authorized, authorized_arg, R, O
 from brick_server.configs import configs
-from brick_server.models import get_doc
+from brick_server.models import get_doc, get_docs
 #from ..dependencies import get_brick_db, dependency_supplier
 
 from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps, UserResponse, AppApprovalRequest, PendingApprovalsResponse, AppNames
 from .models import app_name_desc, user_id_desc
-from ..models import User # TODO: Change naming conventino for mongodb models
+from ..models import User, StagedApp # TODO: Change naming conventino for mongodb models
 
 
 admin_router = InferringRouter('admins')
@@ -73,10 +73,10 @@ class AppApproval:
                                 token: HTTPAuthorizationCredentials = jwt_security_scheme,
                                 ) -> AppNames:
         #TODO: Implement Logic
-        parsed = parse_jwt_token(token)
+        parsed = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=parsed['user_id'])
         if not user.is_admin:
             raise NotAuthorizedError(detail='The user is not an admin')
-        app_names = [app.name for app in get_docs(StagedApp, pending_approvals__contains(user.user_id))]
+        app_names = [app.name for app in get_docs(StagedApp, pending_approvals__contains=user.user_id)]
         return app_names
 
