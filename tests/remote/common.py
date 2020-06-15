@@ -16,6 +16,7 @@ BRICK_VERSION = '1.0.3'
 BRICK = Namespace(f'https://brickschema.org/schema/{BRICK_VERSION}/Brick#')
 
 HOSTNAME = os.environ['HOSTNAME']
+ADMIN_ID = os.environ['ADMIN_ID']
 API_BASE = HOSTNAME + '/brickapi/v1'
 ENTITY_BASE = API_BASE + '/entities'
 QUERY_BASE = API_BASE + '/rawqueries'
@@ -60,7 +61,7 @@ with open(privkey_path, 'r') as fp:
 with open(pubkey_path, 'r') as fp:
     _jwt_pub_key = fp.read()
 
-def create_jwt_token(user_id: str = 'admin',
+def create_jwt_token(user_id: str = ADMIN_ID,
                      app_name: str = None,
                      token_lifetime: int = 3600,
                      ):

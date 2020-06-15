@@ -21,7 +21,7 @@ if __name__ == '__main__':
         print(token_lifetime)
     else:
         token_lifetime = 3600
-    print(create_jwt_token(user_id='admin',
+    print(create_jwt_token(user_id='jbkoh@eng.ucsd.edu',
                            app_name='brickserver_frontend',
                            token_lifetime=token_lifetime,
                            ).decode('utf-8'))

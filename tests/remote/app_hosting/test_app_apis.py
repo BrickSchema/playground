@@ -4,8 +4,8 @@ import pytest
 import yaml
 from pdb import set_trace as bp
 
-from .common import USER_APP_BASE, authorize_headers, BRICK, AUTH_BASE, app_manifest, requests_delete, requests_post, requests_get, APP_BASE, create_jwt_token
-from .data import znt_id
+from ..common import USER_APP_BASE, authorize_headers, BRICK, AUTH_BASE, app_manifest, requests_delete, requests_post, requests_get, APP_BASE, create_jwt_token
+from ..data import znt_id
 
 
 app1_token = create_jwt_token(app_name='app1').decode('utf-8')
