@@ -1,4 +1,15 @@
 
+# Prep Stage
+
+1. Run the frontend and register your account there.
+2. Run `tools/prep.sh` using a command like this: `docker exec -it playground /app/tools/prep.sh $YOUR_EMAIL`
+3. Get a JWT token for `admin` user and update `pytest.ini`
+4. Update the hostname in `pytest.ini`
+5. Run pytest `pytest tests/remote`
+    - In case you don't want to override the network configuration, run ` pytest --ignore=tests/remote/app_hosting tests/remote/` instead.
+6. Run the above again because of the dependencies across different pytest files.
+
+
 
 # Helper Sripts
 

@@ -29,7 +29,7 @@ class StagedApp(Document):
 
     #valid = BooleanField(required=True)
     #expiration_date = DateTimeField(required=True)
-    #pending_approvals = DictField(ListField(), default=[]) # pending approvals from users. If approved, the itme goes to approvals
+    pending_approvals = ListField(StringField(help_text='Admin ID'))
     #rejected_approvals = DictField(ListField()) # pending approvals from users. If approved, the itme goes to approvals
     #approvals = DictField(ListField())
     # In both of the above cases, key is query name and list of the values are the owner IDs.

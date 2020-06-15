@@ -86,3 +86,6 @@ class PendingApprovalsResponse(BaseModel):
 class UserRelationshipsRequest(Relationships):
     graph: str = Field(None)
 
+
+
+AppNames = List[str]

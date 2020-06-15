@@ -1,4 +1,5 @@
 from urllib.parse import quote_plus
+import requests
 import pytest
 import os
 import yaml
@@ -27,6 +28,7 @@ def test_get_app_static():
         assert resp.status_code == 200
         assert resp.text
         assert resp.cookies['app_token']
+        assert session.cookies['app_token']
         resp = session.get(url)
         assert resp.status_code == 200
         assert resp.text
