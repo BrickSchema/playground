@@ -46,7 +46,13 @@ class AppApproval:
                           approval_request: AppApprovalRequest,
                           token: HTTPAuthorizationCredentials = jwt_security_scheme,
                           ) -> IsSuccess:
-        #TODO Implement the logic
+        parsed = parse_jwt_token(token.credentials)
+        user_id = parsed['user_id']
+        app = get_doc(StagedApp, app_id=approval_request.app_name)
+        if user_id not in app.pending_approvals:
+            raise HTTPException(status_code=400, detail='The user "{user_id}" either is not the right person to approve this app or already approaved it.')
+        app.pending_approvals = [admin for admin in app.pending_approvals if admin != user_id]
+        app.save()
         return IsSuccess()
 
     @admin_router.get('/app_approval/{app_name}',

@@ -43,5 +43,4 @@ def test_stage_genie():
 def test_get_staged_apps():
     headers = authorize_headers()
     resp = requests_get(APP_BASE + '/', headers=headers)
-    bp()
     assert resp.status_code in [200, 409]
