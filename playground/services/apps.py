@@ -30,7 +30,7 @@ from brick_server.configs import configs
 from brick_server.models import get_doc
 #from ..dependencies import get_brick_db, dependency_supplier
 
-from .models import AppResponse, AppManifest, AppStageRequest, AppNames
+from .models import AppResponse, AppManifest, AppStageRequest, AppNames, StagedAppsResponse, StagedAppResponse
 from .models import app_name_desc
 from ..models import StagedApp, User, MarketApp # TODO: Change naming conventino for mongodb models
 from ..app_management.app_management import get_cname, stop_container
@@ -97,14 +97,16 @@ class AppByName:
 class Apps():
 
     @app_router.get('/',
-                     status_code=200,
-                     description='List all staged apps.',
-                     )
+                    status_code=200,
+                    description='List all staged apps.',
+                    response_model=StagedAppsResponse,
+                    )
     @authorized_frontend
-    def get(self,
+    async def get(self,
             token: HTTPAuthorizationCredentials = jwt_security_scheme,
-            ) -> AppNames:
-        return [app.name for app in StagedApp.objects()]
+            ) -> StagedAppsResponse:
+        return [StagedAppResponse(name=app.name, is_approved=not app.pending_approvals)
+                for app in StagedApp.objects()]
 
     @app_router.post('/',
                      status_code=200,

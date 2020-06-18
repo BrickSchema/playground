@@ -89,3 +89,11 @@ class UserRelationshipsRequest(Relationships):
 
 
 AppNames = List[str]
+
+
+class StagedAppResponse(BaseModel):
+    name: str = Field(..., description=app_name_desc )
+    is_approved: bool = Field(...)
+
+StagedAppsResponse = List[StagedAppResponse]
+
