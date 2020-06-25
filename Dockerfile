@@ -5,10 +5,7 @@ RUN apt update && \
 
 ARG SRC="/usr/src/brick-server"
 
-RUN git clone https://gitlab.com/jbkoh/brick-server-minimal.git $SRC  && \
-    cd $SRC
-    #&& \
-    #git checkout --track origin/fastapi
+COPY ./ $SRC
 
 RUN rm -rf /app  && \
     mv $SRC /app
@@ -18,7 +15,6 @@ RUN pip install --upgrade pip && \
     pip uninstall -y fastapi && \
     pip install git+https://github.com/jbkoh/fastapi.git@fix-bodyparsing
 
-#COPY configs/configs.json /app/configs/
 ENV BRICK_CONFIGFILE "/app/configs/configs.json"
 
 CMD /app/docker/start.sh

@@ -22,7 +22,7 @@ select ?s where {
     headers = authorize_headers({
         'Content-Type': 'sparql-query'
     })
-    resp = requests_post(QUERY_BASE + '/sparql', data=qstr, headers=headers)
+    resp = requests.post(QUERY_BASE + '/sparql', data=qstr, headers=headers)
     assert resp.json()['results']['bindings']
 
 
@@ -56,7 +56,7 @@ select ?child ?parent where {
         'Content-Type': 'sparql-query'
     })
     resp = requests.post(QUERY_BASE + '/sparql', data=qstr, headers=headers)
-    assert len(resp.json()['results']['bindings']) > 2
+    assert len(resp.json()['results']['bindings']) > 0
 
 def test_sparql_location_tree():
     qstr = """
