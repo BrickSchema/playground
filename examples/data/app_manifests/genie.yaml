@@ -1,5 +1,5 @@
 name: genie
-description: A dummy app1
+description: genie(test)
 permission_templates:
   all_points:
     queries:

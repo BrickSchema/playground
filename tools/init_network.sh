@@ -10,17 +10,27 @@ docker network create -o "com.docker.network.bridge.name"="docker1" -d bridge --
 iptables -C DOCKER-USER -i docker1 -j DROP
 RET=$?
 if [ $RET -eq 1 ]; then
-    echo "Create new rule."
+    echo "No existing rule. Create new rule."
     iptables -I DOCKER-USER -i docker1 -j DROP
 elif [ $RET -eq 0 ]; then
     echo "Rule 'DOCKER-USER -i docker1 -j DROP' already exists."
+fi
+
+# decline any other communication with host
+iptables -C INPUT -i docker1 -j DROP
+RET=$?
+if [ $RET -eq 1 ]; then
+    echo "No existing rule. Create new rule."
+    iptables -I INPUT -i docker1 -j DROP
+elif [ $RET -eq 0 ]; then
+    echo "Rule 'INPUT -i docker1 -j DROP' already exists."
 fi
 
 # allow communication with host ephemeral ports
 iptables -C INPUT -i docker1 -p udp --match multiport --dport 32768:60999 -j ACCEPT
 RET=$?
 if [ $RET -eq 1 ]; then
-    echo "Create new rule."
+    echo "No existing rule. Create new rule."
     iptables -I INPUT -i docker1 -p udp --match multiport --dport 32768:60999 -j ACCEPT
 elif [ $RET -eq 0 ]; then
     echo "Rule 'INPUT -i docker1 -p udp --match multiport --dport 32768:60999 -j ACCEPT' already exists."
@@ -29,37 +39,28 @@ fi
 iptables -C INPUT -i docker1 -p tcp --match multiport --dport 32768:60999 -j ACCEPT
 RET=$?
 if [ $RET -eq 1 ]; then
-    echo "Create new rule."
+    echo "No existing rule. Create new rule."
     iptables -I INPUT -i docker1 -p tcp --match multiport --dport 32768:60999 -j ACCEPT
 elif [ $RET -eq 0 ]; then
     echo "Rule 'INPUT -i docker1 -p tcp --match multiport --dport 32768:60999 -j ACCEPT' already exists."
 fi
 
-# decline any other communication with host
-iptables -C INPUT -i docker1 -j DROP
-RET=$?
-if [ $RET -eq 1 ]; then
-    echo "Create new rule."
-    iptables -I INPUT -i docker1 -j DROP
-elif [ $RET -eq 0 ]; then
-    echo "Rule 'INPUT -i docker1 -j DROP' already exists."
-fi
+# allow communication with the playground server
 
-# PLAYGROUND_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' playground)
 PLAYGROUND_IP=$(docker network inspect isolated_nw | grep Gateway | awk 'NR==1 {print $2}' | sed 's/0.1/0.2/'| sed -e 's/^"//' -e 's/"$//')
 iptables -C DOCKER-USER -i docker1 -p tcp --match multiport -d $PLAYGROUND_IP --dport 32768:60999 -j ACCEPT
 RET=$?
 if [ $RET -eq 1 ]; then
-    echo "Create new rule."
+    echo "No existing rule. Create new rule."
     iptables -I DOCKER-USER -i docker1 -p tcp --match multiport -d $PLAYGROUND_IP --dport 32768:60999 -j ACCEPT
 elif [ $RET -eq 0 ]; then
     echo "Rule 'DOCKER-USER -i docker1 -p tcp --match multiport -d $PLAYGROUND_IP --dport 32768:60999 -j ACCEPT' already exists."
 fi
-iptables -C DOCKER-USER -i docker1 -p tcp --match multiport -s $PLAYGROUND_IP --sport 32768:60999 -j ACCEPT
+iptables -C DOCKER-USER -i docker1 -p udp --match multiport -s $PLAYGROUND_IP --sport 32768:60999 -j ACCEPT
 RET=$?
 if [ $RET -eq 1 ]; then
-    echo "Create new rule."
-    iptables -I DOCKER-USER -i docker1 -p tcp --match multiport -s $PLAYGROUND_IP --sport 32768:60999 -j ACCEPT
+    echo "No existing rule. Create new rule."
+    iptables -I DOCKER-USER -i docker1 -p udp --match multiport -s $PLAYGROUND_IP --sport 32768:60999 -j ACCEPT
 elif [ $RET -eq 0 ]; then
     echo "Rule 'DOCKER-USER -i docker1 -p tcp --match multiport -s $PLAYGROUND_IP --sport 32768:60999 -j ACCEPT' already exists."
 fi

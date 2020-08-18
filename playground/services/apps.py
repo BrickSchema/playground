@@ -9,6 +9,7 @@ def gen_uuid():
     return str(uuid4())
 from io import StringIO
 import asyncio
+import httpx
 from typing import ByteString, Any, Dict, Callable
 from collections import defaultdict
 
@@ -37,7 +38,7 @@ from ..app_management.app_management import get_cname, stop_container
 from ..dbs import get_app_management_redis_db
 
 DEFAULT_ADMIN_ID = configs['app_management']['default_admin']
-
+# DEFAULT_ADMIN_ID = 'admin'
 
 app_router = InferringRouter('apps')
 
@@ -168,10 +169,14 @@ class AppStatic():
             raise HTTPException(status_code=400,
                                 detail='An `app_token` should be given either in cookie or as a query parameter.',
                                 )
-        if not app_token and app_token_query:
-            app_token = app_token_query
-        payload = parse_jwt_token(app_token) #TODO: Change app_id to app_name later
-        target_app = payload['app_id']
+        # if not app_token and app_token_query:
+        #     app_token = app_token_query
+        if app_token_query:
+            payload = parse_jwt_token(app_token_query) # prioritize the query token as it's latest
+        else:
+            payload = parse_jwt_token(app_token)
+
+        target_app = payload['app_id'] #TODO: Change app_id to app_name later
         if app_name != target_app:
             raise NotAuthorizedError(detail='The given app token is not for the target app')
         user = get_doc(User, user_id=payload['user_id'])
@@ -221,23 +226,22 @@ class AppApi():
         else:
             raise DoesNotExistError('Container', cname)
 
-        dest = container_url + '/' + path
+        dest = container_url + path
         request_data = await request.body()
-        api_resp = requests.request(
-            method=request.method,
-            url=dest,
-            #url=request.url.replace(request.host_url, container_url).replace(request.path, '/'+path),
-            headers={key: value for key, value in request.headers.items() if key != 'Host'},
-            data=request_data,
-            cookies=request.cookies,
-            allow_redirects=False,
-        )
-        headers = {name: value for name, value in api_resp.raw.headers.items()
-                   if name.lower() not in EXCLUDED_HEADERS}
+        async with httpx.AsyncClient() as client:
+            api_resp = await client.request(
+                method=request.method,
+                url=dest,
+                #url=request.url.replace(request.host_url, container_url).replace(request.path, '/'+path),
+                headers={key: value for key, value in request.headers.items() if key != 'Host'},
+                params={key: value for key, value in request.query_params.items()},
+                data=request_data,
+                allow_redirects=False,
+            )
+            headers = {name: value for name, value in api_resp.headers.items() if name.lower() not in EXCLUDED_HEADERS}
 
-        resp = Response(api_resp.content,
-                        status_code=api_resp.status_code,
-                        headers=headers,
-                        )
-        return resp
-
+            resp = Response(api_resp.content,
+                            status_code=api_resp.status_code,
+                            headers=headers, 
+                            )
+            return resp

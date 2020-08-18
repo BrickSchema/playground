@@ -17,6 +17,7 @@ BRICK = Namespace(f'https://brickschema.org/schema/{BRICK_VERSION}/Brick#')
 
 HOSTNAME = os.environ['HOSTNAME']
 ADMIN_ID = os.environ['ADMIN_ID']
+JWT_TOKEN = os.environ['JWT_TOKEN']
 API_BASE = HOSTNAME + '/brickapi/v1'
 ENTITY_BASE = API_BASE + '/entities'
 QUERY_BASE = API_BASE + '/rawqueries'
@@ -35,6 +36,7 @@ default_headers = {
 }
 
 app_manifest = 'examples/data/app_manifests/app1.yaml'
+genie_manifest = 'examples/data/app_manifests/genie.yaml'
 
 
 def authorize_headers(headers={}):
