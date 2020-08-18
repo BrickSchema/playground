@@ -59,15 +59,16 @@ class LoginPerApp():
             else:
                 raise e
 
-        iptables_manager.grant_host_access(app_management.get_container_id(container_name),
-                                           self.caddr_db.get(container_name),
-                                           "tcp", # TODO: Make it configurable.
-                                           "5001"
-                                           )
+        # iptables_manager.grant_host_access(app_management.get_container_id(container_name),
+        #                                    self.caddr_db.get(container_name),
+        #                                    "tcp", # TODO: Make it configurable.
+        #                                    "5001"
+        #                                    )
 
         if not external:
             redirect_url = f'/brickapi/v1/apps/{app_name}/static/index.html?app_token_query=' + app_token.decode('utf-8')
             resp = Response(content=redirect_url)
+            resp.set_cookie(key='app_token', value=app_token.decode('utf-8'))
             return resp
         else:
             resp = RedirectResponse(app.callback_url)

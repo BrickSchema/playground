@@ -20,7 +20,7 @@ from .services.market_apps import marketapp_router
 from .services.users import user_router
 from .services.admins import admin_router
 
-#update_dependency_supplier('auth_logic', evaluate_app_user)
+# update_dependency_supplier('auth_logic', evaluate_app_user)
 
 #app = brick_server_app
 

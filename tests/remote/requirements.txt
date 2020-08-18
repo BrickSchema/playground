@@ -1,0 +1,8 @@
+arrow
+PyJWT
+rdflib
+pytest
+PyYAML
+requests
+pytest-env
+pytest-ordering

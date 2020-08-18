@@ -21,7 +21,12 @@ if __name__ == '__main__':
         print(token_lifetime)
     else:
         token_lifetime = 3600
-    print(create_jwt_token(user_id='jbkoh@eng.ucsd.edu',
+    if len(sys.argv) == 3:
+        user_name = sys.argv[2]
+    else:
+        user_name = 'admin'
+    # print(create_jwt_token(user_id='jbkoh@eng.ucsd.edu',
+    print(create_jwt_token(user_id=user_name,
                            app_name='brickserver_frontend',
                            token_lifetime=token_lifetime,
                            ).decode('utf-8'))
