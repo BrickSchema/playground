@@ -169,13 +169,9 @@ class AppStatic():
             raise HTTPException(status_code=400,
                                 detail='An `app_token` should be given either in cookie or as a query parameter.',
                                 )
-        # if not app_token and app_token_query:
-        #     app_token = app_token_query
         if app_token_query:
-            payload = parse_jwt_token(app_token_query) # prioritize the query token as it's latest
-        else:
-            payload = parse_jwt_token(app_token)
-
+            app_token = app_token_query # prioritize the token over cookies as it's more updated
+        payload = parse_jwt_token(app_token)
         target_app = payload['app_id'] #TODO: Change app_id to app_name later
         if app_name != target_app:
             raise NotAuthorizedError(detail='The given app token is not for the target app')
@@ -199,11 +195,12 @@ EXCLUDED_HEADERS = ['content-encoding', 'content-length', 'transfer-encoding', '
 class AppApi():
     caddr_db: StrictRedis = Depends(get_app_management_redis_db)
 
-    @app_router.get('/{app_name}/api/{path:path}',
+    @app_router.api_route('/{app_name}/api/{path:path}',
+                     methods=["GET", "POST", "DELETE", "PUT", "OPTIONS", "HEAD", "PATCH", "TRACE"],
                      status_code=200,
                      description='List all apps . (Not implemented yet)',
                      )
-    async def app_api_get(self,
+    async def app_api(self,
             request: Request,
             path: str = Path(..., description='TODO'),
             app_name: str=Path(..., description='TODO'),
