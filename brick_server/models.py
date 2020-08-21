@@ -71,7 +71,7 @@ class OAuthAccessToken(Document): # TODO: Might not need this one.
 class GrafanaDashboard(Document):
     user = ReferenceField(User)
     uid = StringField(required=True)
-    id = StringField(required=True)
+    grafana_id = StringField(required=True)
     url = StringField(required=True)
 
 
@@ -79,6 +79,7 @@ def get_doc(doc_type, **query):
     try:
         doc = doc_type.objects.get(**query)
     except doc_type.DoesNotExist:
+        print('WARNING: {0} does not exist for {1}'.format(doc_type, query))
         raise DoesNotExistError(doc_type, str(query))
     except doc_type.MultipleObjectsReturned:
         raise MultipleObjectsFoundError(doc_type, str(query))
