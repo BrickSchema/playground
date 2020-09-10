@@ -17,5 +17,5 @@ def test_get_market_apps():
 @pytest.mark.run(order=201)
 def test_get_market_app():
     headers = authorize_headers()
-    resp = requests_get(MARKETAPP_BASE + '/bacnet_driver', headers=headers)
+    resp = requests_get(MARKETAPP_BASE + 'bacnet_driver', headers=headers)
     assert resp.status_code == 200

@@ -11,7 +11,7 @@ from .data import znt_id
 genie_token = create_jwt_token(app_name='genie').decode('utf-8')
 
 
-@pytest.mark.run(order=701)
+@pytest.mark.run(order=901)
 def test_activate_new_app():
     headers = authorize_headers()
     manifest = yaml.full_load(open(genie_manifest))
@@ -19,7 +19,7 @@ def test_activate_new_app():
     assert resp.status_code in [200, 409]
 
 
-@pytest.mark.run(order=702)
+@pytest.mark.run(order=902)
 def test_get_activated_user_apps():
     headers = authorize_headers()
     manifest = yaml.full_load(open(genie_manifest))
@@ -46,7 +46,7 @@ def test_login_per_app_internal():
 
 @pytest.mark.run(order=1001)
 def test_get_app_api():
-    api_url = '/api/redirected'
+    api_url = '/api/redirected' # api in genie
     url = APP_BASE + '/genie/api' + api_url
     params = {
         'user_access_token': genie_token
