@@ -38,7 +38,6 @@ from ..app_management.app_management import get_cname, stop_container
 from ..dbs import get_app_management_redis_db
 
 DEFAULT_ADMIN_ID = configs['app_management']['default_admin']
-# DEFAULT_ADMIN_ID = 'admin'
 
 app_router = InferringRouter('apps')
 
