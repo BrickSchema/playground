@@ -6,3 +6,4 @@ PyYAML
 requests
 pytest-env
 pytest-ordering
+cryptography

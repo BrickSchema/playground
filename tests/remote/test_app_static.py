@@ -33,6 +33,19 @@ def test_get_app_static():
         assert resp.status_code == 200
         assert resp.text
         assert resp.cookies['app_token']
+        
+        url = APP_BASE + '/app1/static/child/me.html'
+        authorized_url = url + '?app_token_query=' + app1_token
+        resp = session.get(authorized_url)
+        assert resp.status_code == 200
+        assert resp.text
+        assert resp.cookies['app_token']
+        assert session.cookies['app_token']
+        resp = session.get(url)
+        assert resp.status_code == 200
+        assert resp.text
+        assert resp.cookies['app_token']
+        url = APP_BASE + '/app1/static/child/me.html'
 
     # Token is already in the cookie
     with get_session() as session:

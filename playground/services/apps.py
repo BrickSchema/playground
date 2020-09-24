@@ -88,7 +88,7 @@ class AppByName:
                   token: HTTPAuthorizationCredentials = jwt_security_scheme,
                   ):
         # TODO: Is it ever used?
-        updates = {'set__' + k: v for k, v in app_modeification.dict().items()}
+        updates = {'set__' + k: v for k, v in app_modification.dict().items()}
         app_doc = get_doc(StagedApp, name=app_name)
         app_doc.update(**updates)
         return 'Success', 201

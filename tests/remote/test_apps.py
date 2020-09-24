@@ -4,7 +4,7 @@ import yaml
 import pdb
 from pdb import set_trace as bp
 
-from .common import APP_BASE, authorize_headers, BRICK, app_manifest, requests_post, requests_get
+from .common import APP_BASE, authorize_headers, BRICK, app_manifest, requests_post, requests_get, requests_delete
 from .data import znt_id
 
 
@@ -38,9 +38,17 @@ def test_stage_genie():
     resp = requests_post(APP_BASE + '/', json=body, headers=headers)
     assert resp.status_code in [200, 409]
 
+# @pytest.mark.run(order=503)
+# def test_destage_app1():
+#     headers = authorize_headers()
+#     resp = requests_delete(APP_BASE + '/app1', headers=headers)
+#     assert resp.status_code == 200
+
 
 @pytest.mark.run(order=504)
 def test_get_staged_apps():
     headers = authorize_headers()
     resp = requests_get(APP_BASE + '/', headers=headers)
     assert resp.status_code in [200, 409]
+    assert 'genie' in [app['name'] for app in resp.json()]
+    assert 'app1' not in [app['name'] for app in resp.json()]
