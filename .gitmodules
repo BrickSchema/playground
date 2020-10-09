@@ -1,6 +1,3 @@
 [submodule "brick-server-minimal"]
 	path = brick-server-minimal
 	url = git@gitlab.com:jbkoh/brick-server-minimal.git
-[submodule "examples/app_srcs/genie"]
-	path = examples/app_srcs/genie
-	url = git@gitlab.com:mesl/genie-brickified.git
