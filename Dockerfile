@@ -8,8 +8,9 @@ RUN rm -rf /app
 COPY . /app/
 
 RUN pip install --upgrade pip && \
-    pip install -r /app/requirements.txt && \
-    pip install git+https://gitlab.com/mesl/brickserver/brick-server-minimal
+    pip install -r /app/requirements.txt
+
+RUN pip install git+https://gitlab.com/mesl/brickserver/brick-server-minimal
 
 #ARG SRC="/usr/src/playground"
 
