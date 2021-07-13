@@ -1,3 +1,0 @@
-[submodule "brick-server-minimal"]
-	path = brick-server-minimal
-	url = git@gitlab.com:mesl/brickserver/brick-server-minimal.git
