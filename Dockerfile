@@ -4,7 +4,7 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 RUN apt update && \
     apt install -y vim certbot net-tools nmap htop git
 
-RUN rm -rf /app  && \
+RUN rm -rf /app
 COPY . /app/
 
 RUN pip install --upgrade pip && \
