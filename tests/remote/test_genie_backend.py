@@ -11,7 +11,7 @@ from .data import znt_id
 genie_token = create_jwt_token(app_name='genie').decode('utf-8')
 
 
-@pytest.mark.run(order=901)
+@pytest.mark.order(901)
 def test_activate_new_app():
     headers = authorize_headers()
     manifest = yaml.full_load(open(genie_manifest))
@@ -19,7 +19,7 @@ def test_activate_new_app():
     assert resp.status_code in [200, 409]
 
 
-@pytest.mark.run(order=902)
+@pytest.mark.order(902)
 def test_get_activated_user_apps():
     headers = authorize_headers()
     manifest = yaml.full_load(open(genie_manifest))
@@ -28,7 +28,7 @@ def test_get_activated_user_apps():
     assert manifest['name'] in resp.json()['activated_apps']
 
 
-@pytest.mark.run(order=1000)
+@pytest.mark.order(1000)
 def test_login_per_app_internal():
     headers = authorize_headers()
     manifest = yaml.full_load(open(genie_manifest))
@@ -44,7 +44,7 @@ def test_login_per_app_internal():
     assert resp.status_code in [200, 409]
 
 
-@pytest.mark.run(order=1001)
+@pytest.mark.order(1001)
 def test_get_app_api():
     api_url = '/api/redirected' # api in genie
     url = APP_BASE + '/genie/api' + api_url
@@ -58,7 +58,7 @@ def test_get_app_api():
 
 KILL_CMD = '/exit'
 
-@pytest.mark.run(order=1002)
+@pytest.mark.order(1002)
 def test_kill_app_api():
     url = APP_BASE + '/genie/api' + KILL_CMD
     resp = requests_get(url, cookies={'app_token': genie_token})

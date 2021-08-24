@@ -43,6 +43,8 @@ class LoginPerApp():
         jwt_payload = parse_jwt_token(token.credentials)
         user = get_doc(User, user_id=jwt_payload['user_id'])
         app = get_doc(StagedApp, name=app_name)
+        print(app)
+        print(user.activated_apps)
         assert app in user.activated_apps # authorization
 
         app_token = create_jwt_token(app_name=app.name,
