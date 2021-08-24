@@ -9,7 +9,7 @@ from .common import USER_APP_BASE, authorize_headers, BRICK, AUTH_BASE, app_mani
 from .data import znt_id
 
 
-@pytest.mark.run(order=1100)
+@pytest.mark.order(1100)
 def test_get_app_static():
     url = APP_BASE + '/app1/static/child/me.html'
     dummy_token = 'DUMMY_TOKEN'
@@ -25,6 +25,7 @@ def test_get_app_static():
         url = APP_BASE + '/app1/static/index.html'
         authorized_url = url + '?app_token_query=' + app1_token
         resp = session.get(authorized_url)
+        # print(resp.text)
         assert resp.status_code == 200
         assert resp.text
         assert resp.cookies['app_token']
