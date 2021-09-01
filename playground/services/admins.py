@@ -30,6 +30,7 @@ from .models import AppResponse, AppManifest, ActivationRequest, ActivatedApps, 
 from .models import app_name_desc, user_id_desc
 from ..models import User, StagedApp # TODO: Change naming conventino for mongodb models
 
+from ..auth.authorization import Authorization
 
 admin_router = InferringRouter('admins')
 

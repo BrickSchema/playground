@@ -92,7 +92,7 @@ class DomainUser(Document):
         help_text="brick location -> DomainRole",
         default={},
     )
-    rooms = ListField(StringField())
+    # rooms = ListField(StringField())
     is_superuser = BooleanField(default=False)
 
     meta = {
