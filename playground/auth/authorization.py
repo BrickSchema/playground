@@ -2,48 +2,61 @@ from typing import Dict, Any, Optional, Type, TypeVar, List
 from bson import ObjectId
 from mongoengine import Document
 
+from brick_server.dbs import BrickSparqlAsync
+from brick_server.dependencies import get_brick_db
+
 from brick_server.auth.authorization import parse_jwt_token
 from brick_server.models import get_doc, get_docs
 from brick_server.services.models import jwt_security_scheme
 from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 
-from ..models import StagedApp, User, Domain, DomainUser, DomainOccupancy, DomainRole
+from ..models import (
+    StagedApp,
+    User,
+    Domain,
+    DomainUser,
+    DomainOccupancy,
+    DomainRole,
+    DefaultRole,
+    PermissionType,
+    Entity,
+)
 
 SEP = "^#$%"
 
 
-def make_permission_key(user_id, app_name, entity_id):
-    return user_id + SEP + app_name + SEP + entity_id
-
-
-def check_permissions(entity_ids, user, app, permission_required):
-    for entity_id in entity_ids:
-        perm_key = make_permission_key(user.user_id, app.name, entity_id)
-        perm = r.get(perm_key)
-        if perm is None:
-            raise exceptions.Unauthorized(
-                "The token does not have any permission over {0}".format(entity_id)
-            )
-        perm = perm.decode("utf-8")
-        perm_type, perm_start_time, perm_end_time = decode_permission_val(perm)
-        if permission_required not in perm_type:
-            raise exceptions.Unauthorized(
-                "The token does not have `{0}` permission for {1}".format(
-                    permission_required, entity_id
-                )
-            )
-        curr_time = time.time()
-        if curr_time < perm_start_time or curr_time > perm_end_time:
-            raise exceptions.Unauthorized("The token is not valid at the current time.")
-    return True
-
-
-def evaluate_app_user(action_type, target_ids, *args, **kwargs):
-    jwt_payload = parse_jwt_token(kwargs["token"].credentials)
-    app = get_doc(StagedApp, name=jwt_payload["app_id"])
-    user = get_doc(User, user_id=jwt_payload["user_id"])
-    check_permissions(target_ids, user, app, action_type)
+# def make_permission_key(user_id, app_name, entity_id):
+#     return user_id + SEP + app_name + SEP + entity_id
+#
+#
+# def check_permissions(entity_ids, user, app, permission_required):
+#     for entity_id in entity_ids:
+#         perm_key = make_permission_key(user.user_id, app.name, entity_id)
+#         perm = r.get(perm_key)
+#         if perm is None:
+#             raise exceptions.Unauthorized(
+#                 "The token does not have any permission over {0}".format(entity_id)
+#             )
+#         perm = perm.decode("utf-8")
+#         perm_type, perm_start_time, perm_end_time = decode_permission_val(perm)
+#         if permission_required not in perm_type:
+#             raise exceptions.Unauthorized(
+#                 "The token does not have `{0}` permission for {1}".format(
+#                     permission_required, entity_id
+#                 )
+#             )
+#         curr_time = time.time()
+#         if curr_time < perm_start_time or curr_time > perm_end_time:
+#             raise exceptions.Unauthorized("The token is not valid at the current time.")
+#     return True
+#
+#
+# def evaluate_app_user(action_type, target_ids, *args, **kwargs):
+#     jwt_payload = parse_jwt_token(kwargs["token"].credentials)
+#     app = get_doc(StagedApp, name=jwt_payload["app_id"])
+#     user = get_doc(User, user_id=jwt_payload["user_id"])
+#     check_permissions(target_ids, user, app, action_type)
 
 
 def get_doc_or_none(doc_type: Any, **query):
@@ -63,8 +76,10 @@ def get_current_user(jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)) -> 
     return get_doc(User, user_id=jwt_payload["user_id"])
 
 
-def get_staged_app(jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)) -> StagedApp:
-    return get_doc(StagedApp, name=jwt_payload["app_id"])
+def get_staged_app(
+    jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)
+) -> Optional[StagedApp]:
+    return get_doc_or_none(StagedApp, name=jwt_payload["app_id"])
 
 
 def get_domain_id(
@@ -93,35 +108,53 @@ def get_domain_occupancies(
     return get_docs(DomainOccupancy, user=user.id, domain=domain_id)
 
 
+async def get_entity_obj(brick_db: BrickSparqlAsync, entity_id: str):
+    entity_cls = ""
+    return Entity(id=entity_id, cls=entity_cls)
+
+
 class Authorization:
     def __init__(
         self,
+        brick_db: BrickSparqlAsync = Depends(get_brick_db),
         user: User = Depends(get_current_user),
+        app: Optional[StagedApp] = Depends(get_staged_app),
         domain_id: Optional[ObjectId] = None,
     ) -> None:
+        self.brick_db = brick_db
+
         self.user = user
+        self.app = app
         self.domain_id = domain_id
         self.domain_occupancies = ...
         self.domain_user = ...
         self.domain_roles = {}
 
-    def check_entity_by_location(
+    def check_entity_permission(
         self,
-        location: str,
-        entity: str,
-        permission: str,
+        entity: Entity,
+        permission: PermissionType,
         domain_role: DomainRole,
-    ):
-        # return entity in basic permission of location
+    ) -> bool:
+        if self.app is not None:
+            # self.app.
+            # app mask
+            ...
+        db_permission = domain_role.permissions.get(entity.cls, None)
+        if db_permission == str(PermissionType.WRITE):
+            return True
+        if db_permission == str(PermissionType.READ) and permission == PermissionType.READ:
+            return True
+        return False
+
+    async def is_entity_in_location(self, location: str, entity: Entity) -> bool:
+        query = ""
+        raw_res = await self.brick_db.query(query)
         return True
 
-    def is_entity_in_location(self, location: str, entity: str):
-        # query graph
-        return True
-
-    def check_in_locations_by_role_names(self, zipped, entity: str, permission: str):
+    def check_in_locations_by_role_names(self, zipped, entity: Entity, permission: PermissionType) -> bool:
         for location, role_name in zipped:
-            if self.is_entity_in_location(location, entity):
+            if await self.is_entity_in_location(location, entity):
                 if (self.domain_id, role_name) not in self.domain_roles:
                     self.domain_roles[(self.domain_id, role_name)] = get_domain_role(
                         self.domain_id, role_name
@@ -129,18 +162,19 @@ class Authorization:
                 domain_role = self.domain_roles[(self.domain_id, role_name)]
                 if domain_role is None:
                     continue
-                if self.check_entity_by_location(
-                    location=self.domain_occupancies.location,
+                if self.check_entity_permission(
                     entity=entity,
                     permission=permission,
                     domain_role=domain_role,
                 ):
                     return True
+        return False
 
-    def check(self, entity: str, permission: str) -> bool:
+    def check(self, entity_id: str, permission: PermissionType) -> bool:
         # if the user is site admin, grant all permissions
         if self.user.is_admin:
             return True
+        entity = await get_entity_obj(self.brick_db, entity_id)
 
         # check permission in domain occupancy list
         if self.domain_occupancies is ...:
@@ -149,7 +183,7 @@ class Authorization:
         locations = [
             domain_occupancy.location for domain_occupancy in self.domain_occupancies
         ]
-        role_names = ["basic"] * len(locations)
+        role_names = [str(DefaultRole.BASIC)] * len(locations)
         if self.check_in_locations_by_role_names(
             zip(locations, role_names), entity, permission
         ):
