@@ -8,6 +8,7 @@ from mongoengine import (
     IntField,
     BooleanField,
 )
+from pydantic import BaseModel
 
 from brick_server.models import User as BrickUser
 
@@ -56,9 +57,13 @@ class User(BrickUser):
     activated_apps = ListField(ReferenceField(StagedApp), default=[])
 
 
-class PointType(str, Enum):
-    HVAC = "HVAC"
-    Temperature = "Temperature"
+# class PointType(str, Enum):
+#     HVAC = "HVAC"
+#     Temperature = "Temperature"
+
+class Entity(BaseModel):
+    id: str
+    cls: str
 
 
 class Domain(Document):
@@ -70,7 +75,7 @@ class DomainRole(Document):
     role_name = StringField(required=True)
     permissions = DictField(
         StringField(),
-        help_text="PointType -> Permission (r/w)",
+        help_text="EntityCls -> PermissionType",
         default={},
     )
 
@@ -109,3 +114,20 @@ class DomainOccupancy(Document):
     domain = ReferenceField(Domain, required=True)
     user = ReferenceField(User, required=True)
     location: StringField(required=True)
+
+
+class StrEnumMixin(str, Enum):
+    def __str__(self) -> str:
+        return self.value
+
+
+class DefaultRole(StrEnumMixin, Enum):
+    BASIC = "basic"
+    ADMIN = "admin"
+
+
+class PermissionType(StrEnumMixin, Enum):
+    READ = "read"
+    WRITE = "write"
+
+
