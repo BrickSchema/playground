@@ -31,7 +31,7 @@ from .models import app_name_desc
 from ..models import MarketApp # TODO: Change naming conventino for mongodb models
 
 
-marketapp_router = InferringRouter('market_apps')
+marketapp_router = InferringRouter(prefix='/market_apps')
 
 @cbv(marketapp_router)
 class MarketAppsRoute():

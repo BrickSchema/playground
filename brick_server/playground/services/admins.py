@@ -32,7 +32,7 @@ from ..models import User, StagedApp # TODO: Change naming conventino for mongod
 
 from ..auth.authorization import Authorization
 
-admin_router = InferringRouter('admins')
+admin_router = InferringRouter(prefix='/admins')
 
 @cbv(admin_router)
 class AppApproval:
