@@ -143,7 +143,10 @@ class Authorization:
         db_permission = domain_role.permissions.get(entity.cls, None)
         if db_permission == str(PermissionType.WRITE):
             return True
-        if db_permission == str(PermissionType.READ) and permission == PermissionType.READ:
+        if (
+            db_permission == str(PermissionType.READ)
+            and permission == PermissionType.READ
+        ):
             return True
         return False
 
@@ -152,7 +155,9 @@ class Authorization:
         raw_res = await self.brick_db.query(query)
         return True
 
-    def check_in_locations_by_role_names(self, zipped, entity: Entity, permission: PermissionType) -> bool:
+    def check_in_locations_by_role_names(
+        self, zipped, entity: Entity, permission: PermissionType
+    ) -> bool:
         for location, role_name in zipped:
             if await self.is_entity_in_location(location, entity):
                 if (self.domain_id, role_name) not in self.domain_roles:
@@ -204,3 +209,16 @@ class Authorization:
             return True
 
         return False
+
+    def __call__(self, entity_id: str, permission: PermissionType):
+        if not self.check(entity_id, permission):
+            raise Exception("Permission denied")
+
+
+def auth_logic(
+    brick_db: BrickSparqlAsync = Depends(get_brick_db),
+    user: User = Depends(get_current_user),
+    app: Optional[StagedApp] = Depends(get_staged_app),
+    domain_id: Optional[ObjectId] = None,
+) -> Authorization:
+    return Authorization(brick_db, user, app, domain_id)
