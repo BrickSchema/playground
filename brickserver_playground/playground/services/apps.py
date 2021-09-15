@@ -39,7 +39,7 @@ from ..dbs import get_app_management_redis_db
 
 DEFAULT_ADMIN_ID = configs['app_management']['default_admin']
 
-app_router = InferringRouter('apps')
+app_router = InferringRouter(prefix='/apps')
 
 def get_app_admins(*args, **kwargs):
     app_name = kwargs['app_name']

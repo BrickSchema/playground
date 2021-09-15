@@ -33,7 +33,7 @@ from .models import app_name_desc, user_id_desc
 from ..models import StagedApp, User
 
 
-user_router = InferringRouter('users')
+user_router = InferringRouter(prefix='/users')
 
 @cbv(user_router)
 class UserRelationResource:
