@@ -1,26 +1,24 @@
-from typing import Dict, Any, Optional, Type, TypeVar, List
+from typing import Any, Dict, List, Optional, Set
+
 from bson import ObjectId
-from mongoengine import Document
-
-from brick_server.dbs import BrickSparqlAsync
-from brick_server.dependencies import get_brick_db
-
-from brick_server.auth.authorization import parse_jwt_token
-from brick_server.models import get_doc, get_docs
-from brick_server.services.models import jwt_security_scheme
 from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 
+from brick_server.auth.authorization import parse_jwt_token
+from brick_server.dbs import BrickSparqlAsync
+from brick_server.dependencies import get_brick_db
+from brick_server.models import get_doc, get_docs
+from brick_server.services.models import jwt_security_scheme
+
 from ..models import (
-    StagedApp,
-    User,
-    Domain,
-    DomainUser,
+    DefaultRole,
     DomainOccupancy,
     DomainRole,
-    DefaultRole,
-    PermissionType,
+    DomainUser,
     Entity,
+    PermissionType,
+    StagedApp,
+    User,
 )
 
 SEP = "^#$%"
@@ -175,7 +173,9 @@ class Authorization:
                     return True
         return False
 
-    def check(self, entity_id: str, permission: PermissionType) -> bool:
+    def check(self, entity_ids: Set[str], permission: PermissionType) -> bool:
+        # TODO: entity_id -> entity_ids
+        entity_id = entity_ids.pop()
         # if the user is site admin, grant all permissions
         if self.user.is_admin:
             return True
@@ -210,8 +210,8 @@ class Authorization:
 
         return False
 
-    def __call__(self, entity_id: str, permission: PermissionType):
-        if not self.check(entity_id, permission):
+    def __call__(self, entity_ids: List[str], permission: PermissionType):
+        if not self.check(entity_ids, permission):
             raise Exception("Permission denied")
 
 
