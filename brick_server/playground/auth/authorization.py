@@ -4,11 +4,10 @@ from bson import ObjectId
 from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 
-from brick_server.auth.authorization import parse_jwt_token
-from brick_server.dbs import BrickSparqlAsync
-from brick_server.dependencies import get_brick_db
-from brick_server.models import get_doc, get_docs
-from brick_server.services.models import jwt_security_scheme
+from brick_server.minimal.auth.authorization import jwt_security_scheme, parse_jwt_token
+from brick_server.minimal.dbs import BrickSparqlAsync
+from brick_server.minimal.dependencies import get_brick_db
+from brick_server.minimal.models import get_doc, get_docs
 
 from ..models import (
     DefaultRole,
@@ -153,7 +152,7 @@ class Authorization:
         raw_res = await self.brick_db.query(query)
         return True
 
-    def check_in_locations_by_role_names(
+    async def check_in_locations_by_role_names(
         self, zipped, entity: Entity, permission: PermissionType
     ) -> bool:
         for location, role_name in zipped:
@@ -173,7 +172,7 @@ class Authorization:
                     return True
         return False
 
-    def check(self, entity_ids: Set[str], permission: PermissionType) -> bool:
+    async def check(self, entity_ids: Set[str], permission: PermissionType) -> bool:
         # TODO: entity_id -> entity_ids
         entity_id = entity_ids.pop()
         # if the user is site admin, grant all permissions
@@ -189,7 +188,7 @@ class Authorization:
             domain_occupancy.location for domain_occupancy in self.domain_occupancies
         ]
         role_names = [str(DefaultRole.BASIC)] * len(locations)
-        if self.check_in_locations_by_role_names(
+        if await self.check_in_locations_by_role_names(
             zip(locations, role_names), entity, permission
         ):
             return True
@@ -203,15 +202,15 @@ class Authorization:
             return True
 
         # check permission by domain user roles
-        if self.check_in_locations_by_role_names(
+        if await self.check_in_locations_by_role_names(
             self.domain_user.roles.items(), entity, permission
         ):
             return True
 
         return False
 
-    def __call__(self, entity_ids: List[str], permission: PermissionType):
-        if not self.check(entity_ids, permission):
+    async def __call__(self, entity_ids: Set[str], permission: PermissionType):
+        if not await self.check(entity_ids, permission):
             raise Exception("Permission denied")
 
 
