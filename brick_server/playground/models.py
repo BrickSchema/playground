@@ -1,16 +1,17 @@
 from enum import Enum
+
 from mongoengine import (
-    Document,
-    StringField,
-    DictField,
-    ReferenceField,
-    ListField,
-    IntField,
     BooleanField,
+    DictField,
+    Document,
+    IntField,
+    ListField,
+    ReferenceField,
+    StringField,
 )
 from pydantic import BaseModel
 
-from brick_server.models import User as BrickUser
+from brick_server.minimal.models import User as BrickUser
 
 
 class MarketApp(Document):
@@ -60,6 +61,7 @@ class User(BrickUser):
 # class PointType(str, Enum):
 #     HVAC = "HVAC"
 #     Temperature = "Temperature"
+
 
 class Entity(BaseModel):
     id: str
@@ -129,5 +131,3 @@ class DefaultRole(StrEnumMixin, Enum):
 class PermissionType(StrEnumMixin, Enum):
     READ = "read"
     WRITE = "write"
-
-
