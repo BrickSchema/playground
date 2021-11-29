@@ -55,7 +55,7 @@ from .models import (
 # DEFAULT_ADMIN_ID = configs['app_management']['default_admin']
 DEFAULT_ADMIN_ID = settings.default_admin
 
-app_router = InferringRouter(prefix="/apps")
+app_router = InferringRouter()
 
 
 def get_app_admins(*args, **kwargs):

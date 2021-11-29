@@ -198,7 +198,7 @@ class Authorization:
             self.domain_user = get_domain_user(self.user, self.domain_id)
         if self.domain_user is None:
             return False
-        if self.domain_user.is_superuser:
+        if self.domain_user.is_admin:
             return True
 
         # check permission by domain user roles
@@ -221,3 +221,9 @@ def auth_logic(
     domain_id: Optional[ObjectId] = None,
 ) -> Authorization:
     return Authorization(brick_db, user, app, domain_id)
+
+
+class DomainAdminPermissionChecker:
+    def __call__(self, domain_id: str = Depends(get_domain_id)):
+        # find a doc in DomainUser
+        pass
