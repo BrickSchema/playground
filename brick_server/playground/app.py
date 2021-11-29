@@ -61,7 +61,7 @@ app.add_middleware(SessionMiddleware, secret_key=os.urandom(24))
 app.include_router(app_router, prefix="/brickapi/v1/apps")
 app.include_router(marketapp_router, prefix="/brickapi/v1/market_apps")
 app.include_router(user_router, prefix="/brickapi/v1/user")
-app.include_router(auth_router, prefix="/auth")
+app.include_router(auth_router, prefix="/brickapi/v1/auth")
 app.include_router(admin_router, prefix="/brickapi/v1/admin")
 
 app.mount("/brickapi/v1/appstatic", StaticFiles(directory="static"), name="static")

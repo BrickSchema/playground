@@ -20,7 +20,7 @@ from .models import MarketAppResponse
 # from ..dependencies import get_brick_db, dependency_supplier
 
 
-marketapp_router = InferringRouter(prefix="/market_apps")
+marketapp_router = InferringRouter()
 
 
 @cbv(marketapp_router)

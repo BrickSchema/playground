@@ -35,7 +35,7 @@ from .models import (
 # from ..dependencies import get_brick_db, dependency_supplier
 
 
-admin_router = InferringRouter(prefix="/admins")
+admin_router = InferringRouter()
 
 
 @cbv(admin_router)

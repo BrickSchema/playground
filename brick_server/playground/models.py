@@ -100,7 +100,7 @@ class DomainUser(Document):
         default={},
     )
     # rooms = ListField(StringField())
-    is_superuser = BooleanField(default=False)
+    is_admin = BooleanField(default=False)
 
     meta = {
         "indexes": [

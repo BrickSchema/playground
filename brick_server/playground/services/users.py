@@ -33,7 +33,7 @@ from .models import (
     UserResponse,
 )
 
-user_router = InferringRouter(prefix="/users")
+user_router = InferringRouter()
 
 
 @cbv(user_router)
