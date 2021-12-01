@@ -49,9 +49,6 @@ from .models import (
     app_name_desc,
 )
 
-# from ..dependencies import get_brick_db, dependency_supplier
-
-
 # DEFAULT_ADMIN_ID = configs['app_management']['default_admin']
 DEFAULT_ADMIN_ID = settings.default_admin
 

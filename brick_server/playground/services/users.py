@@ -6,7 +6,7 @@ def gen_uuid():
 
 
 import arrow
-from fastapi import Body, Depends
+from fastapi import Body
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
@@ -17,8 +17,6 @@ from brick_server.minimal.auth.authorization import (
     jwt_security_scheme,
     parse_jwt_token,
 )
-from brick_server.minimal.dbs import BrickSparqlAsync
-from brick_server.minimal.dependencies import get_brick_db
 from brick_server.minimal.exceptions import AlreadyExistsError
 
 # from brick_server.configs import configs
@@ -38,8 +36,6 @@ user_router = InferringRouter()
 
 @cbv(user_router)
 class UserRelationResource:
-    brick_db: BrickSparqlAsync = Depends(get_brick_db)
-
     @user_router.post(
         "/relationship",
         description="Update a user's relationship",

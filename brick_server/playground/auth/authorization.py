@@ -5,8 +5,6 @@ from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 
 from brick_server.minimal.auth.authorization import jwt_security_scheme, parse_jwt_token
-from brick_server.minimal.dbs import BrickSparqlAsync
-from brick_server.minimal.dependencies import get_brick_db
 from brick_server.minimal.models import get_doc, get_docs
 
 from ..models import (
@@ -105,7 +103,7 @@ def get_domain_occupancies(
     return get_docs(DomainOccupancy, user=user.id, domain=domain_id)
 
 
-async def get_entity_obj(brick_db: BrickSparqlAsync, entity_id: str):
+async def get_entity_obj(entity_id: str):
     entity_cls = ""
     return Entity(id=entity_id, cls=entity_cls)
 
@@ -113,13 +111,10 @@ async def get_entity_obj(brick_db: BrickSparqlAsync, entity_id: str):
 class Authorization:
     def __init__(
         self,
-        brick_db: BrickSparqlAsync = Depends(get_brick_db),
         user: User = Depends(get_current_user),
         app: Optional[StagedApp] = Depends(get_staged_app),
         domain_id: Optional[ObjectId] = None,
     ) -> None:
-        self.brick_db = brick_db
-
         self.user = user
         self.app = app
         self.domain_id = domain_id
@@ -178,7 +173,7 @@ class Authorization:
         # if the user is site admin, grant all permissions
         if self.user.is_admin:
             return True
-        entity = await get_entity_obj(self.brick_db, entity_id)
+        entity = await get_entity_obj(entity_id)
 
         # check permission in domain occupancy list
         if self.domain_occupancies is ...:
@@ -215,12 +210,11 @@ class Authorization:
 
 
 def auth_logic(
-    brick_db: BrickSparqlAsync = Depends(get_brick_db),
     user: User = Depends(get_current_user),
     app: Optional[StagedApp] = Depends(get_staged_app),
     domain_id: Optional[ObjectId] = None,
 ) -> Authorization:
-    return Authorization(brick_db, user, app, domain_id)
+    return Authorization(user, app, domain_id)
 
 
 class DomainAdminPermissionChecker:
