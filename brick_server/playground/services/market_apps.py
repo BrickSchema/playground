@@ -17,7 +17,6 @@ from ..models import MarketApp  # TODO: Change naming conventino for mongodb mod
 from .models import MarketAppResponse
 
 # from brick_server.configs import configs
-# from ..dependencies import get_brick_db, dependency_supplier
 
 
 marketapp_router = InferringRouter()

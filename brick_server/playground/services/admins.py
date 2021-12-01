@@ -32,9 +32,6 @@ from .models import (
     app_name_desc,
 )
 
-# from ..dependencies import get_brick_db, dependency_supplier
-
-
 admin_router = InferringRouter()
 
 
