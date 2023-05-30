@@ -14,7 +14,7 @@ def main() -> None:
         debug=settings.debug,
         reload=settings.debug,
         log_level="debug",
-        reload_dirs=["brick_server/minimal", "brick_server/playground"],
+        reload_dirs=["../brick-server-minimal/brick_server/minimal", "brick_server/playground"],
     )
 
 

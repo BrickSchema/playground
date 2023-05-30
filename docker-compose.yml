@@ -1,72 +1,71 @@
 version: '3.5'
 services:
-  brick-server-postgres:
-    container_name: brick-server-postgres
+  postgres:
     image: timescale/timescaledb-postgis:latest-pg13
     environment: # Below secrets should be matched with the information in `.env` too.
       - POSTGRES_USER=bricker
       - POSTGRES_PASSWORD=brick-demo
       - POSTGRES_DB=brick
+      - PGDATA=/var/lib/postgresql/data/pgdata
     networks:
-      - brick-server-backend-network
+      - brick-server-network
     ports:
       - "35432:5432"
     volumes:
-      - ./docker/init_postgis.sh:/docker-entrypoint-initdb.d/003_init_postgis.sh
-#  brick-server-virtuoso:
-#    container_name: brick-server-virtuoso
-#    image: tenforce/virtuoso:virtuoso7.2.5
-#    environment:
-#      - SPARQL_UPDATE=true
-#    networks:
-#      - brick-server-backend-network
-#    ports:
-#      - "38890:8890"
-  brick-server-graphdb:
-    container_name: brick-server-graphdb
+      - type: bind
+        source: ./docker/init_postgis.sh
+        target: /docker-entrypoint-initdb.d/003_init_postgis.sh
+        read_only: true
+      - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
+  graphdb:
     image: w1zzard/graphdb-free:9.9.0
     networks:
-      - brick-server-backend-network
+      - brick-server-network
     ports:
       - "37200:7200"
-  brick-server-mongo:
-    container_name: brick-server-mongo
+  mongo:
     image: mongo:4.2.3-bionic
     networks:
-      - brick-server-backend-network
+      - brick-server-network
     ports:
       - "37017:27017"
-  brick-server-redis:
-    container_name: brick-server-redis
+  redis:
     image: 'redis:5.0.8'
     command: redis-server --requirepass brick-demo
     networks:
-      - brick-server-backend-network
+      - brick-server-network
     ports:
       - "36379:6379"
-  brick-server:
-    container_name: brick-server
-    image: brick_server:minimal
-    restart: always
+  core:
+    image: brick_server:playground
+    build:
+      context: ..
+      dockerfile: ./brick-server-playground/Dockerfile
+    restart: on-failure
     volumes:
-      - ./brick_server:/root/brick_server
+      - ./brick_server/playground:/root/brick-server-playground/brick_server/playground
+      - ../brick-server-minimal/brick_server/minimal:/root/brick-server-minimal/brick_server/minimal
+      - ./tests:/root/tests
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "9000:9000"
     networks:
-      - brick-server-backend-network
+      - brick-server-network
       - isolated_nw
     environment:
       - DEBUG=true
-      - HOST=brick-server
-      - MONGO_HOST=brick-server-mongo
-      - TIMESCALE_HOST=brick-server-postgres
-      - BRICK_HOST=brick-server-virtuoso
-      - GRAPHDB_HOST=brick-server-graphdb
-#      - GRAFANA_HOST=brick-server-grafana
+      - HOST=core
+      - MONGO_HOST=mongo
+      - TIMESCALE_HOST=postgres
+      - BRICK_HOST=virtuoso
+      - GRAPHDB_HOST=graphdb
+#      - GRAFANA_HOST=grafana
+    depends_on:
+      - graphdb
     privileged: true
+    command: dockerize -wait http://graphdb:7200/rest/repositories python3 -m brick_server.playground
 #    entrypoint: /app/docker/start-reload.sh
 
 networks:
-  brick-server-backend-network:
+  brick-server-network:
   isolated_nw:
