@@ -11,7 +11,18 @@ from mongoengine import (
 )
 from pydantic import BaseModel
 
-from brick_server.minimal.models import User as BrickUser
+from brick_server.minimal.models import User, Domain
+
+
+class PermissionProfile(Document):
+    read = StringField(required=True)
+    write = StringField(required=True)
+
+
+class App(Document):
+    name = StringField(required=True, unique=True)
+    description = StringField()
+    profile = ReferenceField(PermissionProfile, required=True)
 
 
 class MarketApp(Document):
@@ -54,9 +65,11 @@ class StagedApp(Document):
     permission_lifetime = IntField(default=36000)
 
 
-class User(BrickUser):
-    activated_apps = ListField(ReferenceField(StagedApp), default=[])
-
+# class User(BrickUser):
+#     activated_apps = ListField(ReferenceField(StagedApp), default=[])
+#     meta = {
+#         'collection': 'user'
+#     }
 
 # class PointType(str, Enum):
 #     HVAC = "HVAC"
@@ -68,37 +81,37 @@ class Entity(BaseModel):
     cls: str
 
 
-class Domain(Document):
-    name = StringField()
+# class Domain(Document):
+#     name = StringField()
 
 
-class DomainRole(Document):
-    domain = ReferenceField(Domain, required=True)
-    role_name = StringField(required=True)
-    permissions = DictField(
-        StringField(),
-        help_text="EntityCls -> PermissionType",
-        default={},
-    )
-
-    meta = {
-        "indexes": [
-            {
-                "fields": ["domain", "role_name"],
-                "unique": True,
-            }
-        ]
-    }
+# class DomainRole(Document):
+#     domain = ReferenceField(Domain, required=True)
+#     role_name = StringField(required=True)
+#     permissions = DictField(
+#         StringField(),
+#         help_text="EntityCls -> PermissionType",
+#         default={},
+#     )
+#
+#     meta = {
+#         "indexes": [
+#             {
+#                 "fields": ["domain", "role_name"],
+#                 "unique": True,
+#             }
+#         ]
+#     }
 
 
 class DomainUser(Document):
     domain = ReferenceField(Domain, required=True)
     user = ReferenceField(User, required=True)
-    roles = DictField(
-        ReferenceField(DomainRole),
-        help_text="brick location -> DomainRole",
-        default={},
-    )
+    # roles = DictField(
+    #     ReferenceField(DomainRole),
+    #     help_text="brick location -> DomainRole",
+    #     default={},
+    # )
     # rooms = ListField(StringField())
     is_admin = BooleanField(default=False)
 
@@ -117,17 +130,48 @@ class DomainOccupancy(Document):
     user = ReferenceField(User, required=True)
     location: StringField(required=True)
 
+    meta = {
+        "indexes": [
+            {
+                "fields": ["domain", "user"],
+                "unique": False,
+            }
+        ]
+    }
+
+
+class DomainUserProfile(Document):
+    domain = ReferenceField(Domain, required=True)
+    user = ReferenceField(User, required=True)
+    profile = ReferenceField(PermissionProfile, required=True)
+    arguments = DictField()
+
+    meta = {
+        "indexes": [
+            {
+                "fields": ["domain", "user"],
+                "unique": False,
+            }
+        ]
+    }
+
+
+# class AppProfile(Document):
+#     app = ReferenceField(App, required=True)
+#     profile = ReferenceField(PermissionProfile, required=True)
+#     # TODO: add arguments in app instance
+#     # arguments = DictField()
+
 
 class StrEnumMixin(str, Enum):
     def __str__(self) -> str:
         return self.value
 
-
-class DefaultRole(StrEnumMixin, Enum):
-    BASIC = "basic"
-    ADMIN = "admin"
-
-
+# class DefaultRole(StrEnumMixin, Enum):
+#     BASIC = "basic"
+#     ADMIN = "admin"
+#
+#
 class PermissionType(StrEnumMixin, Enum):
     READ = "read"
     WRITE = "write"
