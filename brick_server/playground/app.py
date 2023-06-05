@@ -11,6 +11,7 @@ settings = config.init_settings(FastAPIConfig)
 print(settings.dict())
 
 from brick_server.minimal.dependencies import update_dependency_supplier
+
 from brick_server.playground.auth.authorization import auth_logic
 
 update_dependency_supplier(auth_logic)
@@ -28,6 +29,7 @@ from brick_server.playground.dbs import init_mongodb
 from .auth.auth_server import auth_router
 from .services.admins import admin_router
 from .services.apps import app_router
+from .services.domains import domain_router as playground_domain_router
 from .services.market_apps import marketapp_router
 from .services.profile import profile_router
 from .services.users import user_router
@@ -72,5 +74,6 @@ app.include_router(user_router, prefix="/brickapi/v1/user")
 app.include_router(auth_router, prefix="/brickapi/v1/auth")
 app.include_router(admin_router, prefix="/brickapi/v1/admin")
 app.include_router(profile_router, prefix="/brickapi/v1/profiles")
+app.include_router(playground_domain_router, prefix="/brickapi/v1/domains")
 
 app.mount("/brickapi/v1/appstatic", StaticFiles(directory="static"), name="static")

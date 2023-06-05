@@ -2,18 +2,20 @@ from typing import Any, Dict, List, Optional, Set
 
 from brick_server.minimal.auth.jwt import jwt_security_scheme, parse_jwt_token
 from brick_server.minimal.dependencies import get_graphdb
-from brick_server.minimal.exceptions import DoesNotExistError, NotAuthorizedError, GraphDBError, InternalServerError
-from brick_server.minimal.models import Domain, get_doc, get_docs
+from brick_server.minimal.exceptions import GraphDBError, InternalServerError
+from brick_server.minimal.models import Domain, get_doc, get_doc_or_none, get_docs
+from brick_server.minimal.schemas import PermissionType
 from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 from loguru import logger
 
 from ..models import (  # DefaultRole,; DomainRole,
+    App,
+    DomainApp,
     DomainOccupancy,
     DomainUser,
     DomainUserProfile,
     Entity,
-    PermissionType,
     StagedApp,
     User,
 )
@@ -54,15 +56,8 @@ SEP = "^#$%"
 #     check_permissions(target_ids, user, app, action_type)
 
 
-def get_doc_or_none(doc_type: Any, **query):
-    try:
-        return get_doc(doc_type, **query)
-    except DoesNotExistError:
-        return None
-
-
 def get_jwt_payload(
-        token: HTTPAuthorizationCredentials = jwt_security_scheme,
+    token: HTTPAuthorizationCredentials = jwt_security_scheme,
 ) -> Dict[str, Any]:
     return parse_jwt_token(token.credentials)
 
@@ -72,7 +67,7 @@ def get_current_user(jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)) -> 
 
 
 def get_staged_app(
-        jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)
+    jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)
 ) -> Optional[StagedApp]:
     return get_doc_or_none(StagedApp, name=jwt_payload["app_id"])
 
@@ -82,10 +77,21 @@ def get_domain(domain: str = Path(..., description="Name of the domain")) -> Dom
     return get_doc(Domain, name=domain)
 
 
+def get_app(app: str = Path(..., description="Name of the app")) -> App:
+    return get_doc(App, name=app)
+
+
 def get_domain_user(
-        user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
+    user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
 ) -> Optional[DomainUser]:
     return get_doc_or_none(DomainUser, user=user.id, domain=domain.id)
+
+
+def get_domain_app(
+    domain: Domain = Depends(get_domain),
+    app: App = Depends(get_app),
+) -> DomainApp:
+    return get_doc(DomainApp, domain=domain.id, app=app.id)
 
 
 # def get_domain_role(
@@ -97,13 +103,13 @@ def get_domain_user(
 
 
 def get_domain_occupancies(
-        user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
+    user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
 ) -> List[DomainOccupancy]:
     return get_docs(DomainOccupancy, user=user.id, domain=domain.id)
 
 
 def get_domain_user_profiles(
-        user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
+    user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
 ) -> List[DomainUserProfile]:
     return get_docs(DomainUserProfile, user=user.id, domain=domain.id)
 
@@ -115,10 +121,10 @@ async def get_entity_obj(entity_id: str):
 
 class Authorization:
     def __init__(
-            self,
-            user: User = Depends(get_current_user),
-            app: Optional[StagedApp] = Depends(get_staged_app),
-            domain: Optional[Domain] = None,
+        self,
+        user: User = Depends(get_current_user),
+        app: Optional[StagedApp] = Depends(get_staged_app),
+        domain: Optional[Domain] = None,
     ) -> None:
         self.user = user
         self.app = app
@@ -181,10 +187,10 @@ class Authorization:
         return d
 
     async def check_profile(
-            self,
-            profile,
-            entity_id: str,
-            permission: PermissionType,
+        self,
+        profile,
+        entity_id: str,
+        permission: PermissionType,
     ):
         template: str = profile.profile.__getattribute__(permission)
         query = template.format(**profile.arguments)
@@ -205,7 +211,6 @@ class Authorization:
         return False
 
     async def check(self, entity_ids: Set[str], permission: PermissionType) -> bool:
-
         # if the user is site admin, grant all permissions
         if self.user.is_admin:
             return True
@@ -274,9 +279,9 @@ class Authorization:
 
 
 def auth_logic(
-        user: User = Depends(get_current_user),
-        app: Optional[StagedApp] = Depends(get_staged_app),
-        domain: Optional[Domain] = Depends(get_domain),
+    user: User = Depends(get_current_user),
+    app: Optional[StagedApp] = Depends(get_staged_app),
+    domain: Optional[Domain] = Depends(get_domain),
 ) -> Authorization:
     authorization = Authorization(user, app, domain)
 

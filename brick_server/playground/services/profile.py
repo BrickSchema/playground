@@ -1,6 +1,7 @@
 from typing import Any, Callable
 
 from brick_server.minimal.auth.checker import (
+    PermissionChecker,
     PermissionCheckerWithEntityId,
     PermissionType,
 )
@@ -30,7 +31,7 @@ class ProfileRoute:
         self,
         # background_tasks: BackgroundTasks,
         # domain: str = Path(...),
-        # checker: Any = Depends(PermissionChecker(PermissionType.write)),
+        checker: Any = Depends(PermissionChecker(PermissionType.ADMIN_SITE)),
     ) -> schemas.PermissionProfile:
         # create_user("admin", "admin", "admin@gmail.com")
 
@@ -47,6 +48,6 @@ class ProfileRoute:
         self,
         # entity_id: str = Query(..., description=Descriptions.entity_id),
         # domain: Domain = Depends(query_domain),
-        checker: Any = Depends(PermissionCheckerWithEntityId(PermissionType.read)),
+        checker: Any = Depends(PermissionCheckerWithEntityId(PermissionType.READ)),
     ) -> None:
         pass

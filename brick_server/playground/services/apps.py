@@ -1,5 +1,4 @@
 import os
-import time
 from uuid import uuid4
 
 from redis import StrictRedis
@@ -12,7 +11,6 @@ def gen_uuid():
 import httpx
 from brick_server.minimal.auth.authorization import (
     authorized,
-    authorized_frontend,
     jwt_security_scheme,
     parse_jwt_token,
 )
@@ -23,7 +21,7 @@ from brick_server.minimal.exceptions import (
 )
 
 # from brick_server.configs import configs
-from brick_server.minimal.models import get_doc
+from brick_server.minimal.models import get_doc, get_doc_or_none
 from brick_server.minimal.schemas import IsSuccess
 from fastapi import Body, Cookie, Depends, HTTPException, Path, Query
 from fastapi.security import HTTPAuthorizationCredentials
@@ -33,25 +31,20 @@ from fastapi_utils.inferring_router import InferringRouter
 from starlette.requests import Request
 from starlette.responses import FileResponse, Response
 
+from brick_server.playground import models, schemas
+
 from ..app_management.app_management import get_cname, stop_container
 from ..dbs import get_app_management_redis_db
 from ..models import (  # TODO: Change naming conventino for mongodb models
-    MarketApp,
     StagedApp,
     User,
 )
-from .models import (
-    AppResponse,
-    AppStageRequest,
-    StagedAppResponse,
-    StagedAppsResponse,
-    app_name_desc,
-)
+from .models import AppResponse, app_name_desc
 
 # DEFAULT_ADMIN_ID = configs['app_management']['default_admin']
 DEFAULT_ADMIN_ID = settings.default_admin
 
-app_router = InferringRouter()
+app_router = InferringRouter(tags=["Apps"])
 
 
 def get_app_admins(*args, **kwargs):
@@ -67,7 +60,6 @@ class AppByName:
         status_code=200,
         description="Get information about the app",
         response_model=AppResponse,
-        tags=["Apps"],
     )
     @authorized  # TODO: Reimplement the authentication mechanism
     def get(
@@ -93,7 +85,31 @@ class AppByName:
         app_doc.delete()
         return IsSuccess()
 
-    @app_router.post(
+    @app_router.post("/", description="Create an app")
+    def post(
+        self,
+        # app_name: str = Path(..., description=app_name_desc),
+        app_create: schemas.AppCreate = Body(...),
+        # checker: Any = Depends(PermissionChecker(PermissionType.ADMIN_SITE)),
+    ) -> schemas.App:
+        app = get_doc_or_none(models.App, name=app_create.name)
+        if app is not None:
+            raise AlreadyExistsError("app", "name")
+        profile = models.PermissionProfile(
+            read=app_create.profile.read,
+            write=app_create.profile.write,
+        )
+        profile.save()
+        app = models.App(
+            name=app_create.name,
+            description=app_create.description,
+            profile=profile,
+            approved=False,
+        )
+        app.save()
+        return schemas.App.from_orm(app)
+
+    @app_router.patch(
         "/{app_name}",
         status_code=200,
         description="modify metadata of the app.",
@@ -112,67 +128,67 @@ class AppByName:
         return "Success", 201
 
 
-@cbv(app_router)
-class Apps:
-    @app_router.get(
-        "/",
-        status_code=200,
-        description="List all staged apps.",
-        response_model=StagedAppsResponse,
-    )
-    @authorized_frontend
-    async def get(
-        self,
-        token: HTTPAuthorizationCredentials = jwt_security_scheme,
-    ) -> StagedAppsResponse:
-        return [
-            StagedAppResponse(name=app.name, is_approved=not app.pending_approvals)
-            for app in StagedApp.objects()
-        ]
-
-    @app_router.post(
-        "/",
-        status_code=200,
-        description="Stage an app",
-        response_model=IsSuccess,
-    )
-    @authorized_frontend
-    async def stage_app(
-        self,
-        stage_request: AppStageRequest = Body(...),
-        token: HTTPAuthorizationCredentials = jwt_security_scheme,
-    ):
-        jwt_payload = parse_jwt_token(token.credentials)
-        # TODO: Check is_admin
-
-        app_name = stage_request.app_name
-        existing_apps = StagedApp.objects(name=app_name)
-        if existing_apps:
-            raise AlreadyExistsError(StagedApp, app_name)
-        market_app = get_doc(MarketApp, name=app_name)
-        app = StagedApp(
-            name=market_app.name,
-            app_id=market_app.name,
-            description=market_app.description,
-            app_expires_at=time.time() + stage_request.app_lifetime,
-            token_lifetime=market_app.token_lifetime,
-            installer=jwt_payload["user_id"],
-            permission_templates=market_app.permission_templates,
-        )
-        app.save()
-
-        for perm_name in app.permission_templates.keys():
-            # TODO
-            # app.approvals[perm_name] = []
-            pass
-        app.pending_approvals = [
-            DEFAULT_ADMIN_ID
-        ]  # TODO: This is only for debug. properly implement this later.
-
-        # request_app_approval(app)
-        app.save()
-
-        return IsSuccess()
+# @cbv(app_router)
+# class Apps:
+#     @app_router.get(
+#         "/",
+#         status_code=200,
+#         description="List all staged apps.",
+#         response_model=StagedAppsResponse,
+#     )
+#     @authorized_frontend
+#     async def get(
+#             self,
+#             token: HTTPAuthorizationCredentials = jwt_security_scheme,
+#     ) -> StagedAppsResponse:
+#         return [
+#             StagedAppResponse(name=app.name, is_approved=not app.pending_approvals)
+#             for app in StagedApp.objects()
+#         ]
+#
+#     @app_router.post(
+#         "/",
+#         status_code=200,
+#         description="Stage an app",
+#         response_model=IsSuccess,
+#     )
+#     @authorized_frontend
+#     async def stage_app(
+#             self,
+#             stage_request: AppStageRequest = Body(...),
+#             token: HTTPAuthorizationCredentials = jwt_security_scheme,
+#     ):
+#         jwt_payload = parse_jwt_token(token.credentials)
+#         # TODO: Check is_admin
+#
+#         app_name = stage_request.app_name
+#         existing_apps = StagedApp.objects(name=app_name)
+#         if existing_apps:
+#             raise AlreadyExistsError(StagedApp, app_name)
+#         market_app = get_doc(MarketApp, name=app_name)
+#         app = StagedApp(
+#             name=market_app.name,
+#             app_id=market_app.name,
+#             description=market_app.description,
+#             app_expires_at=time.time() + stage_request.app_lifetime,
+#             token_lifetime=market_app.token_lifetime,
+#             installer=jwt_payload["user_id"],
+#             permission_templates=market_app.permission_templates,
+#         )
+#         app.save()
+#
+#         for perm_name in app.permission_templates.keys():
+#             # TODO
+#             # app.approvals[perm_name] = []
+#             pass
+#         app.pending_approvals = [
+#             DEFAULT_ADMIN_ID
+#         ]  # TODO: This is only for debug. properly implement this later.
+#
+#         # request_app_approval(app)
+#         app.save()
+#
+#         return IsSuccess()
 
 
 @cbv(app_router)

@@ -16,19 +16,17 @@ from brick_server.minimal.exceptions import AlreadyExistsError
 # from brick_server.configs import configs
 from brick_server.minimal.models import get_doc
 from brick_server.minimal.schemas import IsSuccess
-from fastapi import Body
+from fastapi import Body, Depends
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from rdflib import URIRef
 
-from ..models import StagedApp, User
-from .models import (
-    ActivatedApps,
-    ActivationRequest,
-    UserRelationshipsRequest,
-    UserResponse,
-)
+from brick_server.playground import models
+from brick_server.playground.auth.authorization import get_current_user, get_domain_app
+
+from ..models import User
+from .models import ActivatedApps, UserRelationshipsRequest, UserResponse
 
 user_router = InferringRouter()
 
@@ -120,24 +118,38 @@ class UserApps:
         return IsSuccess()
 
     @user_router.post(
-        "/apps",
+        "/domains/{domain}/apps/{app}",
         status_code=200,
-        description="Activate an app for the user.",
+        description="Install an app for the user.",
         # response_model=AppResponse,
         tags=["Users"],
     )
-    def actviate_app(
+    def install_app(
         self,
-        activation_req: ActivationRequest = Body(...),
-        token: HTTPAuthorizationCredentials = jwt_security_scheme,
+        # activation_req: ActivationRequest = Body(...),
+        user: models.User = Depends(get_current_user),
+        domain_app: models.DomainApp = Depends(get_domain_app),
+        # token: HTTPAuthorizationCredentials = jwt_security_scheme,
     ) -> IsSuccess:
-        jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(User, user_id=jwt_payload["user_id"])
-        app_name = activation_req.app_name
-        app = get_doc(StagedApp, name=app_name)
-        if app in user.activated_apps:
-            raise AlreadyExistsError(StagedApp, app_name)
-        app_id = app.app_id
-        user.activated_apps.append(app)
-        user.save()
-        return IsSuccess(reason="Already activated")
+        domain_user_app = models.DomainUserApp(
+            domain=domain_app.domain,
+            user=user,
+            app=domain_app.app,
+            running=False,
+        )
+        try:
+            domain_user_app.save()
+        except Exception:
+            # TODO: catch the precise already exist exception
+            raise AlreadyExistsError("app", "name")
+
+        # jwt_payload = parse_jwt_token(token.credentials)
+        # user = get_doc(User, user_id=jwt_payload["user_id"])
+        # app_name = activation_req.app_name
+        # app = get_doc(models.DomainApp, domain=, name=app_name)
+        # if app in user.activated_apps:
+        #     raise AlreadyExistsError(StagedApp, app_name)
+        # app_id = app.app_id
+        # user.activated_apps.append(app)
+        # user.save()
+        # return IsSuccess(reason="Already activated")
