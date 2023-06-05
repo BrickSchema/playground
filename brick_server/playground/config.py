@@ -1,8 +1,7 @@
 from typing import Type, Union
 
-from fastapi_rest_framework import config
-
 from brick_server.minimal.config import AuthConfig, BaseConfig, DatabaseConfig
+from fastapi_rest_framework import config
 
 
 @config.add

@@ -5,11 +5,6 @@ def gen_uuid():
     return str(uuid4())
 
 
-from fastapi import HTTPException, Path
-from fastapi.security import HTTPAuthorizationCredentials
-from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
-
 from brick_server.minimal.auth.authorization import (
     authorized_admin,
     jwt_security_scheme,
@@ -20,6 +15,10 @@ from brick_server.minimal.exceptions import NotAuthorizedError
 # from brick_server.configs import configs
 from brick_server.minimal.models import get_doc, get_docs
 from brick_server.minimal.schemas import IsSuccess
+from fastapi import HTTPException, Path
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
 
 from ..models import (  # TODO: Change naming conventino for mongodb models
     StagedApp,

@@ -1,8 +1,13 @@
 import redis
 from fastapi_rest_framework.config import settings
 
-import brick_server.minimal.dbs
-from brick_server.playground.models import PermissionProfile, User, DomainUser, DomainOccupancy, DomainUserProfile
+from brick_server.playground.models import (
+    DomainOccupancy,
+    DomainUser,
+    DomainUserProfile,
+    PermissionProfile,
+    User,
+)
 
 # from brick_server.configs import configs
 
@@ -33,6 +38,13 @@ app_management_redis_db = redis.StrictRedis(
 def get_app_management_redis_db():
     return app_management_redis_db
 
+
 def init_mongodb():
-    for model in [PermissionProfile, User, DomainUser, DomainOccupancy, DomainUserProfile]:
+    for model in [
+        PermissionProfile,
+        User,
+        DomainUser,
+        DomainOccupancy,
+        DomainUserProfile,
+    ]:
         model.ensure_indexes()

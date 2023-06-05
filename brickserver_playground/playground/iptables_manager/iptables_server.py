@@ -1,13 +1,13 @@
-import grpc
-from concurrent import futures
-import time
 import logging
+import time
+from concurrent import futures
+
+import grpc
+import iptables_manager_core
+import iptables_manager_pb2
 
 # import the generated classes
 import iptables_manager_pb2_grpc
-import iptables_manager_pb2
-
-import iptables_manager_core
 
 
 class IptablesManagerServicer(iptables_manager_pb2_grpc.IptablesManagerServicer):
@@ -46,7 +46,9 @@ class IptablesManagerServicer(iptables_manager_pb2_grpc.IptablesManagerServicer)
         dst_ip = request.dst_ip
         dst_port = request.dst_port
         try:
-            iptables_manager_core.grant_external_access(cname, cip, protocol, dst_ip, dst_port)
+            iptables_manager_core.grant_external_access(
+                cname, cip, protocol, dst_ip, dst_port
+            )
         except TypeError:
             print("type error")
             res.status = -1
@@ -64,7 +66,9 @@ class IptablesManagerServicer(iptables_manager_pb2_grpc.IptablesManagerServicer)
         dst_ip = request.dst_ip
         dst_port = request.dst_port
         try:
-            iptables_manager_core.revoke_external_access(cname, cip, protocol, dst_ip, dst_port)
+            iptables_manager_core.revoke_external_access(
+                cname, cip, protocol, dst_ip, dst_port
+            )
         except TypeError:
             print("type error")
             res.status = -1
@@ -111,7 +115,9 @@ class IptablesManagerServicer(iptables_manager_pb2_grpc.IptablesManagerServicer)
         res = iptables_manager_pb2.Response()
         res.status = 1
         try:
-            iptables_manager_core.revoke_all_access(request.container_name, request.option)
+            iptables_manager_core.revoke_all_access(
+                request.container_name, request.option
+            )
         except TypeError:
             print("type error")
             res.status = -1
@@ -123,9 +129,11 @@ class IptablesManagerServicer(iptables_manager_pb2_grpc.IptablesManagerServicer)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    iptables_manager_pb2_grpc.add_IptablesManagerServicer_to_server(IptablesManagerServicer(), server)
-    print('Starting server. Listening on port 50051.')
-    server.add_insecure_port('[::]:50051')
+    iptables_manager_pb2_grpc.add_IptablesManagerServicer_to_server(
+        IptablesManagerServicer(), server
+    )
+    print("Starting server. Listening on port 50051.")
+    server.add_insecure_port("[::]:50051")
     server.start()
     # server.wait_for_termination()
     try:

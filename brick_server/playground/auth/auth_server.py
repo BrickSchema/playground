@@ -1,16 +1,15 @@
-from fastapi import Depends, Path
-from fastapi.security import HTTPAuthorizationCredentials
-from fastapi_utils.cbv import cbv
-from redis import StrictRedis
-from starlette.responses import RedirectResponse, Response
-
 from brick_server.minimal.auth.auth_server import auth_router
-from brick_server.minimal.auth.authorization import (
+from brick_server.minimal.auth.jwt import (
     create_jwt_token,
     jwt_security_scheme,
     parse_jwt_token,
 )
 from brick_server.minimal.models import get_doc
+from fastapi import Depends, Path
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi_utils.cbv import cbv
+from redis import StrictRedis
+from starlette.responses import RedirectResponse, Response
 
 from ..app_management import app_management
 from ..dbs import get_app_management_redis_db

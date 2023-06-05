@@ -6,31 +6,31 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.staticfiles import StaticFiles
 
 from brick_server.playground.config import FastAPIConfig
+
 settings = config.init_settings(FastAPIConfig)
 print(settings.dict())
 
-from brick_server.minimal.dependencies import update_dependency_supplier, get_auth_logic
+from brick_server.minimal.dependencies import update_dependency_supplier
 from brick_server.playground.auth.authorization import auth_logic
-update_dependency_supplier(auth_logic)
 
-from brick_server.playground.dbs import init_mongodb
+update_dependency_supplier(auth_logic)
 
 # from brick_server import app as brick_server_app
 from brick_server.minimal.init import initialization
 from brick_server.minimal.services.actuation import actuation_router
 from brick_server.minimal.services.data import data_router
+from brick_server.minimal.services.domain import domain_router
 from brick_server.minimal.services.entities import entity_router
 from brick_server.minimal.services.queries import query_router
-from brick_server.minimal.services.domain import domain_router
+
+from brick_server.playground.dbs import init_mongodb
 
 from .auth.auth_server import auth_router
 from .services.admins import admin_router
 from .services.apps import app_router
 from .services.market_apps import marketapp_router
-from .services.users import user_router
 from .services.profile import profile_router
-
-
+from .services.users import user_router
 
 # from brick_server.dummy_frontend import dummy_frontend_router
 # from brick_server.configs import configs

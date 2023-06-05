@@ -6,12 +6,6 @@ def gen_uuid():
 
 
 import arrow
-from fastapi import Body
-from fastapi.security import HTTPAuthorizationCredentials
-from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
-from rdflib import URIRef
-
 from brick_server.minimal.auth.authorization import (
     authenticated,
     jwt_security_scheme,
@@ -22,6 +16,11 @@ from brick_server.minimal.exceptions import AlreadyExistsError
 # from brick_server.configs import configs
 from brick_server.minimal.models import get_doc
 from brick_server.minimal.schemas import IsSuccess
+from fastapi import Body
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
+from rdflib import URIRef
 
 from ..models import StagedApp, User
 from .models import (

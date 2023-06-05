@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field
-
 from brick_server.minimal.schemas import Relationships
+from pydantic import BaseModel, Field
 
 app_name_desc = "An application's name"
 app_desc_desc = "A description of the app"

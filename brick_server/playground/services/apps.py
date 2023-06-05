@@ -10,14 +10,6 @@ def gen_uuid():
 
 
 import httpx
-from fastapi import Body, Cookie, Depends, HTTPException, Path, Query
-from fastapi.security import HTTPAuthorizationCredentials
-from fastapi_rest_framework.config import settings
-from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
-from starlette.requests import Request
-from starlette.responses import FileResponse, Response
-
 from brick_server.minimal.auth.authorization import (
     authorized,
     authorized_frontend,
@@ -33,6 +25,13 @@ from brick_server.minimal.exceptions import (
 # from brick_server.configs import configs
 from brick_server.minimal.models import get_doc
 from brick_server.minimal.schemas import IsSuccess
+from fastapi import Body, Cookie, Depends, HTTPException, Path, Query
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi_rest_framework.config import settings
+from fastapi_utils.cbv import cbv
+from fastapi_utils.inferring_router import InferringRouter
+from starlette.requests import Request
+from starlette.responses import FileResponse, Response
 
 from ..app_management.app_management import get_cname, stop_container
 from ..dbs import get_app_management_redis_db

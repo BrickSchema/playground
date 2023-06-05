@@ -1,5 +1,4 @@
 import subprocess
-from typing import List
 from shlex import split
 
 
@@ -19,7 +18,7 @@ def create_chain(container_name: str):
     # argument check
     if not isinstance(container_name, str):
         raise TypeError("container_name is expected to be str")
-    elif container_name == '':
+    elif container_name == "":
         raise ValueError("container_name is expected to be non empty")
     cmd = "sudo iptables -N " + container_name + "-extn"
     subprocess.run(split(cmd))
@@ -35,24 +34,29 @@ def delete_chain(container_name: str):
     # argument check
     if not isinstance(container_name, str):
         raise TypeError("container_name is expected to be str")
-    elif container_name == '':
+    elif container_name == "":
         raise ValueError("container_name is expected to be non empty")
 
     revoke_all_access(container_name)
 
-    cmd = "iptables -D DOCKER-USER -j " + container_name+"-extn"
+    cmd = "iptables -D DOCKER-USER -j " + container_name + "-extn"
     subprocess.run(split(cmd))
-    cmd = "sudo iptables -X " + container_name+"-extn"
+    cmd = "sudo iptables -X " + container_name + "-extn"
     subprocess.run(split(cmd))
 
     cmd = "iptables -D INPUT -j " + container_name + "-host"
     subprocess.run(split(cmd))
-    cmd = "sudo iptables -X " + container_name+"-host"
+    cmd = "sudo iptables -X " + container_name + "-host"
     subprocess.run(split(cmd))
 
 
-def grant_external_access(container_name: str, container_ip: str, protocol: str = '', dst_ip: str = '',
-                          dst_port: str = '') -> None:
+def grant_external_access(
+    container_name: str,
+    container_ip: str,
+    protocol: str = "",
+    dst_ip: str = "",
+    dst_port: str = "",
+) -> None:
     """
     Grant the target container access to external host
 
@@ -82,11 +86,11 @@ def grant_external_access(container_name: str, container_ip: str, protocol: str 
     # argument check
     if not isinstance(container_name, str):
         raise TypeError("container_name is expected to be str")
-    elif container_name == '':
+    elif container_name == "":
         raise ValueError("container_name is expected to be non empty")
     if not isinstance(container_ip, str):
         raise TypeError("container_ip is expected to be str")
-    elif container_ip == '':
+    elif container_ip == "":
         raise ValueError("container_ip is expected to be non empty")
     if not isinstance(protocol, str):
         raise TypeError("protocol is expected to be str")
@@ -105,12 +109,12 @@ def grant_external_access(container_name: str, container_ip: str, protocol: str 
     cmd = "sudo iptables -I "
     # define the spec, container_name here is the chain name
     spec = container_name + "-extn" + " -i docker1 "
-    if protocol is not '':
+    if protocol != "":
         spec = spec + "-p " + protocol + " "
     spec = spec + "-s " + cip + " "
-    if dst_ip is not '':
+    if dst_ip != "":
         spec += "-d " + dst_ip + " "
-    if dst_port is not '':
+    if dst_port != "":
         spec += "--dport " + dst_port + " "
     # if dst_ip_port is not None:
     #     if dst_ip_port[0] is not '':
@@ -123,7 +127,9 @@ def grant_external_access(container_name: str, container_ip: str, protocol: str 
     subprocess.run(split(cmd))
 
 
-def grant_host_access(container_name: str, container_ip: str, protocol: str = '', dst_port: str = ''):
+def grant_host_access(
+    container_name: str, container_ip: str, protocol: str = "", dst_port: str = ""
+):
     """
     Grant the target container access to local host
 
@@ -150,11 +156,11 @@ def grant_host_access(container_name: str, container_ip: str, protocol: str = ''
     # argument check
     if not isinstance(container_name, str):
         raise TypeError("container_name is expected to be str")
-    elif container_name == '':
+    elif container_name == "":
         raise ValueError("container_name is expected to be non empty")
     if not isinstance(container_ip, str):
         raise TypeError("container_ip is expected to be str")
-    elif container_ip == '':
+    elif container_ip == "":
         raise ValueError("container_ip is expected to be non empty")
     if not isinstance(protocol, str):
         raise TypeError("protocol is expected to be str")
@@ -168,10 +174,10 @@ def grant_host_access(container_name: str, container_ip: str, protocol: str = ''
     cmd = "sudo iptables -I "
     # specify the spec
     spec = container_name + "-host" + " -i docker1 "
-    if protocol is not '':
+    if protocol != "":
         spec = spec + "-p " + protocol + " "
     spec = spec + "-s " + cip + " "
-    if dst_port is not '':
+    if dst_port != "":
         spec = spec + "--dport " + dst_port + " "
     spec = spec + "-j ACCEPT"
 
@@ -179,7 +185,7 @@ def grant_host_access(container_name: str, container_ip: str, protocol: str = ''
     subprocess.run(split(cmd))
 
 
-def revoke_all_access(container_name: str, option: int=0):
+def revoke_all_access(container_name: str, option: int = 0):
     """
     Revoke all accesses granted to a particular container
     Parameters
@@ -198,7 +204,7 @@ def revoke_all_access(container_name: str, option: int=0):
     # argument check
     if not isinstance(container_name, str):
         raise TypeError("container_name is expected to be str")
-    elif container_name == '':
+    elif container_name == "":
         raise ValueError("container_name is expected to be non empty")
     if not isinstance(option, int):
         raise TypeError("option is expected to be str")
@@ -216,8 +222,13 @@ def revoke_all_access(container_name: str, option: int=0):
         subprocess.run(split(cmd))
 
 
-def revoke_external_access(container_name: str, container_ip: str, protocol: str = '', dst_ip: str = '',
-                          dst_port: str = '') -> None:
+def revoke_external_access(
+    container_name: str,
+    container_ip: str,
+    protocol: str = "",
+    dst_ip: str = "",
+    dst_port: str = "",
+) -> None:
     """
     Revoke the target container access to external host
 
@@ -247,11 +258,11 @@ def revoke_external_access(container_name: str, container_ip: str, protocol: str
     # argument check
     if not isinstance(container_name, str):
         raise TypeError("container_name is expected to be str")
-    elif container_name == '':
+    elif container_name == "":
         raise ValueError("container_name is expected to be non empty")
     if not isinstance(container_ip, str):
         raise TypeError("container_ip is expected to be str")
-    elif container_ip == '':
+    elif container_ip == "":
         raise ValueError("container_ip is expected to be non empty")
     if not isinstance(protocol, str):
         raise TypeError("protocol is expected to be str")
@@ -270,12 +281,12 @@ def revoke_external_access(container_name: str, container_ip: str, protocol: str
     cmd = "sudo iptables -D "
     # define the spec
     spec = container_name + "-extn" + " -i docker1 "
-    if protocol is not '':
+    if protocol != "":
         spec = spec + "-p " + protocol + " "
     spec = spec + "-s " + cip + " "
-    if dst_ip is not '':
+    if dst_ip != "":
         spec += "-d " + dst_ip + " "
-    if dst_port is not '':
+    if dst_port != "":
         spec += "--dport " + dst_port + " "
     # if dst_ip_port is not None:
     #     if dst_ip_port[0] is not '':
@@ -288,7 +299,9 @@ def revoke_external_access(container_name: str, container_ip: str, protocol: str
     subprocess.run(split(cmd))
 
 
-def revoke_host_access(container_name: str, container_ip: str, protocol: str = '', dst_port: str = ''):
+def revoke_host_access(
+    container_name: str, container_ip: str, protocol: str = "", dst_port: str = ""
+):
     """
     Revoke the target container access to local host
 
@@ -315,11 +328,11 @@ def revoke_host_access(container_name: str, container_ip: str, protocol: str = '
     # argument check
     if not isinstance(container_name, str):
         raise TypeError("container_name is expected to be str")
-    elif container_name == '':
+    elif container_name == "":
         raise ValueError("container_name is expected to be non empty")
     if not isinstance(container_ip, str):
         raise TypeError("container_ip is expected to be str")
-    elif container_ip == '':
+    elif container_ip == "":
         raise ValueError("container_ip is expected to be non empty")
     if not isinstance(protocol, str):
         raise TypeError("protocol is expected to be str")
@@ -333,10 +346,10 @@ def revoke_host_access(container_name: str, container_ip: str, protocol: str = '
     cmd = "sudo iptables -D "
     # specify the spec
     spec = container_name + "-host" + " -i docker1 "
-    if protocol is not '':
+    if protocol != "":
         spec = spec + "-p " + protocol + " "
     spec = spec + "-s " + cip + " "
-    if dst_port is not '':
+    if dst_port != "":
         spec = spec + "--dport " + dst_port + " "
     spec = spec + "-j ACCEPT"
 

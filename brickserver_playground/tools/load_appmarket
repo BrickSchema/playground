@@ -1,31 +1,34 @@
 #!/usr/bin/env python
 import json
-import yaml
-import time
 import sys
+import time
 from pdb import set_trace as bp
+
 import jwt
+import yaml
+
 sys.path.append("./brick-server-minimal")
 sys.path.append("./")
 
-from playground.models import MarketApp
 from brick_server.models import get_doc
+from playground.models import MarketApp
 
-market_app_yamls = ['examples/market_apps/sample_app.yaml',
-                    'examples/data/app_manifests/app1.yaml',
-                    'examples/data/app_manifests/genie.yaml'
-                    ]
+market_app_yamls = [
+    "examples/market_apps/sample_app.yaml",
+    "examples/data/app_manifests/app1.yaml",
+    "examples/data/app_manifests/genie.yaml",
+]
 
 for market_app_yaml in market_app_yamls:
-    with open(market_app_yaml, 'r') as fp:
-        manifest= yaml.full_load(fp)
-    found = MarketApp.objects(name=manifest['name'])
+    with open(market_app_yaml) as fp:
+        manifest = yaml.full_load(fp)
+    found = MarketApp.objects(name=manifest["name"])
     if found:
         continue
     market_app = MarketApp(
-        name=manifest['name'],
-        description=manifest['description'],
-        permission_templates=manifest['permission_templates'],
+        name=manifest["name"],
+        description=manifest["description"],
+        permission_templates=manifest["permission_templates"],
     )
 
     market_app.save()
