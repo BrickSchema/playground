@@ -1,21 +1,17 @@
 from typing import Any, Dict, List, Optional, Set
 
-from brick_server.minimal.exceptions import DoesNotExistError
-from bson import ObjectId
+from brick_server.minimal.auth.jwt import jwt_security_scheme, parse_jwt_token
+from brick_server.minimal.dependencies import get_graphdb
+from brick_server.minimal.exceptions import DoesNotExistError, NotAuthorizedError, GraphDBError, InternalServerError
+from brick_server.minimal.models import Domain, get_doc, get_docs
 from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 from loguru import logger
 
-from brick_server.minimal.auth.jwt import jwt_security_scheme, parse_jwt_token
-from brick_server.minimal.models import get_doc, get_docs, Domain
-from brick_server.minimal.dependencies import get_graphdb
-
-from ..models import (
-    # DefaultRole,
+from ..models import (  # DefaultRole,; DomainRole,
     DomainOccupancy,
-    DomainUserProfile,
-    # DomainRole,
     DomainUser,
+    DomainUserProfile,
     Entity,
     PermissionType,
     StagedApp,
@@ -64,6 +60,7 @@ def get_doc_or_none(doc_type: Any, **query):
     except DoesNotExistError:
         return None
 
+
 def get_jwt_payload(
         token: HTTPAuthorizationCredentials = jwt_security_scheme,
 ) -> Dict[str, Any]:
@@ -80,9 +77,7 @@ def get_staged_app(
     return get_doc_or_none(StagedApp, name=jwt_payload["app_id"])
 
 
-def get_domain(
-        domain: str = Path(..., description="Name of the domain")
-) -> Domain:
+def get_domain(domain: str = Path(..., description="Name of the domain")) -> Domain:
     # return ObjectId(domain)
     return get_doc(Domain, name=domain)
 
@@ -99,6 +94,7 @@ def get_domain_user(
 # ) -> Optional[DomainRole]:
 #     return get_doc_or_none(DomainRole, domain=domain_id, role_name=role_name)
 #
+
 
 def get_domain_occupancies(
         user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
@@ -176,31 +172,43 @@ class Authorization:
     #             ):
     #                 return True
     #     return False
+    def parse_graphdb_result(self, res):
+        keys = res["head"]["vars"]
+        d = {key: [] for key in keys}
+        for row in res["results"]["bindings"]:
+            for i, key in enumerate(keys):
+                d[key].append(row[key]["value"])
+        return d
 
     async def check_profile(
             self,
             profile,
-            entity: Entity,
+            entity_id: str,
             permission: PermissionType,
     ):
-
         template: str = profile.profile.__getattribute__(permission)
         query = template.format(**profile.arguments)
         logger.info("{} {} {}", template, profile.arguments, query)
 
         # TODO: cache in redis
-        raw_res = await self.brick_db.query(self.domain.name, query)
+        try:
+            res = await self.brick_db.query(self.domain.name, query)
+            parsed_res = self.parse_graphdb_result(res)
+            assert len(parsed_res.keys()) == 1
+            entity_ids = parsed_res[list(parsed_res.keys())[0]]
+            return entity_id in entity_ids
 
+        except GraphDBError as e:
+            logger.warning(repr(e))
+            raise InternalServerError()
 
         return False
 
     async def check(self, entity_ids: Set[str], permission: PermissionType) -> bool:
-        # TODO: entity_id -> entity_ids
-        entity_id = entity_ids.pop()
+
         # if the user is site admin, grant all permissions
         if self.user.is_admin:
             return True
-        entity = await get_entity_obj(entity_id)
 
         # # check permission in domain occupancy list
         # if self.domain_occupancies is ...:
@@ -223,6 +231,12 @@ class Authorization:
         if self.domain_user.is_admin:
             return True
 
+        if len(entity_ids) == 0:
+            return False
+        # TODO: entity_id -> entity_ids
+        entity_id = entity_ids.pop()
+        # entity = await get_entity_obj(entity_id)
+
         # # check permission by domain user roles
         # if await self.check_in_locations_by_role_names(
         #     self.domain_user.roles.items(), entity, permission
@@ -232,15 +246,31 @@ class Authorization:
         # check permission by domain user profile
         domain_user_profiles = get_domain_user_profiles(self.user, self.domain)
         for profile in domain_user_profiles:
-            if await self.check_profile(profile, entity, permission):
+            if await self.check_profile(profile, entity_id, permission):
                 return True
 
         return False
 
+    def check_admin_site(self) -> bool:
+        return self.user.is_admin
+
+    def check_admin_domain(self) -> bool:
+        if self.check_admin_site():
+            return True
+        if self.domain_user is ...:
+            self.domain_user = get_domain_user(self.user, self.domain)
+        if self.domain_user is None:
+            return False
+        return self.domain_user.is_admin
+
     async def __call__(self, entity_ids: Set[str], permission: PermissionType) -> bool:
-        if not await self.check(entity_ids, permission):
-            raise Exception("Permission denied")
-        return True
+        if permission == PermissionType.ADMIN_SITE:
+            result = self.check_admin_site()
+        elif permission == PermissionType.ADMIN_SITE:
+            result = self.check_admin_domain()
+        else:
+            result = await self.check(entity_ids, permission)
+        return result
 
 
 def auth_logic(
@@ -249,6 +279,7 @@ def auth_logic(
         domain: Optional[Domain] = Depends(get_domain),
 ) -> Authorization:
     authorization = Authorization(user, app, domain)
+
     async def _auth_logic(entity_ids: Set[str], permission: PermissionType):
         return await authorization(entity_ids, permission)
 

@@ -10,16 +10,16 @@ description = "brick server playground"
 license = "BSD-3-Clause"
 name = "brick-server-playground"
 packages = [
-    { include = "brick_server" },
+  {include = "brick_server"}
 ]
 repository = "https://gitlab.com/mesl/brickserver/brick-server-playground"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-brick-server-minimal = {path = "../brick-server-minimal", develop = true}
+brick-server-minimal = {develop = true, path = "../brick-server-minimal"}
+docker = "^6.1.2"
 python = ">=3.7,<3.11"
 redis = "^4.5.5"
-docker = "^6.1.2"
 
 [tool.poetry.dev-dependencies]
 asgi-lifespan = "^1.0.1"

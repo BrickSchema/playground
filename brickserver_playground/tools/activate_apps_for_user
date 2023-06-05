@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 
 import json
-import yaml
-import time
 import sys
+import time
 from pdb import set_trace as bp
+
 import jwt
+import yaml
+
 sys.path.append("./brick-server-minimal")
 sys.path.append("./")
 
 from brick_server.models import get_doc
-from playground.models import MarketApp, User, StagedApp
+from playground.models import MarketApp, StagedApp, User
 
-app_names = ['bacnet_driver', 'app1', 'genie']
+app_names = ["bacnet_driver", "app1", "genie"]
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     user_id = sys.argv[1]
     user = get_doc(User, user_id=user_id)
     for app_name in app_names:

@@ -1,10 +1,10 @@
 arrow
+authlib
+cryptography
 PyJWT<2.0.0
-rdflib
 pytest
-PyYAML
-requests
 pytest-env
 pytest-order
-cryptography
-authlib
+PyYAML
+rdflib
+requests

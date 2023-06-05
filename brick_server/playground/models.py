@@ -1,5 +1,6 @@
 from enum import Enum
 
+from brick_server.minimal.models import Domain, User
 from mongoengine import (
     BooleanField,
     DictField,
@@ -10,8 +11,6 @@ from mongoengine import (
     StringField,
 )
 from pydantic import BaseModel
-
-from brick_server.minimal.models import User, Domain
 
 
 class PermissionProfile(Document):
@@ -167,6 +166,7 @@ class StrEnumMixin(str, Enum):
     def __str__(self) -> str:
         return self.value
 
+
 # class DefaultRole(StrEnumMixin, Enum):
 #     BASIC = "basic"
 #     ADMIN = "admin"
@@ -175,3 +175,5 @@ class StrEnumMixin(str, Enum):
 class PermissionType(StrEnumMixin, Enum):
     READ = "read"
     WRITE = "write"
+    ADMIN_DOMAIN = "admin_domain"
+    ADMIN_SITE = "admin_site"

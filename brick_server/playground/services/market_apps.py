@@ -5,13 +5,12 @@ def gen_uuid():
     return str(uuid4())
 
 
+from brick_server.minimal.auth.authorization import authenticated, jwt_security_scheme
+from brick_server.minimal.models import get_doc, get_docs
 from fastapi import Path
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
-
-from brick_server.minimal.auth.authorization import authenticated, jwt_security_scheme
-from brick_server.minimal.models import get_doc, get_docs
 
 from ..models import MarketApp  # TODO: Change naming conventino for mongodb models
 from .models import MarketAppResponse

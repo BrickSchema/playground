@@ -1,10 +1,14 @@
-from urllib.parse import quote_plus
 import pytest
 import yaml
-from pdb import set_trace as bp
 
-from .common import USER_APP_BASE, authorize_headers, BRICK, AUTH_BASE, app_manifest, requests_delete, requests_post, requests_get, APP_BASE
-from .data import znt_id
+from .common import (
+    USER_APP_BASE,
+    app_manifest,
+    authorize_headers,
+    requests_delete,
+    requests_get,
+    requests_post,
+)
 
 
 @pytest.mark.order(700)
@@ -13,11 +17,14 @@ def test_deactivate_all_apps():
     resp = requests_delete(USER_APP_BASE, headers=headers)
     assert resp.status_code == 200
 
+
 @pytest.mark.order(701)
 def test_activate_new_app():
     headers = authorize_headers()
     manifest = yaml.full_load(open(app_manifest))
-    resp = requests_post(USER_APP_BASE, json={'app_name': manifest['name']}, headers=headers)
+    resp = requests_post(
+        USER_APP_BASE, json={"app_name": manifest["name"]}, headers=headers
+    )
     assert resp.status_code in [200, 409]
 
 
@@ -27,9 +34,10 @@ def test_get_activated_user_apps():
     manifest = yaml.full_load(open(app_manifest))
     resp = requests_get(USER_APP_BASE, headers=headers)
     assert resp.status_code in [200]
-    assert manifest['name'] in resp.json()['activated_apps']
+    assert manifest["name"] in resp.json()["activated_apps"]
 
-#def test_login_per_app_external():
+
+# def test_login_per_app_external():
 #    headers = authorize_headers()
 #    manifest = yaml.full_load(open(app_manifest))
 #    params = {
@@ -42,4 +50,3 @@ def test_get_activated_user_apps():
 #                        )
 #    assert resp.status_code == 307
 #    assert resp.cookies['app_token']
-
