@@ -22,6 +22,41 @@ class App(Document):
     name = StringField(required=True, unique=True)
     description = StringField()
     profile = ReferenceField(PermissionProfile, required=True)
+    approved = BooleanField(required=True, default=False)
+
+
+class DomainApp(Document):
+    domain = ReferenceField(Domain, required=True)
+    app = ReferenceField(App, required=True)
+
+    meta = {
+        "indexes": [
+            {
+                "fields": ["domain", "app"],
+                "unique": True,
+            }
+        ]
+    }
+
+
+class DomainUserApp(Document):
+    domain = ReferenceField(Domain, required=True)
+    user = ReferenceField(User, required=True)
+    app = ReferenceField(App, required=True)
+    running = BooleanField(required=True, default=False)
+    arguments = DictField()
+
+    meta = {
+        "indexes": [
+            {
+                "fields": ["domain", "user", "app"],
+                "unique": True,
+            },
+            {
+                "fields": ["domain", "user"],
+            },
+        ]
+    }
 
 
 class MarketApp(Document):
@@ -172,8 +207,3 @@ class StrEnumMixin(str, Enum):
 #     ADMIN = "admin"
 #
 #
-class PermissionType(StrEnumMixin, Enum):
-    READ = "read"
-    WRITE = "write"
-    ADMIN_DOMAIN = "admin_domain"
-    ADMIN_SITE = "admin_site"
