@@ -9,14 +9,16 @@ from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 from loguru import logger
 
+from brick_server.playground.schemas import PermissionModel
+
 from ..models import (  # DefaultRole,; DomainRole,
     App,
     DomainApp,
     DomainOccupancy,
     DomainUser,
+    DomainUserApp,
     DomainUserProfile,
     Entity,
-    StagedApp,
     User,
 )
 
@@ -62,14 +64,14 @@ def get_jwt_payload(
     return parse_jwt_token(token.credentials)
 
 
-def get_current_user(jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)) -> User:
+def get_user_from_jwt(jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)) -> User:
     return get_doc(User, user_id=jwt_payload["user_id"])
 
 
-def get_staged_app(
+def get_app_from_jwt(
     jwt_payload: Dict[str, Any] = Depends(get_jwt_payload)
-) -> Optional[StagedApp]:
-    return get_doc_or_none(StagedApp, name=jwt_payload["app_id"])
+) -> Optional[App]:
+    return get_doc_or_none(App, name=jwt_payload["app_name"])
 
 
 def get_domain(domain: str = Path(..., description="Name of the domain")) -> Domain:
@@ -82,7 +84,7 @@ def get_app(app: str = Path(..., description="Name of the app")) -> App:
 
 
 def get_domain_user(
-    user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
+    user: User = Depends(get_user_from_jwt), domain: Domain = Depends(get_domain)
 ) -> Optional[DomainUser]:
     return get_doc_or_none(DomainUser, user=user.id, domain=domain.id)
 
@@ -94,6 +96,14 @@ def get_domain_app(
     return get_doc(DomainApp, domain=domain.id, app=app.id)
 
 
+def get_domain_user_app(
+    domain: Domain = Depends(get_domain),
+    user: User = Depends(get_user_from_jwt),
+    app: App = Depends(get_app),
+) -> DomainUserApp:
+    return get_doc(DomainUserApp, domain=domain.id, user=user.id, app=app.id)
+
+
 # def get_domain_role(
 #     domain_id: ObjectId = Depends(get_domain_id),
 #     role_name: str = "basic",
@@ -103,13 +113,13 @@ def get_domain_app(
 
 
 def get_domain_occupancies(
-    user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
+    user: User = Depends(get_user_from_jwt), domain: Domain = Depends(get_domain)
 ) -> List[DomainOccupancy]:
     return get_docs(DomainOccupancy, user=user.id, domain=domain.id)
 
 
 def get_domain_user_profiles(
-    user: User = Depends(get_current_user), domain: Domain = Depends(get_domain)
+    user: User = Depends(get_user_from_jwt), domain: Domain = Depends(get_domain)
 ) -> List[DomainUserProfile]:
     return get_docs(DomainUserProfile, user=user.id, domain=domain.id)
 
@@ -122,16 +132,17 @@ async def get_entity_obj(entity_id: str):
 class Authorization:
     def __init__(
         self,
-        user: User = Depends(get_current_user),
-        app: Optional[StagedApp] = Depends(get_staged_app),
+        user: User,
+        app: Optional[App] = None,
         domain: Optional[Domain] = None,
     ) -> None:
         self.user = user
         self.app = app
         self.domain = domain
+        self.domain_user_app = ...
         self.domain_occupancies = ...
         self.domain_user = ...
-        self.domain_roles = {}
+        # self.domain_roles = {}
         self.brick_db = get_graphdb()
 
     # def check_entity_permission(
@@ -189,12 +200,13 @@ class Authorization:
     async def check_profile(
         self,
         profile,
+        arguments,
         entity_id: str,
         permission: PermissionType,
     ):
-        template: str = profile.profile.__getattribute__(permission)
-        query = template.format(**profile.arguments)
-        logger.info("{} {} {}", template, profile.arguments, query)
+        template: str = profile.__getattribute__(permission)
+        query = template.format(**arguments)
+        logger.info("{} {} {}", template, arguments, query)
 
         # TODO: cache in redis
         try:
@@ -236,6 +248,15 @@ class Authorization:
         if self.domain_user.is_admin:
             return True
 
+        if (
+            self.domain_user_app is ...
+            and self.app is not None
+            and self.domain is not None
+        ):
+            self.domain_user_app = get_domain_user_app(self.domain, self.user, self.app)
+        if self.domain_user_app is None:
+            return False
+
         if len(entity_ids) == 0:
             return False
         # TODO: entity_id -> entity_ids
@@ -249,9 +270,21 @@ class Authorization:
         #     return True
 
         # check permission by domain user profile
+
+        if self.domain_user_app is not None:
+            authed = await self.check_profile(
+                self.app.profile, self.domain_user_app.arguments, entity_id, permission
+            )
+            if self.app.permission_model == PermissionModel.AUGMENTATION and authed:
+                return True
+            if self.app.permission_model == PermissionModel.INTERSECTION and not authed:
+                return False
+
         domain_user_profiles = get_domain_user_profiles(self.user, self.domain)
         for profile in domain_user_profiles:
-            if await self.check_profile(profile, entity_id, permission):
+            if await self.check_profile(
+                profile.profile, profile.arguments, entity_id, permission
+            ):
                 return True
 
         return False
@@ -279,8 +312,8 @@ class Authorization:
 
 
 def auth_logic(
-    user: User = Depends(get_current_user),
-    app: Optional[StagedApp] = Depends(get_staged_app),
+    user: User = Depends(get_user_from_jwt),
+    app: Optional[App] = Depends(get_app_from_jwt),
     domain: Optional[Domain] = Depends(get_domain),
 ) -> Authorization:
     authorization = Authorization(user, app, domain)

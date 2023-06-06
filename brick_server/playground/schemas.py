@@ -1,3 +1,6 @@
+from enum import Enum
+
+from brick_server.minimal.schemas import StrEnumMixin
 from pydantic import BaseModel, Field
 
 
@@ -7,6 +10,11 @@ class PermissionProfile(BaseModel):
 
     read: str = Field(..., description="Read template of the profile")
     write: str = Field(..., description="Write template of the profile")
+
+
+class PermissionModel(StrEnumMixin, Enum):
+    INTERSECTION = "intersection"
+    AUGMENTATION = "augmentation"
 
 
 class App(BaseModel):

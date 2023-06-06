@@ -23,7 +23,7 @@ from fastapi_utils.inferring_router import InferringRouter
 from rdflib import URIRef
 
 from brick_server.playground import models
-from brick_server.playground.auth.authorization import get_current_user, get_domain_app
+from brick_server.playground.auth.authorization import get_domain_app, get_user_from_jwt
 
 from ..models import User
 from .models import ActivatedApps, UserRelationshipsRequest, UserResponse
@@ -127,7 +127,7 @@ class UserApps:
     def install_app(
         self,
         # activation_req: ActivationRequest = Body(...),
-        user: models.User = Depends(get_current_user),
+        user: models.User = Depends(get_user_from_jwt),
         domain_app: models.DomainApp = Depends(get_domain_app),
         # token: HTTPAuthorizationCredentials = jwt_security_scheme,
     ) -> IsSuccess:
