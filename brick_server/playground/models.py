@@ -12,6 +12,8 @@ from mongoengine import (
 )
 from pydantic import BaseModel
 
+from brick_server.playground.schemas import PermissionModel
+
 
 class PermissionProfile(Document):
     read = StringField(required=True)
@@ -23,6 +25,7 @@ class App(Document):
     description = StringField()
     profile = ReferenceField(PermissionProfile, required=True)
     approved = BooleanField(required=True, default=False)
+    permission_model = StringField(required=True, default=PermissionModel.INTERSECTION)
 
 
 class DomainApp(Document):
