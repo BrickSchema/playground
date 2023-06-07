@@ -1,6 +1,7 @@
 from enum import Enum
+from typing import Dict
 
-from brick_server.minimal.schemas import StrEnumMixin
+from brick_server.minimal.schemas import Domain, StrEnumMixin, User
 from pydantic import BaseModel, Field
 
 
@@ -31,3 +32,18 @@ class AppCreate(BaseModel):
     name: str = Field(..., description="Name of the app")
     description: str = Field("", description="")
     profile: PermissionProfile = Field(..., description="")
+
+
+class DomainUserApp(BaseModel):
+    class Config:
+        orm_mode = True
+
+    domain: Domain = Field(...)
+    user: User = Field(...)
+    app: App = Field(...)
+    running: bool = Field(False)
+    arguments: Dict[str, str]
+
+
+class DomainUserAppStart(BaseModel):
+    arguments: Dict[str, str] = Field({})

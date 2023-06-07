@@ -29,7 +29,7 @@ from brick_server.playground.models import (
 app_management_redis_db = redis.StrictRedis(
     host=settings.redis_host,
     port=settings.redis_port,
-    db=settings.redis_dbname,
+    db=settings.redis_db,
     password=settings.redis_password,
     decode_responses=True,
 )
