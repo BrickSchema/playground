@@ -1,5 +1,9 @@
 # import subprocess
 from shlex import split
+from typing import TextIO, Tuple
+
+from docker.models.images import Image
+from fastapi_rest_framework.config import settings
 
 import docker
 
@@ -25,7 +29,7 @@ def register_app(
     build_env: str,
     port: int or None = None,
     build_cmd: str = "",
-) -> None:
+) -> Tuple[Image, TextIO]:
     """
     Register an new app or update an existing app as runnable docker images.
 
@@ -48,7 +52,7 @@ def register_app(
 
     Returns
     -------
-    None
+
 
     Examples
     --------
@@ -89,7 +93,7 @@ def register_app(
 
     # build the docker image
     # subprocess.run(["docker", "build", src_dir, "-t", app_name+":"+ver])
-    return docker_client.images.build(path=src_dir, tag=app_name + ":" + ver)
+    return docker_client.images.build(path=src_dir, tag=app_name + ":" + ver, rm=True)
 
 
 def parse_start_cmd(start_cmd: str) -> str:
@@ -150,14 +154,14 @@ def spawn_app(app_name: str, user_id: str, arguments: str = "") -> str:
         command=arguments,
         detach=True,
         mem_limit="64m",
-        network="isolated_nw",
+        network=settings.isolated_network_name,
         remove=True,
         name=container_name,
     )
     # docker_client.containers.run(image=app_name, command=arguments, stdin_open=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_id)
 
     # create corresponding iptables chain based on container iid
-    iptables_manager.create_chain(get_container_id(container_name))
+    # iptables_manager.create_chain(get_container_id(container_name))
 
     # create entry in database
     caddr_db.set(container_name, get_container_ip(container_name))
@@ -188,7 +192,7 @@ def stop_container(container_name: str) -> None:
     if not isinstance(container_name, str):
         raise TypeError("container name is expected to be str")
     docker_client.containers.get(container_name).stop()
-    iptables_manager.delete_chain(get_container_id(container_name))
+    # iptables_manager.delete_chain(get_container_id(container_name))
     caddr_db.delete(container_name)
 
 
@@ -242,7 +246,7 @@ def get_container_ip(container_name: str) -> str:
     # return rt.stdout.decode("UTF-8")[:-1]
     return docker_client.containers.get(container_name).attrs["NetworkSettings"][
         "Networks"
-    ]["isolated_nw"]["IPAddress"]
+    ][settings.isolated_network_name]["IPAddress"]
 
 
 def get_container_id(container_name: str) -> str:

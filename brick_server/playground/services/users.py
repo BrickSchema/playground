@@ -1,32 +1,34 @@
-from uuid import uuid4
-
-
-def gen_uuid():
-    return str(uuid4())
-
-
 import arrow
 from brick_server.minimal.auth.authorization import (
     authenticated,
     jwt_security_scheme,
     parse_jwt_token,
 )
-from brick_server.minimal.exceptions import AlreadyExistsError
-
-# from brick_server.configs import configs
+from brick_server.minimal.exceptions import AlreadyExistsError, DoesNotExistError
 from brick_server.minimal.models import get_doc
 from brick_server.minimal.schemas import IsSuccess
 from fastapi import Body, Depends
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
+from loguru import logger
 from rdflib import URIRef
 
-from brick_server.playground import models
-from brick_server.playground.auth.authorization import get_domain_app, get_user_from_jwt
-
-from ..models import User
-from .models import ActivatedApps, UserRelationshipsRequest, UserResponse
+from brick_server.playground import models, schemas
+from brick_server.playground.app_management.app_management import (
+    spawn_app,
+    stop_container,
+)
+from brick_server.playground.auth.authorization import (
+    get_domain_app,
+    get_domain_user_app,
+    get_user_from_jwt,
+)
+from brick_server.playground.services.models import (
+    ActivatedApps,
+    UserRelationshipsRequest,
+    UserResponse,
+)
 
 user_router = InferringRouter()
 
@@ -46,7 +48,7 @@ class UserRelationResource:
         token: HTTPAuthorizationCredentials = jwt_security_scheme,
     ):
         jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(User, user_id=jwt_payload["user_id"])
+        user = get_doc(models.User, user_id=jwt_payload["user_id"])
         # TODO: Interpret the graph
         for p, o in relation_req.relationships:
             # TODO: Verify p and o are valid
@@ -68,7 +70,7 @@ class UserResource:
         token: HTTPAuthorizationCredentials = jwt_security_scheme,
     ):
         jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(User, user_id=jwt_payload["user_id"])
+        user = get_doc(models.User, user_id=jwt_payload["user_id"])
         return UserResponse(
             name=user.name,
             user_id=user.user_id,
@@ -94,7 +96,7 @@ class UserApps:
         token: HTTPAuthorizationCredentials = jwt_security_scheme,
     ):
         jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(User, user_id=jwt_payload["user_id"])
+        user = get_doc(models.User, user_id=jwt_payload["user_id"])
         resp = ActivatedApps(activated_apps=[app.name for app in user.activated_apps])
 
         return resp
@@ -111,7 +113,7 @@ class UserApps:
         token: HTTPAuthorizationCredentials = jwt_security_scheme,
     ):
         jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(User, user_id=jwt_payload["user_id"])
+        user = get_doc(models.User, user_id=jwt_payload["user_id"])
         user.activated_apps = []
         user.save()
 
@@ -120,8 +122,7 @@ class UserApps:
     @user_router.post(
         "/domains/{domain}/apps/{app}",
         status_code=200,
-        description="Install an app for the user.",
-        # response_model=AppResponse,
+        description="Get an app for the user.",
         tags=["Users"],
     )
     def install_app(
@@ -153,3 +154,67 @@ class UserApps:
         # user.activated_apps.append(app)
         # user.save()
         # return IsSuccess(reason="Already activated")
+
+    @user_router.get(
+        "/domains/{domain}/apps/{app}",
+        status_code=200,
+        description="Install an app for the user.",
+        tags=["Users"],
+    )
+    def get_app(
+        self,
+        domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
+    ):
+        return schemas.DomainUserApp.from_orm(domain_user_app)
+
+    @user_router.post(
+        "/domains/{domain}/apps/{app}/start",
+        status_code=200,
+        description="Start an app for the user.",
+        # response_model=AppResponse,
+        tags=["Users"],
+    )
+    def start_app(
+        self,
+        domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
+        domain_user_app_start: schemas.DomainUserAppStart = Body(),
+    ):
+        if domain_user_app.running:
+            raise AlreadyExistsError("app", domain_user_app.app.name)
+        container_name = spawn_app(
+            domain_user_app.app.name, domain_user_app.user.user_id.replace("@", "at")
+        )
+        logger.info(container_name)
+        domain_user_app.running = True
+        # TODO: examine the arguments
+        domain_user_app.arguments = domain_user_app_start.arguments
+        domain_user_app.save()
+
+        return schemas.DomainUserApp.from_orm(domain_user_app)
+
+    @user_router.post(
+        "/domains/{domain}/apps/{app}/stop",
+        status_code=200,
+        description="Stop an app for the user.",
+        # response_model=AppResponse,
+        tags=["Users"],
+    )
+    def stop_app(
+        self,
+        domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
+    ):
+        if not domain_user_app.running:
+            raise DoesNotExistError("app", domain_user_app.app.name)
+        container_name = (
+            domain_user_app.app.name
+            + "-"
+            + domain_user_app.user.user_id.replace("@", "at")
+        )
+        try:
+            stop_container(container_name)
+        except Exception as e:
+            logger.exception(e)
+            # raise e
+        domain_user_app.running = False
+        domain_user_app.save()
+        return schemas.DomainUserApp.from_orm(domain_user_app)

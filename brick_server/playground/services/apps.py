@@ -1,12 +1,4 @@
 import os
-from uuid import uuid4
-
-from redis import StrictRedis
-
-
-def gen_uuid():
-    return str(uuid4())
-
 
 import httpx
 from brick_server.minimal.auth.authorization import (
@@ -28,12 +20,15 @@ from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_rest_framework.config import settings
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
+from loguru import logger
+from redis import StrictRedis
 from starlette.requests import Request
 from starlette.responses import FileResponse, Response
 
 from brick_server.playground import models, schemas
+from brick_server.playground.auth.authorization import get_app
 
-from ..app_management.app_management import get_cname, stop_container
+from ..app_management.app_management import get_cname, register_app, stop_container
 from ..dbs import get_app_management_redis_db
 from ..models import (  # TODO: Change naming conventino for mongodb models
     StagedApp,
@@ -107,6 +102,20 @@ class AppByName:
             approved=False,
         )
         app.save()
+        return schemas.App.from_orm(app)
+
+    @app_router.post("/{app}/build")
+    def build(self, app: models.App = Depends(get_app)) -> schemas.App:
+        src_dir = "/root/brick-server-playground/brickserver_playground/examples/app_srcs/app1"
+        start_cmd = "python index.py"
+        build_env = "python:3-slim"
+        port = 5000
+        build_cmd = "pip install -r requirements.txt"
+        image, output = register_app(
+            app.name, "latest", src_dir, start_cmd, build_env, port, build_cmd
+        )
+        logger.info(image)
+        logger.info(list(output))
         return schemas.App.from_orm(app)
 
     @app_router.patch(
