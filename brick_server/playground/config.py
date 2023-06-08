@@ -16,6 +16,7 @@ class RedisConfig(config.Base):
 class PlaygroundConfig(config.Base):
     default_admin: str = "example@gmail.com"
     isolated_network_name: str = "isolated_nw"
+    docker_prefix: str = "brick-server-playground"
 
 
 FastAPIConfig: Type[

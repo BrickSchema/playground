@@ -46,7 +46,8 @@ class DomainUserApp(Document):
     domain = ReferenceField(Domain, required=True)
     user = ReferenceField(User, required=True)
     app = ReferenceField(App, required=True)
-    running = BooleanField(required=True, default=False)
+    status = StringField(default="")
+    container_id = StringField(default="")
     arguments = DictField()
 
     meta = {
@@ -60,6 +61,13 @@ class DomainUserApp(Document):
             },
         ]
     }
+
+    def get_container_name(self):
+        from fastapi_rest_framework.config import settings
+
+        return f"{settings.docker_prefix}-{self.app.name}-{self.user.user_id}-{self.id}".replace(
+            "@", "at"
+        )
 
 
 class MarketApp(Document):

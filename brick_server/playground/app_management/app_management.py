@@ -1,14 +1,15 @@
 # import subprocess
 from shlex import split
-from typing import TextIO, Tuple
+from typing import Optional, TextIO, Tuple
 
+from docker.models.containers import Container
 from docker.models.images import Image
 from fastapi_rest_framework.config import settings
 
 import docker
 
 from ..dbs import get_app_management_redis_db
-from ..iptables_manager import iptables_manager
+from ..schemas import DockerStatus
 
 docker_client = docker.from_env()
 
@@ -102,7 +103,9 @@ def parse_start_cmd(start_cmd: str) -> str:
     return "ENTRYPOINT [" + ", ".join('"' + x + '"' for x in l) + "]"
 
 
-def spawn_app(app_name: str, user_id: str, arguments: str = "") -> str:
+def spawn_app(
+    app_name: str, container_name: str, arguments: str = "", start: bool = True
+) -> Container:
     """
     Run the target application docker image under specific user with given arguments for that application
 
@@ -110,15 +113,17 @@ def spawn_app(app_name: str, user_id: str, arguments: str = "") -> str:
     ----------
     app_name
         the application name, same as the one used to register
-    user_id
-        the identification of the user who's using the app
+    container_name
+        the name of the continer with format {app_name}-{user_id}-{objectid}
     arguments: List[str], optional
         additional arguments for the application
+    start: bool, optional
+        whether to start the app after creation
 
     Returns
     -------
-    str
-        The name of the container which accommodates the spawned app
+    Container
+        the container object which accommodates the spawned app
 
     Examples
     --------
@@ -126,46 +131,48 @@ def spawn_app(app_name: str, user_id: str, arguments: str = "") -> str:
     toy_web3
 
     """
-    # return run_container(app_name+user_id, app_name, ["-it", "-m", "64MB", "--network", "isolated_nw", "--rm"], arguments)
+    # return run_container(app_name, app_name + "-" + user_id, app_name, ["-it", "-m", "64MB", "--network", "isolated_nw", "--rm"], arguments)
 
     # type check
     if not isinstance(app_name, str):
         raise TypeError("app name is expected to be str")
     elif app_name == "":
         raise ValueError("app_name is expected to be a none empty string")
-    if not isinstance(user_id, str):
-        raise TypeError("user id is expected to be str")
-    elif user_id == "":
-        raise ValueError("user_id is expected to be a none empty string")
+    if not isinstance(container_name, str):
+        raise TypeError("container name is expected to be str")
+    elif container_name == "":
+        raise ValueError("container_name is expected to be a none empty string")
     if not isinstance(arguments, str):
         raise TypeError("arguments is expected to be str")
 
     # default parameter, could be modified to kwargs in the future for more flexible settings
     # parameters = ["-d", "-m", "64MB", "--network", "isolated_nw", "--rm"]
     # container naming is subject to changes
-    container_name = app_name + "-" + user_id
+    # container_name = app_name + "-" + user_id
     # parse the arguments to List(str)
     arguments = split(arguments)
     # run the docker image in container
     # subprocess.run(["docker", "run"]+parameters+["--name", container_id, app_name]+arguments)
-
-    docker_client.containers.run(
-        image=app_name,
-        command=arguments,
-        detach=True,
-        mem_limit="64m",
-        network=settings.isolated_network_name,
-        remove=True,
-        name=container_name,
-    )
+    container = get_container(container_name)
+    if container is None:
+        container = docker_client.containers.create(
+            image=app_name,
+            command=arguments,
+            detach=True,
+            mem_limit="64m",
+            network=settings.isolated_network_name,
+            name=container_name,
+            # auto_remove=True,
+        )
+    if start and container.status != DockerStatus.RUNNING:
+        container.start()
     # docker_client.containers.run(image=app_name, command=arguments, stdin_open=True, mem_limit='64m', network='isolated_nw', remove=True, name=container_id)
-
     # create corresponding iptables chain based on container iid
     # iptables_manager.create_chain(get_container_id(container_name))
 
     # create entry in database
     caddr_db.set(container_name, get_container_ip(container_name))
-    return container_name
+    return container
 
 
 # def run_container(container_id:str, image_name:str, parameters:List[str]=None, arguments:List[str]=None) -> str:
@@ -174,7 +181,7 @@ def spawn_app(app_name: str, user_id: str, arguments: str = "") -> str:
 # docker run -p 9999:9999 -it --rm --name client_remote client_to_remote python ./client.py 172.17.0.1 2222
 
 
-def stop_container(container_name: str) -> None:
+def stop_container(container_name: str) -> Container:
     """
     stop the container with the name
     Note when --rm is included in parameters for run by default, this container will be removed after it's stopped.
@@ -186,17 +193,19 @@ def stop_container(container_name: str) -> None:
 
     Returns
     -------
-    None
+    Container
 
     """
     if not isinstance(container_name, str):
         raise TypeError("container name is expected to be str")
-    docker_client.containers.get(container_name).stop()
+    container = docker_client.containers.get(container_name)
+    container.stop()
     # iptables_manager.delete_chain(get_container_id(container_name))
     caddr_db.delete(container_name)
+    return container
 
 
-def start_container(container_name: str) -> None:
+def start_container(container_name: str) -> Container:
     """
     start the container with the name
 
@@ -207,23 +216,27 @@ def start_container(container_name: str) -> None:
 
     Returns
     -------
-    None
+    Container
 
     """
     if not isinstance(container_name, str):
         raise TypeError("container name is expected to be str")
     # subprocess.run(["docker", "start", container_id])
-    docker_client.containers.get(container_name).start()
+    container = docker_client.containers.get(container_name)
+    container.start()
+    return container
 
 
-def rm_container(container_name: str) -> None:
+def rm_container(container_name: str) -> Container:
     """force remove the container with the name"""
     if not isinstance(container_name, str):
         print("Container Name is Expected to be Str")
         return
     # subprocess.run(["docker", "rm", "--force", container_id])
-    docker_client.containers.get(container_name).remove(force=True)
-    iptables_manager.delete_chain(get_container_id(container_name))
+    container = docker_client.containers.get(container_name)
+    container.remove(force=True)
+    # iptables_manager.delete_chain(get_container_id(container_name))
+    return container
 
 
 def get_container_ip(container_name: str) -> str:
@@ -247,6 +260,13 @@ def get_container_ip(container_name: str) -> str:
     return docker_client.containers.get(container_name).attrs["NetworkSettings"][
         "Networks"
     ][settings.isolated_network_name]["IPAddress"]
+
+
+def get_container(container_name: str) -> Optional[Container]:
+    try:
+        return docker_client.containers.get(container_name)
+    except Exception:
+        return None
 
 
 def get_container_id(container_name: str) -> str:

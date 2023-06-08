@@ -41,9 +41,25 @@ class DomainUserApp(BaseModel):
     domain: Domain = Field(...)
     user: User = Field(...)
     app: App = Field(...)
-    running: bool = Field(False)
-    arguments: Dict[str, str]
-
-
-class DomainUserAppStart(BaseModel):
+    status: str = Field("")
+    container_id: str = Field("")
     arguments: Dict[str, str] = Field({})
+
+
+class DomainUserAppCreate(BaseModel):
+    arguments: Dict[str, str] = Field({})
+    start: bool = Field(True)
+
+
+class DockerStatus(StrEnumMixin, Enum):
+    """
+    The states defined in docker documentation (https://docs.docker.com/engine/reference/commandline/ps/)
+    """
+
+    CREATED = "created"
+    RESTARTING = "restarting"
+    RUNNING = "running"
+    REMOVING = "removing"
+    PAUSED = "paused"
+    EXITED = "exited"
+    DEAD = "dead"

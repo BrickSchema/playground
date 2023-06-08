@@ -4,7 +4,7 @@ from brick_server.minimal.auth.authorization import (
     jwt_security_scheme,
     parse_jwt_token,
 )
-from brick_server.minimal.exceptions import AlreadyExistsError, DoesNotExistError
+from brick_server.minimal.exceptions import AlreadyExistsError
 from brick_server.minimal.models import get_doc
 from brick_server.minimal.schemas import IsSuccess
 from fastapi import Body, Depends
@@ -16,7 +16,10 @@ from rdflib import URIRef
 
 from brick_server.playground import models, schemas
 from brick_server.playground.app_management.app_management import (
+    get_container,
+    rm_container,
     spawn_app,
+    start_container,
     stop_container,
 )
 from brick_server.playground.auth.authorization import (
@@ -24,6 +27,7 @@ from brick_server.playground.auth.authorization import (
     get_domain_user_app,
     get_user_from_jwt,
 )
+from brick_server.playground.schemas import DockerStatus
 from brick_server.playground.services.models import (
     ActivatedApps,
     UserRelationshipsRequest,
@@ -155,16 +159,84 @@ class UserApps:
         # user.save()
         # return IsSuccess(reason="Already activated")
 
+    @staticmethod
+    def _operate_container(
+        domain_user_app: models.DomainUserApp, operation: str, start: bool = True
+    ) -> bool:
+        container_name = domain_user_app.get_container_name()
+        container = get_container(container_name)
+        try:
+            if container is None:
+                if operation == "create" or operation == "start":
+                    container = spawn_app(
+                        domain_user_app.app.name, container_name, start=start
+                    )
+            else:
+                if operation == "start" and container.status != DockerStatus.RUNNING:
+                    start_container(container_name)
+                elif (
+                    operation == "create"
+                    and start
+                    and container.status != DockerStatus.RUNNING
+                ):
+                    start_container(container_name)
+                elif operation == "stop":
+                    stop_container(container_name)
+                elif operation == "remove":
+                    rm_container(container_name)
+        except Exception as e:
+            logger.exception(e)
+
+        if container is None:
+            status = DockerStatus.EXITED
+            container_id = ""
+        else:
+            status = container.status
+            container_id = container.id
+
+        if (
+            domain_user_app.status != status
+            or domain_user_app.container_id != container_id
+        ):
+            domain_user_app.status = status
+            domain_user_app.container_id = container_id
+            return True
+        return False
+
     @user_router.get(
         "/domains/{domain}/apps/{app}",
         status_code=200,
-        description="Install an app for the user.",
+        description="Get an app for the user.",
         tags=["Users"],
     )
     def get_app(
         self,
         domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
     ):
+        if self._operate_container(domain_user_app, "get"):
+            domain_user_app.save()
+        return schemas.DomainUserApp.from_orm(domain_user_app)
+
+    @user_router.post(
+        "/domains/{domain}/apps/{app}/create",
+        status_code=200,
+        description="Create an app for the user.",
+        # response_model=AppResponse,
+        tags=["Users"],
+    )
+    def create_app(
+        self,
+        domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
+        domain_user_app_create: schemas.DomainUserAppCreate = Body(),
+    ):
+        # if domain_user_app.status == DockerStatus.RUNNING:
+        #     raise AlreadyExistsError("app", domain_user_app.app.name)
+
+        self._operate_container(domain_user_app, "create")
+        # TODO: examine the arguments
+        domain_user_app.arguments = domain_user_app_create.arguments
+        domain_user_app.save()
+
         return schemas.DomainUserApp.from_orm(domain_user_app)
 
     @user_router.post(
@@ -177,19 +249,9 @@ class UserApps:
     def start_app(
         self,
         domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
-        domain_user_app_start: schemas.DomainUserAppStart = Body(),
     ):
-        if domain_user_app.running:
-            raise AlreadyExistsError("app", domain_user_app.app.name)
-        container_name = spawn_app(
-            domain_user_app.app.name, domain_user_app.user.user_id.replace("@", "at")
-        )
-        logger.info(container_name)
-        domain_user_app.running = True
-        # TODO: examine the arguments
-        domain_user_app.arguments = domain_user_app_start.arguments
-        domain_user_app.save()
-
+        if self._operate_container(domain_user_app, "start"):
+            domain_user_app.save()
         return schemas.DomainUserApp.from_orm(domain_user_app)
 
     @user_router.post(
@@ -203,18 +265,21 @@ class UserApps:
         self,
         domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
     ):
-        if not domain_user_app.running:
-            raise DoesNotExistError("app", domain_user_app.app.name)
-        container_name = (
-            domain_user_app.app.name
-            + "-"
-            + domain_user_app.user.user_id.replace("@", "at")
-        )
-        try:
-            stop_container(container_name)
-        except Exception as e:
-            logger.exception(e)
-            # raise e
-        domain_user_app.running = False
-        domain_user_app.save()
+        if self._operate_container(domain_user_app, "stop"):
+            domain_user_app.save()
+        return schemas.DomainUserApp.from_orm(domain_user_app)
+
+    @user_router.post(
+        "/domains/{domain}/apps/{app}/remove",
+        status_code=200,
+        description="Remove an app for the user.",
+        # response_model=AppResponse,
+        tags=["Users"],
+    )
+    def remove_app(
+        self,
+        domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
+    ):
+        if self._operate_container(domain_user_app, "remove"):
+            domain_user_app.save()
         return schemas.DomainUserApp.from_orm(domain_user_app)
