@@ -83,7 +83,7 @@ class UserResponse(BaseModel):
     is_admin: bool = Field(...)
     is_approved: bool = Field(...)
     registration_time: Optional[datetime] = None
-    activated_apps: List[str]
+    # activated_apps: List[str]
 
 
 class MarketAppResponse(BaseModel):

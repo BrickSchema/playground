@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict
+from typing import Dict, List
 
 from brick_server.minimal.schemas import Domain, StrEnumMixin, User
 from pydantic import BaseModel, Field
@@ -63,3 +63,9 @@ class DockerStatus(StrEnumMixin, Enum):
     PAUSED = "paused"
     EXITED = "exited"
     DEAD = "dead"
+
+
+class AuthorizedEntities(BaseModel):
+    read: List[str] = Field(...)
+    write: List[str] = Field(...)
+    is_admin: bool = Field(False)

@@ -1,13 +1,16 @@
+from typing import List
+
 import arrow
 from brick_server.minimal.auth.authorization import (
     authenticated,
     jwt_security_scheme,
     parse_jwt_token,
 )
+from brick_server.minimal.auth.checker import PermissionChecker
 from brick_server.minimal.exceptions import AlreadyExistsError
 from brick_server.minimal.models import get_doc
-from brick_server.minimal.schemas import IsSuccess
-from fastapi import Body, Depends
+from brick_server.minimal.schemas import IsSuccess, PermissionScope, PermissionType
+from fastapi import Body, Depends, Query
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
@@ -23,6 +26,7 @@ from brick_server.playground.app_management.app_management import (
     stop_container,
 )
 from brick_server.playground.auth.authorization import (
+    Authorization,
     get_domain_app,
     get_domain_user_app,
     get_user_from_jwt,
@@ -34,7 +38,7 @@ from brick_server.playground.services.models import (
     UserResponse,
 )
 
-user_router = InferringRouter()
+user_router = InferringRouter(tags=["Users"])
 
 
 @cbv(user_router)
@@ -43,7 +47,6 @@ class UserRelationResource:
         "/relationship",
         description="Update a user's relationship",
         response_model=IsSuccess,
-        tags=["Users"],
     )
     @authenticated
     async def add_user_relation(
@@ -67,7 +70,6 @@ class UserResource:
         status_code=200,
         description="Get User info",
         response_model=UserResponse,
-        tags=["Users"],
     )
     def get_user_info(
         self,
@@ -81,8 +83,38 @@ class UserResource:
             email=user.email,
             is_admin=user.is_admin,
             is_approved=user.is_approved,
-            activated_apps=[app.name for app in user.activated_apps],
+            # activated_apps=[app.name for app in user.activated_apps],
             registration_time=arrow.get(user.registration_time).datetime,
+        )
+
+    @user_router.get(
+        "/domains/{domain}/permissions",
+        status_code=200,
+        description="Get token permissions in domain",
+    )
+    async def get_permission(
+        self,
+        checker: Authorization = Depends(
+            PermissionChecker(permission_scope=PermissionScope.ENTITY)
+        ),
+        types: List[str] = Query([]),
+    ) -> schemas.AuthorizedEntities:
+        is_admin = checker.check_admin_domain()
+        if not is_admin:
+            read = await checker.get_all_authorized_entities(PermissionType.READ)
+            write = await checker.get_all_authorized_entities(PermissionType.WRITE)
+            # write = set()
+            if types:
+                filtered = await checker.filter_entities_by_types(
+                    read.union(write), types
+                )
+                read.intersection_update(filtered)
+                write.intersection_update(filtered)
+        else:
+            read = []
+            write = []
+        return schemas.AuthorizedEntities(
+            read=list(read), write=list(write), is_admin=is_admin
         )
 
 
