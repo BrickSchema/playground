@@ -11,6 +11,7 @@ from brick_server.minimal.dependencies import (
     get_ts_db,
 )
 from brick_server.minimal.interfaces import AsyncpgTimeseries, GraphDB
+from brick_server.minimal.schemas import PermissionScope
 from fastapi import Depends
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
@@ -31,7 +32,9 @@ class ProfileRoute:
         self,
         # background_tasks: BackgroundTasks,
         # domain: str = Path(...),
-        checker: Any = Depends(PermissionChecker(PermissionType.ADMIN_SITE)),
+        checker: Any = Depends(
+            PermissionChecker(permission_scope=PermissionScope.SITE)
+        ),
     ) -> schemas.PermissionProfile:
         # create_user("admin", "admin", "admin@gmail.com")
 

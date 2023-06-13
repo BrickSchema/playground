@@ -1,10 +1,10 @@
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from brick_server.minimal.auth.jwt import jwt_security_scheme, parse_jwt_token
 from brick_server.minimal.dependencies import get_graphdb
 from brick_server.minimal.exceptions import GraphDBError, InternalServerError
 from brick_server.minimal.models import Domain, get_doc, get_doc_or_none, get_docs
-from brick_server.minimal.schemas import PermissionType
+from brick_server.minimal.schemas import PermissionScope, PermissionType
 from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 from loguru import logger
@@ -139,9 +139,17 @@ class Authorization:
         self.user = user
         self.app = app
         self.domain = domain
-        self.domain_user_app = ...
-        self.domain_occupancies = ...
-        self.domain_user = ...
+        if self.domain is not None:
+            self.domain_user = get_domain_user(self.user, self.domain)
+        else:
+            self.domain_user = None
+        if self.domain is not None and self.app is not None:
+            self.domain_user_app = get_domain_user_app(self.domain, self.user, self.app)
+        else:
+            self.domain_user_app = None
+        # self.domain_user_app = ...
+        # self.domain_occupancies = ...
+        # self.domain_user = ...
         # self.domain_roles = {}
         self.brick_db = get_graphdb()
 
@@ -197,6 +205,58 @@ class Authorization:
                 d[key].append(row[key]["value"])
         return d
 
+    async def query_entity_ids(self, query) -> List[str]:
+        try:
+            res = await self.brick_db.query(self.domain.name, query)
+            parsed_res = self.parse_graphdb_result(res)
+            assert len(parsed_res.keys()) == 1
+            entity_ids = parsed_res[list(parsed_res.keys())[0]]
+            return entity_ids
+        except GraphDBError as e:
+            logger.warning(repr(e))
+            raise InternalServerError(hint="sparql")
+
+    async def filter_entities_by_types(
+        self, entity_ids: Set[str], types: List[str]
+    ) -> Set[str]:
+        entity_ids_string = ",".join(map(lambda x: f"<{x}>", entity_ids))
+        type_query_string = "UNION".join(map(lambda x: f"{{?entity a {x}.}}", types))
+        query = f"""
+select distinct ?entity where {{
+    {type_query_string}
+    filter (?entity in ({entity_ids_string})).
+}}
+        """
+        logger.info(query)
+        return set(await self.query_entity_ids(query))
+
+    async def get_authorized_entities_in_profile(
+        self, profile, arguments, permission: PermissionType
+    ) -> List[str]:
+        # TODO: cache in redis
+        template: str = profile.__getattribute__(permission)
+        query = template.format(**arguments)
+        logger.info("{} {} {}", template, arguments, query)
+        return await self.query_entity_ids(query)
+
+    async def get_all_authorized_entities(self, permission: PermissionType) -> Set[str]:
+        entity_ids = set()
+        domain_user_profiles = get_domain_user_profiles(self.user, self.domain)
+        for profile in domain_user_profiles:
+            entity_ids_domain_user = await self.get_authorized_entities_in_profile(
+                profile.profile, profile.arguments, permission
+            )
+            entity_ids.update(entity_ids_domain_user)
+        if self.domain_user_app is not None:
+            entity_ids_app = await self.get_authorized_entities_in_profile(
+                self.app.profile, self.domain_user_app.arguments, permission
+            )
+            if self.app.permission_model == PermissionModel.AUGMENTATION:
+                entity_ids.update(entity_ids_app)
+            elif self.app.permission_model == PermissionModel.INTERSECTION:
+                entity_ids.intersection_update(entity_ids_app)
+        return entity_ids
+
     async def check_profile(
         self,
         profile,
@@ -204,25 +264,14 @@ class Authorization:
         entity_id: str,
         permission: PermissionType,
     ):
-        template: str = profile.__getattribute__(permission)
-        query = template.format(**arguments)
-        logger.info("{} {} {}", template, arguments, query)
+        entity_ids = self.get_authorized_entities_in_profile(
+            profile, arguments, permission
+        )
+        return entity_id in entity_ids
 
-        # TODO: cache in redis
-        try:
-            res = await self.brick_db.query(self.domain.name, query)
-            parsed_res = self.parse_graphdb_result(res)
-            assert len(parsed_res.keys()) == 1
-            entity_ids = parsed_res[list(parsed_res.keys())[0]]
-            return entity_id in entity_ids
-
-        except GraphDBError as e:
-            logger.warning(repr(e))
-            raise InternalServerError()
-
-        return False
-
-    async def check(self, entity_ids: Set[str], permission: PermissionType) -> bool:
+    async def check_entities_permission(
+        self, entity_ids: Set[str], permission: PermissionType
+    ) -> bool:
         # if the user is site admin, grant all permissions
         if self.user.is_admin:
             return True
@@ -241,21 +290,16 @@ class Authorization:
         #     return True
 
         # get domain user info
-        if self.domain_user is ...:
-            self.domain_user = get_domain_user(self.user, self.domain)
+
+        # entities must be in domain
+        if self.domain is None:
+            return False
+        # user must exist in domain
         if self.domain_user is None:
             return False
+        # if the user is domain admin, grant all permissions
         if self.domain_user.is_admin:
             return True
-
-        if (
-            self.domain_user_app is ...
-            and self.app is not None
-            and self.domain is not None
-        ):
-            self.domain_user_app = get_domain_user_app(self.domain, self.user, self.app)
-        if self.domain_user_app is None:
-            return False
 
         if len(entity_ids) == 0:
             return False
@@ -269,9 +313,11 @@ class Authorization:
         # ):
         #     return True
 
-        # check permission by domain user profile
-
-        if self.domain_user_app is not None:
+        # check permission by domain_user_app profile
+        if self.app is not None:
+            # app must be installed by user
+            if self.domain_user_app is None:
+                return False
             authed = await self.check_profile(
                 self.app.profile, self.domain_user_app.arguments, entity_id, permission
             )
@@ -280,6 +326,7 @@ class Authorization:
             if self.app.permission_model == PermissionModel.INTERSECTION and not authed:
                 return False
 
+        # check permission by domain_user profile
         domain_user_profiles = get_domain_user_profiles(self.user, self.domain)
         for profile in domain_user_profiles:
             if await self.check_profile(
@@ -301,27 +348,51 @@ class Authorization:
             return False
         return self.domain_user.is_admin
 
-    async def __call__(self, entity_ids: Set[str], permission: PermissionType) -> bool:
-        if permission == PermissionType.ADMIN_SITE:
-            result = self.check_admin_site()
-        elif permission == PermissionType.ADMIN_SITE:
-            result = self.check_admin_domain()
-        else:
-            result = await self.check(entity_ids, permission)
-        return result
+    async def __call__(
+        self,
+        entity_ids: Set[str],
+        permission_type: PermissionType,
+        permission_scope: PermissionScope,
+    ) -> bool:
+        # app can only use read / write permission (on entities)
+        if permission_scope == PermissionScope.SITE:
+            return self.app is None and self.check_admin_site()
+        elif permission_scope == PermissionScope.DOMAIN:
+            return self.app is None and self.check_admin_domain()
+        elif permission_scope == PermissionScope.USER:
+            return self.app is None
+        elif permission_scope == PermissionScope.ENTITY:
+            if len(entity_ids) == 0:
+                return True
+            else:
+                return await self.check_entities_permission(entity_ids, permission_type)
+        return False
+
+        # if self.app is not None and permission_type not in (PermissionType.READ, PermissionType.WRITE):
+        #     return False
+        # if permission_type == PermissionType.ADMIN_SITE:
+        #     result = self.check_admin_site()
+        # elif permission_type == PermissionType.ADMIN_DOMAIN:
+        #     result = self.check_admin_domain()
+        # elif len(entity_ids) == 0:
+        #     result = True
+        # else:
+        #     result = await self.check_entities_permission(entity_ids, permission_type)
+        # return result
 
 
 def auth_logic(
     user: User = Depends(get_user_from_jwt),
     app: Optional[App] = Depends(get_app_from_jwt),
     domain: Optional[Domain] = Depends(get_domain),
-) -> Authorization:
+) -> Callable[[Set[str], PermissionType, PermissionScope], bool]:
     authorization = Authorization(user, app, domain)
 
-    async def _auth_logic(entity_ids: Set[str], permission: PermissionType):
-        return await authorization(entity_ids, permission)
+    # async def _auth_logic(entity_ids: Set[str], permission_type: PermissionType,
+    #                       permission_scope: PermissionScope) -> bool:
+    #     return await authorization(entity_ids, permission_type, permission_scope)
 
-    return _auth_logic
+    return authorization
 
 
 class DomainAdminPermissionChecker:
