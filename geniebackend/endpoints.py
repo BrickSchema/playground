@@ -64,8 +64,14 @@ def redirected():
 
 @app.route("/api/userid")
 def get_userid():
-    jwt_token = request.args['user_token']
-    url = API_URL + '/auth/get_userid'
+    # print(config)
+    # jwt_token = config["api_token"]
+    # data = jwt.decode(jwt_token.encode("ascii"), options={"verify_signature": False})
+    # return data
+
+    jwt_token = config["api_token"]
+    # jwt_token = request.args['user_token']
+    url = API_URL + '/user'
     authorization = 'Bearer {0}'.format(jwt_token)
     res = requests.get(url, headers={'Authorization': authorization})
     user_email = res.json()
@@ -198,8 +204,8 @@ def get_current_user():
 
 
 if __name__ == '__main__':
-    ssl_context = (config['ssl']['cert'], config['ssl']['key'])
+    # ssl_context = (config['ssl']['cert'], config['ssl']['key'])
     app.run(host=config['host'],
             port=config['port'],
-            ssl_context=ssl_context,
+            # ssl_context=ssl_context,
             )

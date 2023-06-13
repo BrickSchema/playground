@@ -1,6 +1,6 @@
 requests
-flask==1.0.2
-flask_cors==3.0.7
+flask
+flask_cors
 pyjwt
 arrow
 pyyaml
