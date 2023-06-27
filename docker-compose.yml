@@ -45,7 +45,7 @@ services:
     volumes:
       - ./brick_server/playground:/root/brick-server-playground/brick_server/playground
       - ../brick-server-minimal/brick_server/minimal:/root/brick-server-minimal/brick_server/minimal
-      - ./tests:/root/tests
+#      - ./tests:/root/tests
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "9000:9000"
