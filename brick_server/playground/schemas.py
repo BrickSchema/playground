@@ -69,3 +69,9 @@ class AuthorizedEntities(BaseModel):
     read: List[str] = Field(...)
     write: List[str] = Field(...)
     is_admin: bool = Field(False)
+
+
+class NotifyResource(BaseModel):
+    location: str = Field(...)
+    resource_type: str = Field(...)
+    value: float = Field(...)
