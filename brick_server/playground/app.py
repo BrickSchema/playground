@@ -32,6 +32,7 @@ from .services.apps import app_router
 from .services.domains import domain_router as playground_domain_router
 from .services.market_apps import marketapp_router
 from .services.profile import profile_router
+from .services.scheduler import scheduler_router
 from .services.users import user_router
 
 # from brick_server.dummy_frontend import dummy_frontend_router
@@ -74,6 +75,7 @@ app.include_router(user_router, prefix="/brickapi/v1/user")
 app.include_router(auth_router, prefix="/brickapi/v1/auth")
 app.include_router(admin_router, prefix="/brickapi/v1/admin")
 app.include_router(profile_router, prefix="/brickapi/v1/profiles")
+app.include_router(scheduler_router, prefix="/brickapi/v1/scheduler")
 app.include_router(playground_domain_router, prefix="/brickapi/v1/domains")
 
 app.mount("/brickapi/v1/appstatic", StaticFiles(directory="static"), name="static")
