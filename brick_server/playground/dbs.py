@@ -3,6 +3,7 @@ from fastapi_rest_framework.config import settings
 
 from brick_server.playground.models import (
     DomainOccupancy,
+    DomainPreActuationPolicy,
     DomainUser,
     DomainUserProfile,
     PermissionProfile,
@@ -46,5 +47,6 @@ def init_mongodb():
         DomainUser,
         DomainOccupancy,
         DomainUserProfile,
+        DomainPreActuationPolicy,
     ]:
         model.ensure_indexes()

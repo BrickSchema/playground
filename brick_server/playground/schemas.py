@@ -75,3 +75,17 @@ class NotifyResource(BaseModel):
     location: str = Field(...)
     resource_type: str = Field(...)
     value: float = Field(...)
+
+
+class DomainPreActuationPolicyCreate(BaseModel):
+    name: str = Field(...)
+    query: str = Field("")
+    priority: int = Field(0)
+    guards: List[str] = Field([])
+
+
+class DomainPreActuationPolicy(DomainPreActuationPolicyCreate):
+    class Config:
+        orm_mode = True
+
+    domain: Domain = Field(...)
