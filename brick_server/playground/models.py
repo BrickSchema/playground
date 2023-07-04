@@ -201,6 +201,23 @@ class DomainUserProfile(Document):
     }
 
 
+class DomainPreActuationPolicy(Document):
+    domain = ReferenceField(Domain, required=True)
+    name = StringField(required=True)
+    query = StringField(required=True, default="")
+    priority = IntField(required=True, default=0)
+    guards = ListField(StringField())
+
+    meta = {
+        "indexes": [
+            {
+                "fields": ["domain", "name"],
+                "unique": True,
+            }
+        ]
+    }
+
+
 # class AppProfile(Document):
 #     app = ReferenceField(App, required=True)
 #     profile = ReferenceField(PermissionProfile, required=True)

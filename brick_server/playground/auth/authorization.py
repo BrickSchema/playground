@@ -9,9 +9,7 @@ from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 from loguru import logger
 
-from brick_server.playground.schemas import PermissionModel
-
-from ..models import (  # DefaultRole,; DomainRole,
+from brick_server.playground.models import (  # DefaultRole,; DomainRole,
     App,
     DomainApp,
     DomainOccupancy,
@@ -21,6 +19,8 @@ from ..models import (  # DefaultRole,; DomainRole,
     Entity,
     User,
 )
+from brick_server.playground.schemas import PermissionModel
+from brick_server.playground.utils import parse_graphdb_result
 
 SEP = "^#$%"
 
@@ -197,18 +197,11 @@ class Authorization:
     #             ):
     #                 return True
     #     return False
-    def parse_graphdb_result(self, res):
-        keys = res["head"]["vars"]
-        d = {key: [] for key in keys}
-        for row in res["results"]["bindings"]:
-            for i, key in enumerate(keys):
-                d[key].append(row[key]["value"])
-        return d
 
     async def query_entity_ids(self, query) -> List[str]:
         try:
             res = await self.brick_db.query(self.domain.name, query)
-            parsed_res = self.parse_graphdb_result(res)
+            parsed_res = parse_graphdb_result(res)
             assert len(parsed_res.keys()) == 1
             entity_ids = parsed_res[list(parsed_res.keys())[0]]
             return entity_ids

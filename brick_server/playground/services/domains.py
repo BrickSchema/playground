@@ -1,9 +1,9 @@
 from brick_server.minimal.exceptions import AlreadyExistsError, DoesNotExistError
-from fastapi import Depends
+from fastapi import Body, Depends
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 
-from brick_server.playground import models
+from brick_server.playground import models, schemas
 from brick_server.playground.auth.authorization import get_app, get_domain
 
 domain_router = InferringRouter(tags=["Domains"])
@@ -28,3 +28,19 @@ class DomainAppRoute:
         except Exception:
             # TODO: catch the precise already exist exception
             raise AlreadyExistsError("app", app.name)
+
+
+@cbv(domain_router)
+class DomainPreActuationPolicy:
+    @domain_router.post("/{domain}/pre_actuation_policy")
+    async def create_pre_actuation_policy(
+        self,
+        domain: models.Domain = Depends(get_domain),
+        pre_actuation_policy_create: schemas.DomainPreActuationPolicyCreate = Body(...),
+    ) -> schemas.DomainPreActuationPolicy:
+        guard = models.DomainPreActuationPolicy(
+            domain=domain,
+            **pre_actuation_policy_create.dict(),
+        )
+        guard.save()
+        return schemas.DomainPreActuationPolicy.from_orm(guard)
