@@ -1,4 +1,5 @@
-from brick_server.minimal.dependencies import get_ts_db
+from brick_server.minimal.dependencies import get_actuation_iface, get_ts_db
+from brick_server.minimal.interfaces import ActuationInterface
 from brick_server.minimal.interfaces.timeseries.asyncpg_timeseries import (
     AsyncpgTimeseries,
 )
@@ -15,6 +16,7 @@ scheduler_router = InferringRouter(tags=["Scheduler"])
 
 @cbv(scheduler_router)
 class NotifyResourceRoute:
+    actuation_iface: ActuationInterface = Depends(get_actuation_iface)
     ts_db: AsyncpgTimeseries = Depends(get_ts_db)
 
     @scheduler_router.post("/domains/{domain}/notify_resource")
@@ -23,5 +25,5 @@ class NotifyResourceRoute:
         domain: models.Domain = Depends(get_domain),
         body: schemas.NotifyResource = Body(),
     ):
-        policy = SchedulingPolicyNaive(domain, self.ts_db)
+        policy = SchedulingPolicyNaive(domain, self.ts_db, self.actuation_iface)
         await policy.schedule(body)

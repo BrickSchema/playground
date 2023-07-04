@@ -8,7 +8,7 @@ from starlette.staticfiles import StaticFiles
 from brick_server.playground.config import FastAPIConfig
 
 settings = config.init_settings(FastAPIConfig)
-print(settings.dict())
+# print(settings.dict())
 
 from brick_server.minimal.dependencies import update_dependency_supplier
 
