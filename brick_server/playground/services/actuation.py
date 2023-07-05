@@ -1,12 +1,17 @@
 from typing import List
 
 from brick_server.minimal.models import get_docs
-from brick_server.minimal.services.actuation import ActuationEntity
+from brick_server.minimal.services.actuation import (
+    ActuationEntity,
+    actuation_router as actuation_router,
+)
 from loguru import logger
 
 from brick_server.playground import models
 from brick_server.playground.interface.actuation_guards import actuation_guards
 from brick_server.playground.utils import parse_graphdb_result
+
+_ = actuation_router
 
 
 async def guard_before_actuation(
