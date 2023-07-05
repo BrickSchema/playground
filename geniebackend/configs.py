@@ -1,6 +1,8 @@
 import os
 import json
+from dotenv import load_dotenv
 
+load_dotenv()
 config_path = os.environ.get('GETNIE_BACKEND_CONFIG', None)
 if not config_path:
     config_path = './configs/backend_configs.json'

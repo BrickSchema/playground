@@ -6,3 +6,4 @@ arrow
 pyyaml
 Flask-Dance
 uwsgi
+python-dotenv
