@@ -257,7 +257,7 @@ select distinct ?entity where {{
         entity_id: str,
         permission: PermissionType,
     ):
-        entity_ids = self.get_authorized_entities_in_profile(
+        entity_ids = await self.get_authorized_entities_in_profile(
             profile, arguments, permission
         )
         return entity_id in entity_ids

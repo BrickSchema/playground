@@ -92,7 +92,7 @@ class UserResource:
         status_code=200,
         description="Get token permissions in domain",
     )
-    async def get_permission(
+    async def get_permissions(
         self,
         checker: Authorization = Depends(
             PermissionChecker(permission_scope=PermissionScope.ENTITY)
