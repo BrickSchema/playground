@@ -10,10 +10,11 @@ from brick_server.minimal.auth.checker import PermissionChecker
 from brick_server.minimal.exceptions import AlreadyExistsError
 from brick_server.minimal.models import get_doc
 from brick_server.minimal.schemas import IsSuccess, PermissionScope, PermissionType
-from fastapi import Body, Depends, Query
+from fastapi import Body, Depends, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
+from fastapi_utils.timing import TIMER_ATTRIBUTE, _TimingStats
 from loguru import logger
 from rdflib import URIRef
 
@@ -94,6 +95,7 @@ class UserResource:
     )
     async def get_permissions(
         self,
+        request: Request,
         checker: Authorization = Depends(
             PermissionChecker(permission_scope=PermissionScope.ENTITY)
         ),
@@ -113,8 +115,13 @@ class UserResource:
         else:
             read = []
             write = []
+        timer: _TimingStats = getattr(request.state, TIMER_ATTRIBUTE)
+        timer.take_split()
         return schemas.AuthorizedEntities(
-            read=list(read), write=list(write), is_admin=is_admin
+            read=list(read),
+            write=list(write),
+            is_admin=is_admin,
+            response_time=1000 * timer.time,
         )
 
 

@@ -2,6 +2,8 @@ import os
 
 from fastapi import FastAPI
 from fastapi_rest_framework import config
+from fastapi_utils.timing import add_timing_middleware
+from loguru import logger
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.staticfiles import StaticFiles
 
@@ -43,6 +45,8 @@ from brick_server.playground.services.users import user_router
 
 
 app = FastAPI(title="Brick Server Playground", openapi_url="/docs/openapi.json")
+add_timing_middleware(app, record=logger.info)
+app.logger = logger
 
 
 @app.on_event("startup")
