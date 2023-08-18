@@ -67,6 +67,19 @@ services:
     privileged: true
     command: dockerize -wait http://graphdb:7200/rest/repositories python3 -m brick_server.playground
 #    entrypoint: /app/docker/start-reload.sh
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=brick-demo
+    networks:
+      - brick-server-network
+    ports:
+      - "38081:8081"
 
 networks:
   brick-server-network:

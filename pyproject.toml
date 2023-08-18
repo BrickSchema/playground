@@ -16,10 +16,12 @@ repository = "https://gitlab.com/mesl/brickserver/brick-server-playground"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
+aiocache = {extras = ["redis"], version = "^0.12.1"}
 brick-server-minimal = {develop = true, path = "../brick-server-minimal"}
 docker = "^6.1.3"
-python = ">=3.7,<3.11"
+python = ">=3.8,<3.11"
 redis = "^4.5.5"
+torch = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 asgi-lifespan = "^1.0.1"

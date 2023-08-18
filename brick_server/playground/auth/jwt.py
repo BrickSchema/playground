@@ -13,14 +13,17 @@ def create_jwt_token(
     app: models.App,
     token_lifetime: int = settings.jwt_expire_seconds,
 ):
-    domain_user_app = get_doc_or_none(
-        models.DomainUserApp, domain=domain.id, user=user.id, app=app.id
-    )
+    if domain is not None and app is not None:
+        domain_user_app = get_doc_or_none(
+            models.DomainUserApp, domain=domain.id, user=user.id, app=app.id
+        )
+    else:
+        domain_user_app = None
     payload = {
         "user_id": user.user_id,
         "exp": time.time() + token_lifetime,
-        "app_name": app.name,
-        "domain": domain.name,
+        "app_name": app.name if app is not None else None,
+        "domain": domain.name if domain is not None else None,
         "domain_user_app": str(domain_user_app.id) if domain_user_app else None,
     }
     return sign_jwt_token(payload, token_lifetime)

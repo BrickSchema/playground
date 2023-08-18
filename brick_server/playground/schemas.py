@@ -1,16 +1,39 @@
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from brick_server.minimal.schemas import Domain, StrEnumMixin, User
+from bson.objectid import ObjectId as BsonObjectId
 from pydantic import BaseModel, Field
+
+
+class PydanticObjectId(BsonObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        # if not isinstance(v, BsonObjectId):
+        #     raise TypeError('ObjectId required')
+        return str(v)
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
 
 
 class PermissionProfile(BaseModel):
     class Config:
         orm_mode = True
 
+    id: PydanticObjectId = Field(...)
     read: str = Field(..., description="Read template of the profile")
     write: str = Field(..., description="Write template of the profile")
+
+
+class PermissionProfileUpdate(BaseModel):
+    read: Optional[str] = Field(None, description="Read template of the profile")
+    write: Optional[str] = Field(None, description="Write template of the profile")
 
 
 class PermissionModel(StrEnumMixin, Enum):
@@ -69,6 +92,7 @@ class AuthorizedEntities(BaseModel):
     read: List[str] = Field(...)
     write: List[str] = Field(...)
     is_admin: bool = Field(False)
+    response_time: float = Field(0)
 
 
 class NotifyResource(BaseModel):

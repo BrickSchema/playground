@@ -1,3 +1,4 @@
+import json
 from typing import Any, Callable, Dict, List, Optional, Set
 
 from brick_server.minimal.auth.jwt import jwt_security_scheme, parse_jwt_token
@@ -9,6 +10,7 @@ from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 from loguru import logger
 
+from brick_server.playground.interface.cache import use_cache
 from brick_server.playground.models import (  # DefaultRole,; DomainRole,
     App,
     DomainApp,
@@ -17,6 +19,7 @@ from brick_server.playground.models import (  # DefaultRole,; DomainRole,
     DomainUserApp,
     DomainUserProfile,
     Entity,
+    PermissionProfile,
     User,
 )
 from brick_server.playground.schemas import PermissionModel
@@ -76,7 +79,7 @@ def get_app_from_jwt(
 
 def get_domain(domain: str = Path(..., description="Name of the domain")) -> Domain:
     # return ObjectId(domain)
-    return get_doc(Domain, name=domain)
+    return get_doc_or_none(Domain, name=domain)
 
 
 def get_app(app: str = Path(..., description="Name of the app")) -> App:
@@ -102,6 +105,12 @@ def get_domain_user_app(
     app: App = Depends(get_app),
 ) -> DomainUserApp:
     return get_doc(DomainUserApp, domain=domain.id, user=user.id, app=app.id)
+
+
+def get_permission_profile(
+    profile: str = Path(..., description="UUID of the permission profile"),
+) -> DomainApp:
+    return get_doc(PermissionProfile, id=profile)
 
 
 # def get_domain_role(
@@ -226,11 +235,14 @@ select distinct ?entity where {{
     async def get_authorized_entities_in_profile(
         self, profile, arguments, permission: PermissionType
     ) -> List[str]:
-        # TODO: cache in redis
-        template: str = profile.__getattribute__(permission)
-        query = template.format(**arguments)
-        logger.info("{} {} {}", template, arguments, query)
-        return await self.query_entity_ids(query)
+        async def fallback_func():
+            template: str = profile.__getattribute__(permission)
+            query = template.format(**arguments)
+            logger.info("{} {} {}", template, arguments, query)
+            return await self.query_entity_ids(query)
+
+        cache_key = f"permission_profile:{self.domain.name}:{profile.id}:{permission}:{json.dumps(arguments)}"
+        return await use_cache(cache_key, fallback_func)
 
     async def get_all_authorized_entities(self, permission: PermissionType) -> Set[str]:
         entity_ids = set()

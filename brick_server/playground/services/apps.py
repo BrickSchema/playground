@@ -55,6 +55,7 @@ class AppByName:
         status_code=200,
         description="Get information about the app",
         response_model=AppResponse,
+        name="app:get",
     )
     @authorized  # TODO: Reimplement the authentication mechanism
     def get(
@@ -69,6 +70,7 @@ class AppByName:
         "/{app_name}",
         status_code=200,
         description="Delete a app along with its relationships",
+        name="app:delete",
     )
     @authorized
     def delete(
@@ -80,7 +82,7 @@ class AppByName:
         app_doc.delete()
         return IsSuccess()
 
-    @app_router.post("/", description="Create an app")
+    @app_router.post("/", description="Create an app", name="app:create")
     def post(
         self,
         # app_name: str = Path(..., description=app_name_desc),

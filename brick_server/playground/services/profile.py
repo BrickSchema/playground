@@ -1,50 +1,63 @@
-from typing import Any, Callable
+from typing import Any
 
 from brick_server.minimal.auth.checker import (
-    PermissionChecker,
     PermissionCheckerWithEntityId,
     PermissionType,
 )
-from brick_server.minimal.dependencies import (
-    dependency_supplier,
-    get_graphdb,
-    get_ts_db,
-)
+from brick_server.minimal.dependencies import get_graphdb, get_ts_db
 from brick_server.minimal.interfaces import AsyncpgTimeseries, GraphDB
-from brick_server.minimal.schemas import PermissionScope
-from fastapi import Depends
+from fastapi import Body, Depends
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
+from loguru import logger
 
 from brick_server.playground import models, schemas
+from brick_server.playground.auth.authorization import get_permission_profile
 
 profile_router = InferringRouter(tags=["Profiles"])
 
 
 @cbv(profile_router)
 class ProfileRoute:
-    auth_logic: Callable = Depends(dependency_supplier.auth_logic)
+    # auth_logic: Callable = Depends(dependency_supplier.auth_logic)
     graphdb: GraphDB = Depends(get_graphdb)
     ts_db: AsyncpgTimeseries = Depends(get_ts_db)
 
-    @profile_router.post("/create")
+    @profile_router.post("/")
     async def create_profile(
         self,
-        # background_tasks: BackgroundTasks,
         # domain: str = Path(...),
-        checker: Any = Depends(
-            PermissionChecker(permission_scope=PermissionScope.SITE)
-        ),
+        # checker: Any = Depends(PermissionChecker(permission_scope=PermissionScope.SITE)),
     ) -> schemas.PermissionProfile:
-        # create_user("admin", "admin", "admin@gmail.com")
-
         created_profile = models.PermissionProfile(read="", write="")
         try:
             created_profile.save()
         except Exception:
             pass
-            # raise AlreadyExistsError("domain", "name")
+        logger.info(created_profile.id)
         return schemas.PermissionProfile.from_orm(created_profile)
+
+    @profile_router.get("/{profile}")
+    async def get_profile(
+        self,
+        permission_profile: models.PermissionProfile = Depends(get_permission_profile),
+    ) -> schemas.PermissionProfile:
+        return schemas.PermissionProfile.from_orm(permission_profile)
+
+    @profile_router.post("/{profile}")
+    async def update_profile(
+        self,
+        permission_profile: models.PermissionProfile = Depends(get_permission_profile),
+        permission_profile_update: schemas.PermissionProfileUpdate = Body(...),
+    ) -> schemas.PermissionProfile:
+        if permission_profile_update.read is not None:
+            permission_profile.read = permission_profile_update.read
+        if permission_profile_update.write is not None:
+            permission_profile.write = permission_profile_update.write
+        # d = {k: v for k, v in permission_profile_update.dict().items() if v is not None}
+        # permission_profile.__dict__.update(**d)
+        permission_profile.save()
+        return schemas.PermissionProfile.from_orm(permission_profile)
 
     @profile_router.post("/{domain}/test")
     async def test(
