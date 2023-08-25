@@ -32,14 +32,14 @@ def serve() -> None:
 @cli.command()
 @click.option("--user-id", type=str, default="admin")
 @click.option("--app-name", type=str, default="")
-@click.option("--domain", type=str, default="bldg")
+@click.option("--domain-name", type=str, default="")
 @click.option("--token-lifetime", type=int, default=0)
-@click.option("--create-user", is_flag=True)
+@click.option("--create", is_flag=True)
 def generate_jwt(
-    user_id: str, app_name: str, domain: str, token_lifetime: int, create_user: bool
+    user_id: str, app_name: str, domain_name: str, token_lifetime: int, create: bool
 ) -> None:
     settings = config.init_settings(FastAPIConfig)
-    print(settings)
+    # print(settings)
 
     from brick_server.minimal.auth.authorization import create_user
     from brick_server.minimal.dbs import mongo_connection
@@ -59,29 +59,50 @@ def generate_jwt(
         token_lifetime = settings.jwt_expire_seconds
 
     user = get_doc_or_none(User, user_id=user_id)
-    domain = get_doc_or_none(Domain, name=domain)
-    domain_user = get_doc_or_none(DomainUser, domain=domain, user=user)
+    print(user)
+    domain = None
+    app = None
+    if user is None:
+        if create:
+            user = create_user(
+                name=user_id, user_id=user_id, email=f"{user_id}@gmail.com"
+            )
+        else:
+            print("user not found")
+            exit(-1)
+    if domain_name:
+        domain = get_doc_or_none(Domain, name=domain_name)
+        if domain is None:
+            if create:
+                domain = Domain(name=domain)
+                domain.save()
+            else:
+                print("domain not found")
+                exit(-1)
+        domain_user = get_doc_or_none(DomainUser, domain=domain, user=user)
+        if domain_user is None:
+            if create:
+                domain_user = DomainUser(domain=domain, user=user, is_admin=False)
+                domain_user.save()
+            else:
+                print("domain_user not found")
+                exit(-1)
 
-    if app_name:
-        app = get_doc_or_none(App, name=app_name)
-        domain_user_app = get_doc_or_none(
-            DomainUserApp, domain=domain, user=user, app=app
-        )
-    else:
-        app = None
-        domain_user_app = None
-
-    if create_user and user is None:
-        user = create_user(name=user_id, user_id=user_id, email=f"{user_id}@gmail.com")
-    if domain is None:
-        click.echo("error: domain not found!")
-        return
-    if domain_user is None:
-        domain_user = DomainUser(domain=domain, user=user, is_admin=False)
-        domain_user.save()
-    if app is not None and domain_user_app is None:
-        domain_user_app = DomainUserApp(domain=domain, user=user, app=app)
-        domain_user_app.save()
+        if app_name:
+            app = get_doc_or_none(App, name=app_name)
+            if app is None:
+                print("app not found")
+                exit(-1)
+            domain_user_app = get_doc_or_none(
+                DomainUserApp, domain=domain, user=user, app=app
+            )
+            if domain_user_app is None:
+                if create:
+                    domain_user_app = DomainUserApp(domain=domain, user=user, app=app)
+                    domain_user_app.save()
+                else:
+                    print("domain_user_app not found")
+                    exit(-1)
 
     jwt = create_jwt_token(
         domain=domain, user=user, app=app, token_lifetime=token_lifetime

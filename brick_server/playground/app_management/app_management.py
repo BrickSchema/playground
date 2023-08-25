@@ -104,7 +104,11 @@ def parse_start_cmd(start_cmd: str) -> str:
 
 
 def spawn_app(
-    app_name: str, container_name: str, arguments: str = "", start: bool = True
+    app_name: str,
+    container_name: str,
+    token: str,
+    arguments: str = "",
+    start: bool = True,
 ) -> Container:
     """
     Run the target application docker image under specific user with given arguments for that application
@@ -115,6 +119,8 @@ def spawn_app(
         the application name, same as the one used to register
     container_name
         the name of the continer with format {app_name}-{user_id}-{objectid}
+    token
+        the api token used by the container
     arguments: List[str], optional
         additional arguments for the application
     start: bool, optional
@@ -162,6 +168,7 @@ def spawn_app(
             mem_limit="64m",
             network=settings.isolated_network_name,
             name=container_name,
+            environment={"BRICK_SERVER_API_TOKEN": token}
             # auto_remove=True,
         )
     if start and container.status != DockerStatus.RUNNING:

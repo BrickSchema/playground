@@ -22,6 +22,11 @@ class PydanticObjectId(BsonObjectId):
         field_schema.update(type="string")
 
 
+class PermissionProfileCreate(BaseModel):
+    read: str = Field(..., description="Read template of the profile")
+    write: str = Field(..., description="Write template of the profile")
+
+
 class PermissionProfile(BaseModel):
     class Config:
         orm_mode = True
@@ -29,6 +34,10 @@ class PermissionProfile(BaseModel):
     id: PydanticObjectId = Field(...)
     read: str = Field(..., description="Read template of the profile")
     write: str = Field(..., description="Write template of the profile")
+
+
+class PermissionProfileList(BaseModel):
+    profiles: List[PermissionProfile]
 
 
 class PermissionProfileUpdate(BaseModel):
@@ -54,7 +63,43 @@ class App(BaseModel):
 class AppCreate(BaseModel):
     name: str = Field(..., description="Name of the app")
     description: str = Field("", description="")
-    profile: PermissionProfile = Field(..., description="")
+    profile: PermissionProfileCreate = Field(..., description="")
+
+
+class DomainUserProfileUpdate(BaseModel):
+    profile: PydanticObjectId = Field(...)
+    arguments: Dict[str, str] = Field(...)
+
+
+class DomainUserProfile(BaseModel):
+    class Config:
+        orm_mode = True
+
+    domain: Domain = Field(...)
+    user: User = Field(...)
+    profile: PermissionProfile = Field(...)
+    arguments: Dict[str, str] = Field(...)
+
+
+class DomainUserProfileList(BaseModel):
+    profiles: List[DomainUserProfile]
+
+
+class DomainUser(BaseModel):
+    class Config:
+        orm_mode = True
+
+    domain: Domain = Field(...)
+    user: User = Field(...)
+    is_admin: bool = Field(False)
+
+
+class DomainApp(BaseModel):
+    class Config:
+        orm_mode = True
+
+    domain: Domain = Field(...)
+    app: App = Field(...)
 
 
 class DomainUserApp(BaseModel):

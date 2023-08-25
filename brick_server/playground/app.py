@@ -1,6 +1,7 @@
 import os
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_rest_framework import config
 from fastapi_utils.timing import add_timing_middleware
 from loguru import logger
@@ -27,7 +28,7 @@ from brick_server.minimal.services.domain import domain_router
 from brick_server.minimal.services.entities import entity_router
 from brick_server.minimal.services.queries import query_router
 
-from brick_server.playground.auth.auth_server import auth_router
+# from brick_server.playground.auth.auth_server import auth_router
 from brick_server.playground.dbs import init_mongodb
 from brick_server.playground.services.actuation import actuation_router
 from brick_server.playground.services.admins import admin_router
@@ -45,6 +46,14 @@ from brick_server.playground.services.users import user_router
 
 
 app = FastAPI(title="Brick Server Playground", openapi_url="/docs/openapi.json")
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 add_timing_middleware(app, record=logger.info)
 app.logger = logger
 
@@ -79,7 +88,7 @@ app.add_middleware(SessionMiddleware, secret_key=os.urandom(24))
 app.include_router(app_router, prefix="/brickapi/v1/apps")
 app.include_router(marketapp_router, prefix="/brickapi/v1/market_apps")
 app.include_router(user_router, prefix="/brickapi/v1/user")
-app.include_router(auth_router, prefix="/brickapi/v1/auth")
+# app.include_router(auth_router, prefix="/brickapi/v1/auth")
 app.include_router(admin_router, prefix="/brickapi/v1/admin")
 app.include_router(profile_router, prefix="/brickapi/v1/profiles")
 app.include_router(scheduler_router, prefix="/brickapi/v1/scheduler")
