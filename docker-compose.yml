@@ -45,6 +45,8 @@ services:
     build:
       context: ..
       dockerfile: ./brick-server-playground/Dockerfile
+      args:
+        DOCKER_BUILDKIT: 1
     restart: on-failure
     volumes:
       - ./static:/root/brick-server-playground/static
