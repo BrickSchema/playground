@@ -86,6 +86,10 @@ def get_app(app: str = Path(..., description="Name of the app")) -> App:
     return get_doc(App, name=app)
 
 
+def get_user(user: str = Path(..., description="User Id of the user")) -> User:
+    return get_doc(User, user_id=user)
+
+
 def get_domain_user(
     user: User = Depends(get_user_from_jwt), domain: Domain = Depends(get_domain)
 ) -> Optional[DomainUser]:
@@ -145,17 +149,21 @@ class Authorization:
         app: Optional[App] = None,
         domain: Optional[Domain] = None,
     ) -> None:
-        self.user = user
-        self.app = app
-        self.domain = domain
+        self.user: User = user
+        self.app: Optional[App] = app
+        self.domain: Optional[Domain] = domain
         if self.domain is not None:
-            self.domain_user = get_domain_user(self.user, self.domain)
+            self.domain_user: Optional[DomainUser] = get_domain_user(
+                self.user, self.domain
+            )
         else:
-            self.domain_user = None
+            self.domain_user: Optional[DomainUser] = None
         if self.domain is not None and self.app is not None:
-            self.domain_user_app = get_domain_user_app(self.domain, self.user, self.app)
+            self.domain_user_app: Optional[DomainUserApp] = get_domain_user_app(
+                self.domain, self.user, self.app
+            )
         else:
-            self.domain_user_app = None
+            self.domain_user_app: Optional[DomainUserApp] = None
         # self.domain_user_app = ...
         # self.domain_occupancies = ...
         # self.domain_user = ...

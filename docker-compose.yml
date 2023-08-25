@@ -19,12 +19,16 @@ services:
       - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
   graphdb:
     image: w1zzard/graphdb-free:9.9.0
+    volumes:
+      - ../graphdbData:/opt/graphdb/data
     networks:
       - brick-server-network
     ports:
       - "37200:7200"
   mongo:
     image: mongo:4.2.3-bionic
+    volumes:
+      - ../mongoData:/data/db
     networks:
       - brick-server-network
     ports:
@@ -43,6 +47,7 @@ services:
       dockerfile: ./brick-server-playground/Dockerfile
     restart: on-failure
     volumes:
+      - ./static:/root/brick-server-playground/static
       - ./brick_server/playground:/root/brick-server-playground/brick_server/playground
       - ../brick-server-minimal/brick_server/minimal:/root/brick-server-minimal/brick_server/minimal
 #      - ./tests:/root/tests
@@ -54,7 +59,7 @@ services:
       - isolated_nw
     environment:
       - DEBUG=true
-      - HOST=core
+      - HOST=0.0.0.0
       - MONGO_HOST=mongo
       - TIMESCALE_HOST=postgres
       - BRICK_HOST=virtuoso

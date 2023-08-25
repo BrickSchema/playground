@@ -8,10 +8,11 @@ from brick_server.minimal.auth.authorization import (
 )
 from brick_server.minimal.auth.checker import PermissionChecker
 from brick_server.minimal.exceptions import AlreadyExistsError
-from brick_server.minimal.models import get_doc
+from brick_server.minimal.models import get_doc, get_docs
 from brick_server.minimal.schemas import IsSuccess, PermissionScope, PermissionType
 from fastapi import Body, Depends, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials
+from fastapi_rest_framework.config import settings
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
 from fastapi_utils.timing import TIMER_ATTRIBUTE, _TimingStats
@@ -28,10 +29,12 @@ from brick_server.playground.app_management.app_management import (
 )
 from brick_server.playground.auth.authorization import (
     Authorization,
+    get_domain,
     get_domain_app,
     get_domain_user_app,
     get_user_from_jwt,
 )
+from brick_server.playground.auth.jwt import create_jwt_token
 from brick_server.playground.schemas import DockerStatus
 from brick_server.playground.services.models import (
     ActivatedApps,
@@ -128,20 +131,23 @@ class UserResource:
 @cbv(user_router)
 class UserApps:
     @user_router.get(
-        "/apps",
+        "/domains/{domain}/apps",
         status_code=200,
         description="View apps that user activated.",
-        response_model=ActivatedApps,
+        # response_model=ActivatedApps,
         tags=["Users"],
     )
     def get_activated_apps(
         self,
-        token: HTTPAuthorizationCredentials = jwt_security_scheme,
-    ):
-        jwt_payload = parse_jwt_token(token.credentials)
-        user = get_doc(models.User, user_id=jwt_payload["user_id"])
-        resp = ActivatedApps(activated_apps=[app.name for app in user.activated_apps])
-
+        domain: models.Domain = Depends(get_domain),
+        user: models.User = Depends(get_user_from_jwt),
+    ) -> ActivatedApps:
+        activated_apps = get_docs(models.DomainUserApp, domain=domain, user=user)
+        resp = ActivatedApps(
+            activated_apps=[
+                schemas.DomainUserApp.from_orm(app) for app in activated_apps
+            ]
+        )
         return resp
 
     @user_router.delete(
@@ -174,15 +180,16 @@ class UserApps:
         user: models.User = Depends(get_user_from_jwt),
         domain_app: models.DomainApp = Depends(get_domain_app),
         # token: HTTPAuthorizationCredentials = jwt_security_scheme,
-    ) -> IsSuccess:
+    ) -> schemas.DomainUserApp:
         domain_user_app = models.DomainUserApp(
             domain=domain_app.domain,
             user=user,
             app=domain_app.app,
-            running=False,
+            status="",
         )
         try:
             domain_user_app.save()
+            return schemas.DomainUserApp.from_orm(domain_user_app)
         except Exception:
             # TODO: catch the precise already exist exception
             raise AlreadyExistsError("app", "name")
@@ -207,8 +214,17 @@ class UserApps:
         try:
             if container is None:
                 if operation == "create" or operation == "start":
+                    token = create_jwt_token(
+                        domain=domain_user_app.domain,
+                        user=domain_user_app.user,
+                        app=domain_user_app.app,
+                        token_lifetime=settings.jwt_expire_seconds,
+                    )
                     container = spawn_app(
-                        domain_user_app.app.name, container_name, start=start
+                        domain_user_app.app.name,
+                        container_name,
+                        start=start,
+                        token=token,
                     )
             else:
                 if operation == "start" and container.status != DockerStatus.RUNNING:

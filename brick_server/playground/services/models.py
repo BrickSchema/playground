@@ -4,6 +4,8 @@ from typing import Dict, List, Optional
 from brick_server.minimal.schemas import Relationships
 from pydantic import BaseModel, Field
 
+from brick_server.playground.schemas import DomainUserApp
+
 app_name_desc = "An application's name"
 app_desc_desc = "A description of the app"
 app_id_desc = "The identifier of the app"
@@ -16,7 +18,7 @@ class ActivationRequest(BaseModel):
 
 
 class ActivatedApps(BaseModel):
-    activated_apps: List[str]
+    activated_apps: List[DomainUserApp]
 
 
 class PermissionTemplate(BaseModel):

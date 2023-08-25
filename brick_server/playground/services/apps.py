@@ -1,21 +1,14 @@
-import os
+import pathlib
 
 import httpx
-from brick_server.minimal.auth.authorization import (
-    authorized,
-    jwt_security_scheme,
-    parse_jwt_token,
-)
-from brick_server.minimal.exceptions import (
-    AlreadyExistsError,
-    DoesNotExistError,
-    NotAuthorizedError,
-)
+from brick_server.minimal.auth.authorization import authorized, jwt_security_scheme
+from brick_server.minimal.auth.checker import PermissionChecker
+from brick_server.minimal.exceptions import AlreadyExistsError, DoesNotExistError
 
 # from brick_server.configs import configs
 from brick_server.minimal.models import get_doc, get_doc_or_none
 from brick_server.minimal.schemas import IsSuccess
-from fastapi import Body, Cookie, Depends, HTTPException, Path, Query
+from fastapi import Body, Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_rest_framework.config import settings
 from fastapi_utils.cbv import cbv
@@ -26,14 +19,11 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, Response
 
 from brick_server.playground import models, schemas
-from brick_server.playground.auth.authorization import get_app
+from brick_server.playground.auth.authorization import Authorization, get_app
 
-from ..app_management.app_management import get_cname, register_app, stop_container
+from ..app_management.app_management import get_container_ip, register_app
 from ..dbs import get_app_management_redis_db
-from ..models import (  # TODO: Change naming conventino for mongodb models
-    StagedApp,
-    User,
-)
+from ..models import StagedApp  # TODO: Change naming conventino for mongodb models
 from .models import AppResponse, app_name_desc
 
 # DEFAULT_ADMIN_ID = configs['app_management']['default_admin']
@@ -204,6 +194,17 @@ class AppByName:
 
 @cbv(app_router)
 class AppStatic:
+    base_static_dir = pathlib.Path("static").resolve()
+
+    @classmethod
+    def is_safe_path(cls, path, follow_symlinks=True):
+        try:
+            path = pathlib.Path(path).resolve(strict=follow_symlinks)
+            path.relative_to(cls.base_static_dir)
+            return True
+        except Exception:
+            return False
+
     @app_router.get(
         "/{app_name}/static/{path:path}",
         status_code=200,
@@ -213,37 +214,40 @@ class AppStatic:
         request: Request,
         app_name: str = Path(..., description="TODO"),
         path: str = Path(..., description="TODO"),
-        app_token: str = Cookie(None),
-        app_token_query: str = Query(None),
+        # app_token: str = Cookie(None),
+        # app_token_query: str = Query(None),
     ):
         # TODO: parse paths andread and return the right HTMLResponse
-        path_splits = [item for item in os.path.split(path) if item]
-        if not app_token and not app_token_query:
-            raise HTTPException(
-                status_code=400,
-                detail="An `app_token` should be given either in cookie or as a query parameter.",
-            )
-        if app_token_query:
-            app_token = app_token_query  # prioritize the token over cookies as it's more updated
-        payload = parse_jwt_token(app_token)
-        target_app = payload["app_id"]  # TODO: Change app_id to app_name later
-        if app_name != target_app:
-            raise NotAuthorizedError(
-                detail="The given app token is not for the target app"
-            )
-        user = get_doc(User, user_id=payload["user_id"])
-        app = get_doc(StagedApp, name=app_name)
-        if app not in user.activated_apps:
-            raise NotAuthorizedError(detail="The user have not installed the app")
+        # path_splits = [item for item in os.path.split(path) if item]
+        # if not app_token and not app_token_query:
+        #     raise HTTPException(
+        #         status_code=400,
+        #         detail="An `app_token` should be given either in cookie or as a query parameter.",
+        #     )
+        # if app_token_query:
+        #     app_token = app_token_query  # prioritize the token over cookies as it's more updated
+        # payload = parse_jwt_token(app_token)
+        # target_app = payload["app_id"]  # TODO: Change app_id to app_name later
+        # if app_name != target_app:
+        #     raise NotAuthorizedError(
+        #         detail="The given app token is not for the target app"
+        #     )
+        # user = get_doc(User, user_id=payload["user_id"])
+        # app = get_doc(StagedApp, name=app_name)
+        # if app not in user.activated_apps:
+        #     raise NotAuthorizedError(detail="The user have not installed the app")
 
-        filepath = "static/" + app_name + "/" + path
-        if not os.path.exists(filepath):
-            raise DoesNotExistError("File", filepath)
+        filepath = self.base_static_dir / app_name / path
+        if not self.is_safe_path(filepath) or not filepath.is_file():
+            raise DoesNotExistError("File", pathlib.Path(app_name) / path)
+        # filepath = "static/" + app_name + "/" + path
+        # if not os.path.exists(filepath):
+        #     raise DoesNotExistError("File", filepath)
         resp = FileResponse(filepath)
         # TODO: Update app_token if it is about to expire.
-        resp.set_cookie(
-            key="app_token", value=app_token, path="/brickapi/v1/apps/" + app_name
-        )
+        # resp.set_cookie(
+        #     key="app_token", value=app_token, path="/brickapi/v1/apps/" + app_name
+        # )
         # TODO: Find a way to get the path automatically
         return resp
 
@@ -261,29 +265,25 @@ class AppApi:
     caddr_db: StrictRedis = Depends(get_app_management_redis_db)
 
     @app_router.api_route(
-        "/{app_name}/api/{path:path}",
+        "/domains/{domain}/api/{path:path}",
         methods=["GET", "POST", "DELETE", "PUT", "OPTIONS", "HEAD", "PATCH", "TRACE"],
         status_code=200,
-        description="List all apps . (Not implemented yet)",
+        description="Call app apis",
     )
     async def app_api(
         self,
         request: Request,
-        path: str = Path(..., description="TODO"),
-        app_name: str = Path(..., description="TODO"),
-        app_token: str = Cookie(...),  # TODO: Eanble this
+        path: str = Path("/", description="Api endpoint in the app"),
+        checker: Authorization = Depends(PermissionChecker()),
     ):
-        token_payload = parse_jwt_token(app_token)
-        assert token_payload["app_id"] == app_name
-        user_id = token_payload["user_id"]
-        user = get_doc(User, user_id=user_id)
+        if path.startswith("/"):
+            path = path[1:]
+        if checker.domain_user_app is None:
+            raise DoesNotExistError("DomainUserApp", "instance")
 
-        cname = get_cname(app_name, user_id)
-        container_ip = self.caddr_db.get(cname)
-        if path == "exit":  # TODO: find a better naming convention.
-            print("stopping " + cname)
-            stop_container(cname)
-            return IsSuccess()
+        # TODO: cache cname or put in token
+        cname = checker.domain_user_app.get_container_name()
+        container_ip = get_container_ip(cname)
 
         if container_ip:
             container_url = (
@@ -305,8 +305,8 @@ class AppApi:
                     if key != "Host"
                 },
                 params={key: value for key, value in request.query_params.items()},
-                data=request_data,
-                allow_redirects=False,
+                content=request_data,
+                follow_redirects=False,
             )
             headers = {
                 name: value
