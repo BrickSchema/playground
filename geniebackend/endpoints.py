@@ -9,9 +9,10 @@ from flask import Flask, redirect, url_for, session, request, jsonify, g, json
 from flask_cors import CORS
 from werkzeug import exceptions
 
+from .app import app
 from .api import json_response, get_user, query_sparql, query_actuation, query_data, query_entity_tagset, \
     iterate_extract, get_zone_temperature_sensor, get_occupancy_command, get_temperature_setpoint, \
-    get_thermal_power_sensor, API_URL, get_token, cid, csec, parse_api_token, get_headers
+    get_thermal_power_sensor, API_URL, get_token, cid, csec, parse_api_token, get_headers, query_user_profiles_arguments
 from .configs import config
 
 INDEX_URL = config['genie_index']
@@ -20,11 +21,6 @@ ebu3b_prefix = 'http://ucsd.edu/building/ontology/ebu3b#'
 mock_prefix = 'ebu3b:EBU3B_Rm_'
 
 production = False
-
-app = Flask(__name__)
-app.debug = True
-app.secret_key = os.urandom(24)
-CORS(app)
 
 
 @app.route('/')
@@ -45,24 +41,27 @@ def hello_main():
 #         session.pop('app_token', None)
 #     return redirect(INDEX_URL)
 
-# @app.route('/api/redirected')
-# def redirected():
-#     access_token = request.args['user_access_token']
-#     # body = {
-#     #     'user_access_token': access_token,
-#     #     'client_id': cid,
-#     #     'client_secret': csec,
-#     # }
-#     # url = API_URL + '/auth/get_token'
-#     # resp = requests.post(url, json=body, verify=False)
-#     # session['app_token'] = resp.json()['token']
-#
-#     url = API_URL + '/user'
-#     authorization = 'Bearer {0}'.format(access_token)
-#     res = requests.get(url, headers={'Authorization': authorization}, verify=False)
-#     print("redirected", res.json())
-#     user_email = res.json()['email']
-#     return user_email
+@app.route('/api/redirected')
+def redirected():
+    # access_token = request.args['user_access_token']
+    # # body = {
+    # #     'user_access_token': access_token,
+    # #     'client_id': cid,
+    # #     'client_secret': csec,
+    # # }
+    # # url = API_URL + '/auth/get_token'
+    # # resp = requests.post(url, json=body, verify=False)
+    # # session['app_token'] = resp.json()['token']
+    #
+    # url = API_URL + '/user'
+    # authorization = 'Bearer {0}'.format(access_token)
+    # res = requests.get(url, headers={'Authorization': authorization}, verify=False)
+    # print("redirected", res.json())
+    # user_email = res.json()['email']
+    api_token = config["api_token"]
+    payload = parse_api_token(api_token)
+    return payload["user_id"]
+
 
 # @app.route("/api/userid")
 # def get_userid():
@@ -80,15 +79,39 @@ def hello_main():
 #     return user_email
 
 
+@app.route("/api/room", methods=["GET"])
+def get_all_rooms():
+    api_token = config["api_token"]
+    resp = query_user_profiles_arguments(api_token)
+    if resp is None:
+        return json_response({'message': 'error'}, 200)
+    # print(resp)
+    rooms = []
+    for arguments_dict in resp:
+        for value in arguments_dict.values():
+            rooms.append({
+                'room': value,
+                'college': 'UCSD',
+                'campus': 'Warren',
+                'building': 'BLDG',
+            })
+    # res = resp['results']['bindings']
+    # rooms = iterate_extract(res, ebu3b_prefix) if res else []
+    # print(rooms)
+    return json_response({'rooms': rooms})
+
+
 # @app.route("/api/room", methods=["GET"])
 # def get_all_rooms():
+#     user_email = request.args['user_email']
 #     jwt_token = request.headers['Authorization'].split(' ')[1]
 #     authorization = 'Bearer {0}'.format(jwt_token)
-#     q = f"""
+#     q = """
 #     select ?s where {{
+#         <{0}> brick:hasOffice ?s.
 #         ?s rdf:type brick:HVAC_Zone .
 #     }}
-#     """
+#     """.format(user_email)
 #     resp = query_sparql(q, authorization)
 #     if resp == None:
 #         return json_response({'message': 'error'}, resp.status_code)
@@ -108,7 +131,7 @@ def get_temp_setpoint(room):
         return json_response({'value': None})
     try:
         value = query_data(uuid, api_token)
-        print('get_temp_setpoint value:', value)
+        app.logger.info('get_temp_setpoint value: %s', value)
         resp = json_response({'value': value})
     except exceptions.Unauthorized as e:
         resp = json_response({'value': None,
@@ -136,7 +159,7 @@ def get_room_temperature(room):
         return json_response({'value': None})
     # app_token = session['app_token']
     value = query_data(uuid, api_token)
-    print('get_room_temperature:', value)
+    app.logger.info('get_room_temperature: %s', value)
     return json_response({'value': value})
 
 
@@ -144,12 +167,13 @@ def get_room_temperature(room):
 def get_energy_usage(room):
     api_token = config["api_token"]
     uuid = get_thermal_power_sensor(room, api_token)
+    # app.logger.info(f"get_energy_usage of {uuid}")
     # uuid = bldg:BLDG_RM101_MTR
     if not uuid:
         return json_response({'value': None})
     # app_token = session['app_token']
     value = query_data(uuid, api_token)
-    print('get_energy_usage:', value)
+    app.logger.info('get_energy_usage: %s', value)
     return json_response({'value': value})
 
 
@@ -163,6 +187,7 @@ def get_status(room):
     try:
         value = query_data(uuid, api_token)
         resp = json_response({'value': value})
+        app.logger.info('get_status: %s', value)
     except exceptions.Unauthorized as e:
         resp = json_response({'value': None,
                               'status_code': 401})

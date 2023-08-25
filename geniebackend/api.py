@@ -10,6 +10,7 @@ from werkzeug import exceptions
 from flask import request
 
 from .configs import config
+from .app import app
 
 API_URL = config['brickapi']['API_URL']
 bs_url = config['brickapi']['API_URL']
@@ -18,6 +19,7 @@ entity_url = bs_url + '/entities'
 user_url = bs_url + '/user'  # TODO: This should be updated.
 ts_url = bs_url + '/data/timeseries'
 actuation_url = bs_url + '/actuation'
+domain_url = bs_url + '/domains'
 
 brick_prefix = config['brick']['brick_prefix']
 ebu3b_prefix = config['brick']['building_prefix']
@@ -75,10 +77,26 @@ def query_sparql(qstr, api_token):
     if resp.status_code != 200:
         return None
     else:
+        app.logger.info("query_sparql result: %s", resp.json())
         return resp.json()
 
 
-def query_data(uuid, api_token):
+def query_user_profiles_arguments(api_token):
+    payload = parse_api_token(api_token)
+    resp = requests.get(
+        f"{domain_url}/{payload['domain']}/user_profiles_arguments",
+        headers=get_headers(api_token),
+        verify=False
+    )
+    if resp.status_code == 401:
+        raise exceptions.Unauthorized()
+    app.logger.info("user_profiles_arguments result: %s", resp.json())
+    if resp.status_code != 200:
+        return None
+    return resp.json()
+
+
+def query_data(uuid, api_token, value_type="number"):
     payload = parse_api_token(api_token)
     if production:
         start_time = arrow.get().shift(minutes=-30).timestamp
@@ -93,10 +111,9 @@ def query_data(uuid, api_token):
         'start_time': start_time,
         'end_time': end_time,
         'entity_id': uuid,
+        'value_types': value_type,
     }
-    print('query params:', params)
     query_url = f"{ts_url}/domains/{payload['domain']}"
-    print('query dst:', query_url)
     resp = requests.get(
         query_url,
         params=params,
@@ -105,12 +122,13 @@ def query_data(uuid, api_token):
     )
     if resp.status_code == 401:
         raise exceptions.Unauthorized()
-    print(resp.json())
+    app.logger.info("query data result: %s", resp.json())
     if resp.status_code != 200:
         return None
     data = resp.json()["data"]
     if data:
         data.sort(key=lambda d: d[1], reverse=True)
+        app.logger.debug(data[0][2])
         return data[0][2]
     else:
         return None
@@ -196,7 +214,6 @@ def _get_hvac_zone_point(tagset, room, api_token):
     q = f"""
     select ?s where {{
         <{room}> rdf:type brick:HVAC_Zone .
-        #?zone rdf:type brick:HVAC_Zone .
         <{room}> brick:hasPoint ?s.
         ?s rdf:type brick:{tagset} .
     }}
@@ -220,11 +237,12 @@ def _get_vav_point(tagset, room, api_token):
         ?s rdf:type brick:{tagset} .
     }}
     """
+    # print(q)
     resp = query_sparql(q, api_token)
     if resp == None:
         return None
     # res = resp['tuples']
-    print(resp)
+    # print(resp)
     res = resp['results']['bindings'][0]
     return res['s']['value']
 
@@ -236,7 +254,7 @@ def get_temperature_setpoint(room, api_token):
 
 def get_zone_temperature_sensor(room, api_token):
     tagset = 'Zone_Air_Temperature_Sensor'
-    return _get_hvac_zone_point(tagset, room, api_token)
+    return _get_vav_point(tagset, room, api_token)
 
 
 def get_thermal_power_sensor(room, api_token):
@@ -257,7 +275,7 @@ def get_thermal_power_sensor(room, api_token):
     }}
     """
     resp = query_sparql(q, api_token)
-    if resp == None:
+    if resp is None:
         return None
     # res = resp['tuples']
     # return res[0][0]

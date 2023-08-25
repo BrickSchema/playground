@@ -1,7 +1,10 @@
 FROM tiangolo/uwsgi-nginx-flask:python3.7
 
-COPY ./geniebackend /app
+ENV HOME="/root"
+WORKDIR /root
 
-COPY ./requirements.txt /app/
+COPY ./requirements.txt /root/
+RUN --mount=type=cache,target=/root/.cache pip install -r /root/requirements.txt
+COPY . /root
 
-RUN pip install -r /app/requirements.txt
+CMD python3 -m geniebackend.endpoints

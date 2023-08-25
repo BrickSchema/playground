@@ -1,3 +1,3 @@
-export const LOGIN_URL = 'https://bd-datas3.ucsd.edu:5000/api/log';
-export const BASE_API_URL = 'https://bd-datas3.ucsd.edu:5001';
+export const LOGIN_URL = 'http://127.0.0.1:5000/api/log';
+export const BASE_API_URL = 'http://127.0.0.1:9000/brickapi/v1/apps/domains/bldg/api';
 // /api/v1/appapi/Genie

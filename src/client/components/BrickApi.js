@@ -12,8 +12,9 @@ export function getToken() {
 
 
 export function getBrickHeaders() {
+  var token = window.sessionStorage.getItem("token");
   var headers = {
-      "Authorization": "bearer " + getToken()
+      "Authorization": "Bearer " + token
   }
   return headers
 }

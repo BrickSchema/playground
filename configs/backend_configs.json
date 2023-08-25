@@ -4,16 +4,16 @@
         "key": "/datadrive/synergy/repo/genie-brickified/genie_ssl.key"
     },
     "brickapi": {
-        "API_URL": "http://127.0.0.1:9000/brickapi/v1",
+        "API_URL": "http://brick-server-playground-core-1:9000/brickapi/v1",
         "AUTH_URL": "{API_URL}/auth/login/genie-loc"
     },
     "google_oauth": {
         "client_id": "ayeNFhq65ZsmtSH",
         "client_secret": "FlbsBn8nGffwPR9WFjGtWfon0"
     },
-    "genie_index": "https://bd-datas3.ucsd.edu:5001",
+    "genie_index": "https://bd-datas3.ucsd.edu:5000",
     "host": "0.0.0.0",
-    "port": "5001",
+    "port": "5000",
     "brick": {
         "brick_prefix": "https://brickschema.org/schema/1.1.0/Brick#",
         "building_prefix_dep": "http://ucsd.edu/building/ontology/ebu3b#",

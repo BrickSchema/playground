@@ -8,4 +8,5 @@ if not config_path:
     config_path = './configs/backend_configs.json'
 config = json.load(open(config_path, 'r'))
 config["api_token"] = os.environ.get('BRICK_SERVER_API_TOKEN')
+# config["brickapi"]["API_URL"] = os.environ.get('BRICK_SERVER_API_URL', None) or config["brickapi"]["API_URL"]
 assert config["api_token"]
