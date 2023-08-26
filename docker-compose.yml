@@ -68,6 +68,7 @@ services:
       - GRAPHDB_HOST=graphdb
       - REDIS_HOST=redis
       - ISOLATED_NETWORK_NAME=brick-server-playground_isolated_nw
+      - WORKERS=${WORKERS:-1}
 #      - GRAFANA_HOST=grafana
     depends_on:
       - graphdb

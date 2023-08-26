@@ -20,7 +20,8 @@ def serve() -> None:
         host=settings.host,
         port=settings.port,
         debug=settings.debug,
-        reload=settings.debug,
+        reload=settings.workers == 1 and settings.debug,
+        workers=settings.workers,
         log_level="debug",
         reload_dirs=[
             "../brick-server-minimal/brick_server/minimal",
