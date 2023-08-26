@@ -1,8 +1,6 @@
 from brick_server.minimal.dependencies import get_actuation_iface, get_ts_db
 from brick_server.minimal.interfaces import ActuationInterface
-from brick_server.minimal.interfaces.timeseries.asyncpg_timeseries import (
-    AsyncpgTimeseries,
-)
+from brick_server.minimal.interfaces.timeseries.asyncpg import AsyncpgTimeseries
 from fastapi import Body, Depends
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
