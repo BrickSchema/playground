@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from brick_server.minimal.models import get_docs
 from brick_server.minimal.services.actuation import (
@@ -29,11 +29,12 @@ async def execute_policy_query(
 
 async def find_policy(
     self: ActuationEntity, domain: models.Domain, entity_id: str
-) -> models.DomainPreActuationPolicy:
+) -> Optional[models.DomainPreActuationPolicy]:
     policies: List[models.DomainPreActuationPolicy] = list(
         get_docs(models.DomainPreActuationPolicy, domain=domain)
     )
     policies.sort(key=lambda x: -x.priority)
+    # TODO: use multiple policies when entity_ids overlapping
     for policy in policies:
         if policy.query:
             cache_key = f"policy_query:{domain.name}:{policy.id}"
@@ -45,7 +46,8 @@ async def find_policy(
                 continue
         logger.info("{} {} {}", domain.name, policy.name, entity_id)
         return policy
-    raise Exception(f"policy not found for entity {entity_id} in domain {domain.name}")
+    return None
+    # raise Exception(f"policy not found for entity {entity_id} in domain {domain.name}")
 
 
 async def guard_before_actuation(
@@ -55,6 +57,8 @@ async def guard_before_actuation(
     # logger.info(entity_id)
     cache_key = f"policy:{domain.name}:{entity_id}"
     policy = await use_cache(cache_key, find_policy, self, domain, entity_id)
+    if policy is None:
+        return
     for guard_name in policy.guards:
         if guard_name not in actuation_guards:
             # use next guard if not found
