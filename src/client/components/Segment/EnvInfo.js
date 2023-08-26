@@ -213,11 +213,11 @@ class SegmentComponent extends Component {
     const mobile_labels = (this.props.mobile) ? [60,65,70,75,80] : [60,64,68,72,76,80];
     const EnergyPanel = (energy_error) ? (
         <WarningObject icon={"tachometer alternate"} color={"rgb(216, 151, 235)"} 
-        title={"Energy Usage"} mobile={this.props.mobile} />
+        title={"CO₂"} mobile={this.props.mobile} />
     ) : (
         <SegmentObject icon={"tachometer alternate"} color={"rgb(216, 151, 235)"} 
-        title={"Energy Usage"} value={energy_value} label={"kW"} 
-        labels={[0,2,4,6,8,10]} progress={energy_progress} 
+        title={"CO₂"} value={energy_value} label={"ppm"}
+        labels={[400,800,1200,1600,2000]} progress={energy_progress}
         mobile={this.props.mobile} />
     );
     const TemperaturePanel = (temperature_error) ? (

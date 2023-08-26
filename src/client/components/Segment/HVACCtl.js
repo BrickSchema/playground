@@ -133,12 +133,12 @@ const SwitchObject = ({icon, color, title, value, toggleStatus, mobile, loading}
                     <Grid.Row style={{
                         marginTop: 15,
                     }} >
-                        <Button icon labelPosition='right' loading={loading}
-                            color={value === "OFF" ? 'blue' : 'red'} onClick={toggleStatus} 
-                            style={{width: '100% !important'}}>
-                            {value === "OFF" ? "Turn On" : "Turn Off"}
-                            <Icon name={value === "OFF" ? "toggle on" : "toggle off"} />
-                        </Button>
+                        {/*<Button icon labelPosition='right' loading={loading}*/}
+                        {/*    color={value === "OFF" ? 'blue' : 'red'} onClick={toggleStatus} */}
+                        {/*    style={{width: '100% !important'}}>*/}
+                        {/*    {value === "OFF" ? "Turn On" : "Turn Off"}*/}
+                        {/*    <Icon name={value === "OFF" ? "toggle on" : "toggle off"} />*/}
+                        {/*</Button>*/}
                     </Grid.Row>
                     <Grid.Row style={{
                         marginTop: 20,
@@ -291,7 +291,7 @@ class SegmentComponent extends Component {
 
   get_ctrls(option, user_email) {
       this.get_status(option, user_email);
-      this.get_temp_setpoint(option, user_email);
+      // this.get_temp_setpoint(option, user_email);
   }
 
   componentDidMount(prevProps, prevState) {
@@ -303,11 +303,13 @@ class SegmentComponent extends Component {
 	this.get_status(option, user_email);
 	this.get_temp_setpoint(option, user_email);
     */
+        this.get_temp_setpoint(option, user_email);
         intervalId = setInterval(this.get_ctrls.bind(this), 3000, option, user_email);
       }
     }
     else if(localStorage.getItem('user_id')) {
 	let user_id = JSON.parse(localStorage.getItem('user_id'))
+        this.get_temp_setpoint(option, user_id);
         intervalId = setInterval(this.get_ctrls.bind(this), 3000, option, user_id);
           /*
 	this.get_status(option, user_id);
@@ -323,18 +325,18 @@ class SegmentComponent extends Component {
     if (status_error === 401) {
         StatusPanel = (
         <WarningObject icon={"power off"} color={"rgb(143, 201, 251)"}
-        title={"Status"} mobile={this.props.mobile} msg={"Unauthorized"}/>
+        title={"Occupancy Status"} mobile={this.props.mobile} msg={"Unauthorized"}/>
         );
     } else if (status_error === 400) {
         StatusPanel = (
         <WarningObject icon={"power off"} color={"rgb(143, 201, 251)"}
-        title={"Status"} mobile={this.props.mobile} msg={"No data found"}/>
+        title={"Occupancy Status"} mobile={this.props.mobile} msg={"No data found"}/>
         //title={"Status"} mobile={this.props.mobile} />
         );
     } else {
         StatusPanel = (
             <SwitchObject icon={"power off"} color={"rgb(143, 201, 251)"}
-            title={"Status"} value={(status === 3) ? "ON" : "OFF"}
+            title={"Occupancy Status"} value={(status === 3) ? "ON" : "OFF"}
             toggleStatus={this.toggleStatus} mobile={this.props.mobile} loading={loading} />
         );
     }
