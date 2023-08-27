@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/brickapi/v1/apps/genie/static/precache-manifest.235a7221216af66b0ca9824e6c97f004.js"
+  "/brickapi/v1/apps/genie/static/precache-manifest.e2741d2dd6b9814f2c17f03dc1168b21.js"
 );
 
 workbox.clientsClaim();
@@ -29,6 +29,6 @@ workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
 workbox.routing.registerNavigationRoute("/brickapi/v1/apps/genie/static/index.html", {
-
+  
   blacklist: [/^\/_/,/\/[^/]+\.[^/]+$/],
 });
