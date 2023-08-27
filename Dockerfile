@@ -34,7 +34,7 @@ COPY ./brick-server-playground/brick_server/playground/__init__.py /root/brick-s
 RUN --mount=type=cache,target=/root/.cache poetry install --no-dev
 COPY ./brick-server-minimal /root/brick-server-minimal/
 COPY ./brick-server-playground /root/brick-server-playground/
-RUN rm /root/brick-server-playground/.env
+# RUN rm /root/brick-server-playground/.env/
 RUN --mount=type=cache,target=/root/.cache poetry install --no-dev
 
 EXPOSE $PORT
