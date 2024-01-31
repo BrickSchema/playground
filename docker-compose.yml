@@ -16,19 +16,14 @@ services:
         source: ./docker/init_postgis.sh
         target: /docker-entrypoint-initdb.d/003_init_postgis.sh
         read_only: true
-      - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
   graphdb:
     image: w1zzard/graphdb-free:9.9.0
-    volumes:
-      - ../graphdbData:/opt/graphdb/data
     networks:
       - brick-server-network
     ports:
       - "37200:7200"
   mongo:
     image: mongo:4.2.3-bionic
-    volumes:
-      - ../mongoData:/data/db
     networks:
       - brick-server-network
     ports:
@@ -41,7 +36,7 @@ services:
     ports:
       - "36379:6379"
   core:
-    image: brick_server:playground
+    image: tcimba/brick-server:playground
     build:
       context: ..
       dockerfile: ./brick-server-playground/Dockerfile
@@ -49,10 +44,6 @@ services:
         DOCKER_BUILDKIT: 1
     restart: on-failure
     volumes:
-      - ./static:/root/brick-server-playground/static
-      - ./brick_server/playground:/root/brick-server-playground/brick_server/playground
-      - ../brick-server-minimal/brick_server/minimal:/root/brick-server-minimal/brick_server/minimal
-#      - ./tests:/root/tests
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "9000:9000"
@@ -70,6 +61,7 @@ services:
       - ISOLATED_NETWORK_NAME=brick-server-playground_isolated_nw
       - WORKERS=${WORKERS:-1}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-}
+      - CACHE=${CACHE:-true}
 #      - GRAFANA_HOST=grafana
     depends_on:
       - graphdb
@@ -77,8 +69,6 @@ services:
     command: dockerize -wait http://graphdb:7200/rest/repositories python3 -m brick_server.playground
 #    entrypoint: /app/docker/start-reload.sh
   redis-commander:
-    container_name: redis-commander
-    hostname: redis-commander
     image: ghcr.io/joeferner/redis-commander:latest
     restart: always
     environment:

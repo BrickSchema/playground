@@ -75,7 +75,7 @@ def generate_jwt(
         domain = get_doc_or_none(Domain, name=domain_name)
         if domain is None:
             if create:
-                domain = Domain(name=domain)
+                domain = Domain(name=domain_name)
                 domain.save()
             else:
                 print("domain not found")
@@ -92,8 +92,18 @@ def generate_jwt(
         if app_name:
             app = get_doc_or_none(App, name=app_name)
             if app is None:
-                print("app not found")
-                exit(-1)
+                if create:
+                    app = App(
+                        name=app_name,
+                        description="",
+                        approved=True,
+                        profile=None,
+                        permission_model="permission_model",
+                    )
+                    app.save()
+                else:
+                    print("app not found")
+                    exit(-1)
             domain_user_app = get_doc_or_none(
                 DomainUserApp, domain=domain, user=user, app=app
             )

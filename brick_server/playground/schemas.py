@@ -114,8 +114,11 @@ class DomainUserApp(BaseModel):
     arguments: Dict[str, str] = Field({})
 
 
-class DomainUserAppCreate(BaseModel):
+class DomainUserAppArguments(BaseModel):
     arguments: Dict[str, str] = Field({})
+
+
+class DomainUserAppCreate(DomainUserAppArguments):
     start: bool = Field(True)
 
 

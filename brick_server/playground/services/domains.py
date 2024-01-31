@@ -126,9 +126,18 @@ class DomainPreActuationPolicy:
         domain: models.Domain = Depends(get_domain),
         pre_actuation_policy_create: schemas.DomainPreActuationPolicyCreate = Body(...),
     ) -> schemas.DomainPreActuationPolicy:
-        guard = models.DomainPreActuationPolicy(
+        policy = models.DomainPreActuationPolicy(
             domain=domain,
             **pre_actuation_policy_create.dict(),
         )
-        guard.save()
-        return schemas.DomainPreActuationPolicy.from_orm(guard)
+        policy.save()
+        return schemas.DomainPreActuationPolicy.from_orm(policy)
+
+    @domain_router.delete("/{domain}/pre_actuation_policy")
+    async def delete_pre_actuation_policy(
+        self,
+        domain: models.Domain = Depends(get_domain),
+    ):
+        policies = get_docs(models.DomainPreActuationPolicy, domain=domain)
+        for policy in policies:
+            policy.delete()

@@ -1,0 +1,22 @@
+version: '3.5'
+services:
+#  postgres:
+#    volumes:
+#      - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
+#  graphdb:
+#    volumes:
+#      - ../graphdbData:/opt/graphdb/home
+#  mongo:
+#    volumes:
+#      - ../mongoData:/data/db
+  core:
+    build:
+      context: ..
+      dockerfile: ./brick-server-playground/Dockerfile
+      args:
+        DOCKER_BUILDKIT: 1
+    volumes:
+      - ./static:/root/brick-server-playground/static
+      - ./brick_server/playground:/root/brick-server-playground/brick_server/playground
+      - ../brick-server-minimal/brick_server/minimal:/root/brick-server-minimal/brick_server/minimal
+      - ./tests:/root/brick-server-playground/tests
