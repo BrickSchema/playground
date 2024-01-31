@@ -1,7 +1,11 @@
+from brick_server.playground.interface.actuation_guard_ml import ActuationGuardML
 from brick_server.playground.interface.actuation_guard_naive import (
     ActuationGuardIsEven,
     ActuationGuardIsOdd,
     ActuationGuardIsPrime,
+)
+from brick_server.playground.interface.actuation_guard_range_checker import (
+    ActuationGuardRangeChecker,
 )
 
 # from loguru import logger
@@ -10,6 +14,8 @@ actuation_guards = {
     "is_odd": ActuationGuardIsOdd(),
     "is_even": ActuationGuardIsEven(),
     "is_prime": ActuationGuardIsPrime(),
+    "ml": ActuationGuardML(),
+    "range_checker": ActuationGuardRangeChecker(),
 }
 
 

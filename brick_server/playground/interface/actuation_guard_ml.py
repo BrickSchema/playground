@@ -1,3 +1,4 @@
+import random
 from pathlib import Path
 
 import torch
@@ -7,6 +8,7 @@ from loguru import logger
 
 from brick_server.playground.interface.actuation_guard_base import ActuationGuard
 
+# device = torch.device("cpu")
 device = torch.device("cpu")
 
 
@@ -87,6 +89,9 @@ class ActuationGuardML(ActuationGuard):
         # self.device = torch.device("cpu")
         # self.model = VAE(state_dim=22, action_dim=2, latent_dim=2 * 2, device=self.device)
         # self.model.load_state_dict(torch.load(model_file, map_location=self.device))
+        import __main__
+
+        setattr(__main__, "VAE", VAE)
         self.model = torch.load(model_file, map_location=device)
 
     # def inference(self, input):
@@ -98,7 +103,9 @@ class ActuationGuardML(ActuationGuard):
     def __call__(self, entity_id, value) -> bool:
         # if entity_id not in ML_ENTITY_IDS:
         #     raise TypeError()
-        index = ML_ENTITY_IDS.index(entity_id)
+        # index = ML_ENTITY_IDS.index(entity_id)
+        value = float(value)
+        index = random.randint(0, len(ML_ENTITY_IDS) - 1)
         # TODO: get from db
         input_vector = [
             58.6129875,

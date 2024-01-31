@@ -32,6 +32,7 @@ COPY ./brick-server-playground/pyproject.toml ./brick-server-playground/poetry.l
 COPY ./brick-server-minimal/brick_server/minimal/__init__.py /root/brick-server-minimal/brick_server/minimal/
 COPY ./brick-server-playground/brick_server/playground/__init__.py /root/brick-server-playground/brick_server/playground/
 RUN --mount=type=cache,target=/root/.cache poetry install --no-dev
+RUN --mount=type=cache,target=/root/.cache pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 COPY ./brick-server-minimal /root/brick-server-minimal/
 COPY ./brick-server-playground /root/brick-server-playground/
 # RUN rm /root/brick-server-playground/.env/

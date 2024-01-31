@@ -1,5 +1,4 @@
 import redis
-from aiocache import caches
 from fastapi_rest_framework.config import settings
 
 from brick_server.playground.models import (
@@ -26,24 +25,6 @@ from brick_server.playground.models import (
 #
 # def get_redis_pool():
 #    return pool
-
-caches.set_config(
-    {
-        "default": {
-            "cache": "aiocache.RedisCache",
-            "endpoint": settings.redis_host,
-            "port": settings.redis_port,
-            "db": settings.redis_db,
-            "password": settings.redis_password,
-            "timeout": 1,
-            "serializer": {"class": "aiocache.serializers.PickleSerializer"},
-            "plugins": [
-                {"class": "aiocache.plugins.HitMissRatioPlugin"},
-                {"class": "aiocache.plugins.TimingPlugin"},
-            ],
-        }
-    }
-)
 
 
 app_management_redis_db = redis.StrictRedis(

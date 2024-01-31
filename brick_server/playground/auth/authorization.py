@@ -4,13 +4,13 @@ from typing import Any, Callable, Dict, List, Optional, Set
 from brick_server.minimal.auth.jwt import jwt_security_scheme, parse_jwt_token
 from brick_server.minimal.dependencies import get_graphdb
 from brick_server.minimal.exceptions import GraphDBError, InternalServerError
+from brick_server.minimal.interfaces.cache import use_cache
 from brick_server.minimal.models import Domain, get_doc, get_doc_or_none, get_docs
 from brick_server.minimal.schemas import PermissionScope, PermissionType
 from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
 from loguru import logger
 
-from brick_server.playground.interface.cache import use_cache
 from brick_server.playground.models import (  # DefaultRole,; DomainRole,
     App,
     DomainApp,
@@ -246,29 +246,39 @@ select distinct ?entity where {{
         async def fallback_func():
             template: str = profile.__getattribute__(permission)
             query = template.format(**arguments)
-            logger.info("{} {} {}", template, arguments, query)
+            # logger.info("{} {} {}", template, arguments, query)
             return await self.query_entity_ids(query)
 
         cache_key = f"permission_profile:{self.domain.name}:{profile.id}:{permission}:{json.dumps(arguments)}"
-        return await use_cache(cache_key, fallback_func)
+        # start = time.time()
+        result = await use_cache(cache_key, fallback_func)
+        # end = time.time()
+        # logger.info("{} {}", profile.id, (end - start) * 1000)
+        return result
 
     async def get_all_authorized_entities(self, permission: PermissionType) -> Set[str]:
-        entity_ids = set()
-        domain_user_profiles = get_domain_user_profiles(self.user, self.domain)
-        for profile in domain_user_profiles:
-            entity_ids_domain_user = await self.get_authorized_entities_in_profile(
-                profile.profile, profile.arguments, permission
-            )
-            entity_ids.update(entity_ids_domain_user)
-        if self.domain_user_app is not None:
-            entity_ids_app = await self.get_authorized_entities_in_profile(
-                self.app.profile, self.domain_user_app.arguments, permission
-            )
-            if self.app.permission_model == PermissionModel.AUGMENTATION:
-                entity_ids.update(entity_ids_app)
-            elif self.app.permission_model == PermissionModel.INTERSECTION:
-                entity_ids.intersection_update(entity_ids_app)
-        return entity_ids
+        async def fallback_func():
+            entity_ids = set()
+            domain_user_profiles = get_domain_user_profiles(self.user, self.domain)
+            for profile in domain_user_profiles:
+                entity_ids_domain_user = await self.get_authorized_entities_in_profile(
+                    profile.profile, profile.arguments, permission
+                )
+                entity_ids.update(entity_ids_domain_user)
+            if self.domain_user_app is not None:
+                entity_ids_app = await self.get_authorized_entities_in_profile(
+                    self.app.profile, self.domain_user_app.arguments, permission
+                )
+                if self.app.permission_model == PermissionModel.AUGMENTATION:
+                    entity_ids.update(entity_ids_app)
+                elif self.app.permission_model == PermissionModel.INTERSECTION:
+                    entity_ids.intersection_update(entity_ids_app)
+            return entity_ids
+
+        # only support one app instance in one domain per user
+        cache_key = f"authorized_entities:{self.domain.name}:{self.app.name}:{self.user.user_id}"
+        result = await use_cache(cache_key, fallback_func)
+        return result
 
     async def check_profile(
         self,

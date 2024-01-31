@@ -15,7 +15,6 @@ from fastapi.security import HTTPAuthorizationCredentials
 from fastapi_rest_framework.config import settings
 from fastapi_utils.cbv import cbv
 from fastapi_utils.inferring_router import InferringRouter
-from fastapi_utils.timing import TIMER_ATTRIBUTE, _TimingStats
 from loguru import logger
 from rdflib import URIRef
 
@@ -104,6 +103,10 @@ class UserResource:
         ),
         types: List[str] = Query([]),
     ) -> schemas.AuthorizedEntities:
+        import time
+
+        start = time.time()
+
         is_admin = checker.check_admin_domain()
         if not is_admin:
             read = await checker.get_all_authorized_entities(PermissionType.READ)
@@ -118,13 +121,13 @@ class UserResource:
         else:
             read = []
             write = []
-        timer: _TimingStats = getattr(request.state, TIMER_ATTRIBUTE)
-        timer.take_split()
+        # timer: _TimingStats = getattr(request.state, TIMER_ATTRIBUTE)
+        # timer.take_split()
         return schemas.AuthorizedEntities(
             read=list(read),
             write=list(write),
             is_admin=is_admin,
-            response_time=1000 * timer.time,
+            response_time=1000 * (time.time() - start),
         )
 
 
@@ -270,6 +273,23 @@ class UserApps:
     ):
         if self._operate_container(domain_user_app, "get"):
             domain_user_app.save()
+        return schemas.DomainUserApp.from_orm(domain_user_app)
+
+    @user_router.post(
+        "/domains/{domain}/apps/{app}/init",
+        status_code=200,
+        description="Init an app for the user, only set the arguments.",
+        # response_model=AppResponse,
+        tags=["Users"],
+    )
+    def init_app(
+        self,
+        domain_user_app: models.DomainUserApp = Depends(get_domain_user_app),
+        domain_user_app_init: schemas.DomainUserAppArguments = Body(),
+    ):
+        domain_user_app.arguments = domain_user_app_init.arguments
+        domain_user_app.save()
+
         return schemas.DomainUserApp.from_orm(domain_user_app)
 
     @user_router.post(
