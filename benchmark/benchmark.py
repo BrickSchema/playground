@@ -429,6 +429,7 @@ async def ensure_domain(domain_name):
         resp = await client.get(
             f"{API_BASE}/domains/{domain_name}/init",
             headers=headers,
+            timeout=30,
         )
         if resp.status_code != 200:
             logger.error("{} {}", resp, resp.request)
