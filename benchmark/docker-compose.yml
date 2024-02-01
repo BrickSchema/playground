@@ -45,6 +45,7 @@ services:
     restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - .:/root/brick-server-playground/benchmark
     ports:
       - "9000:9000"
     networks:
