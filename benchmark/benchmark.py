@@ -16,26 +16,29 @@ init_settings(FastAPIConfig)
 from brick_server.minimal.auth.authorization import create_user as brick_create_user
 from brick_server.minimal.auth.jwt import create_jwt_token
 from brick_server.minimal.dbs import mongo_connection
+_ = mongo_connection
 from brick_server.minimal.models import get_doc_or_none
 
 from brick_server.playground.dbs import init_mongodb
 from brick_server.playground.models import App, Domain, User
 
+
+'''global config'''
 API_BASE = "http://127.0.0.1:9000/brickapi/v1"
 REDIS_API_BASE = "http://redis-commander:8081"
 GRAPHDB_API_BASE = "http://graphdb:7200"
 DOMAIN_NAME = "Center_Hall"
 APP_NAME = "genie"
-MAX_PROFILES = 5
-MAX_USERS = 1000
 PROJECT_FOLDER = Path(__file__).parent.parent.absolute()
 EXAMPLES_DATA_FOLDER = PROJECT_FOLDER / "examples" / "data"
-_ = mongo_connection
+ENTITIES = list(read_file("center_hall.txt"))
+ROOMS = list(read_file("center_hall_rooms.txt"))
 
 logger.remove()
 logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 
 
+'''util func'''
 def test_deco(name):
     def decorator(func):
         async def wrapper(*args, **kwargs):
@@ -59,10 +62,85 @@ def read_file(filename):
     return _entities
 
 
-ENTITIES = list(read_file("center_hall.txt"))
-ROOMS = list(read_file("center_hall_rooms.txt"))
+'''microbenchmark configurations'''
+# number of profiles used in capability derivation test
+MAX_PROFILES = 5  
+
+# number of users used in capability derivation test
+MAX_USERS = 1000 
+
+# Permission profile for capability derivation microbenchmark
+query_app_read = """
+SELECT ?p WHERE {{
+?vav a brick:VAV.
+?vav brick:feeds {room}.
+?vav brick:hasPoint
+?p. ?p a ?o.
+FILTER (?o IN      (brick:Temperature_Sensor, brick:Occupancy_Sensor, brick:Temperature_Setpoint)).
+}}
+"""
+
+query_app_write = """
+SELECT ?p WHERE {{
+?vav a brick:VAV.
+?vav brick:feeds {room}.
+?vav brick:hasPoint ?p.
+?p a ?o.
+FILTER (?o IN      (brick:Warm_Cool_Adjust_Sensor, brick:Temperature_Setpoint)).
+}}
+"""
+
+# Validator assignment policies (Fig.10)
+
+# "Default"
+query_default = """
+select distinct ?equip where {
+    ?equip a brick:Point .
+}
+    """
+
+# "First Floor"
+query_1 = """
+select distinct ?p where {
+    ?loc brick:isPartOf Center_Hall:First_Floor .
+    ?equip brick:feeds ?loc .
+    ?p brick:isPointOf ?equip.
+}
+"""
+
+# "AH-4"
+query_2 = """
+select distinct ?p where {
+    {?p a brick:Point .
+    ?p brick:isPointOf ?equip.
+        Center_Hall:AH-4 brick:feeds ?equip .}
+    UNION
+    {?p a brick:Point .
+    ?p brick:isPointOf Center_Hall:AH-4.}
+}
+"""
+
+# "VAV-2"
+query_3 = """
+select distinct ?p where {
+    ?p a brick:Point .
+    ?p brick:isPointOf Center_Hall:VAV-2.
+}
+    """
+
+# "Third Floor"
+query_4 = """
+select distinct ?p where {
+    ?loc brick:isPartOf Center_Hall:Third_Floor .
+    ?equip brick:feeds* ?loc .
+    ?p brick:isPointOf ?equip.
+}
+"""
 
 
+'''
+Measurement unit for each microbenchmark
+'''
 async def benchmark(
     url,
     method,
@@ -140,7 +218,9 @@ async def delete_domain_pre_actuation_policy(domain):
         await client.request("DELETE", f"/domains/{domain}/pre_actuation_policy")
 
 
-# used in test 1
+'''
+Execution wrapper for test 1
+'''
 async def run_1(domain, profile_num, description, iterations=100):
     # print(domain, user)
     user_headers = []
@@ -160,7 +240,9 @@ async def run_1(domain, profile_num, description, iterations=100):
     )
 
 
-# used in test 2 -4
+'''
+Execution wrapper for test 2 - 4
+'''
 async def run_2(
     domain, description, iterations=100, warmup=False, response_key="policy"
 ):
@@ -191,71 +273,6 @@ async def run_2(
         random_data=True,
         response_key=response_key,
     )
-
-
-query_app_read = """
-SELECT ?p WHERE {{
-?vav a brick:VAV.
-?vav brick:feeds {room}.
-?vav brick:hasPoint
-?p. ?p a ?o.
-FILTER (?o IN      (brick:Temperature_Sensor, brick:Occupancy_Sensor, brick:Temperature_Setpoint)).
-}}
-"""
-
-query_app_write = """
-SELECT ?p WHERE {{
-?vav a brick:VAV.
-?vav brick:feeds {room}.
-?vav brick:hasPoint ?p.
-?p a ?o.
-FILTER (?o IN      (brick:Warm_Cool_Adjust_Sensor, brick:Temperature_Setpoint)).
-}}
-"""
-
-query_user_read = """
-SELECT ?p WHERE {{
-?vav a brick:VAV.
-?vav brick:feeds {room}.
-?vav brick:hasPoint
-?p.
-"""
-
-query_default = """
-select distinct ?equip where {
-    ?equip a brick:Point .
-}
-    """
-query_1 = """
-select distinct ?p where {
-    ?loc brick:isPartOf Center_Hall:First_Floor .
-    ?equip brick:feeds ?loc .
-    ?p brick:isPointOf ?equip.
-}
-"""
-query_2 = """
-select distinct ?p where {
-    {?p a brick:Point .
-    ?p brick:isPointOf ?equip.
-        Center_Hall:AH-4 brick:feeds ?equip .}
-    UNION
-    {?p a brick:Point .
-    ?p brick:isPointOf Center_Hall:AH-4.}
-}
-"""
-query_3 = """
-select distinct ?p where {
-    ?p a brick:Point .
-    ?p brick:isPointOf Center_Hall:VAV-2.
-}
-    """
-query_4 = """
-select distinct ?p where {
-    ?loc brick:isPartOf Center_Hall:Third_Floor .
-    ?equip brick:feeds* ?loc .
-    ?p brick:isPointOf ?equip.
-}
-"""
 
 
 @test_deco("Capability Derivation")
