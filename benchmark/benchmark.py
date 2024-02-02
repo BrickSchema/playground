@@ -13,7 +13,7 @@ from tqdm import tqdm
 from brick_server.playground.config import FastAPIConfig
 
 init_settings(FastAPIConfig)
-from brick_server.minimal.auth.authorization import create_user
+from brick_server.minimal.auth.authorization import create_user as brick_create_user
 from brick_server.minimal.auth.jwt import create_jwt_token
 from brick_server.minimal.dbs import mongo_connection
 from brick_server.minimal.models import get_doc_or_none
@@ -26,14 +26,8 @@ REDIS_API_BASE = "http://redis-commander:8081"
 GRAPHDB_API_BASE = "http://graphdb:7200"
 DOMAIN_NAME = "Center_Hall"
 APP_NAME = "genie"
-USERS = ["user1", "user2", "user3", "user4", "user5"]
-ROOMS = [
-    "Center_Hall:102",
-    "Center_Hall:103",
-    "Center_Hall:209",
-    "Center_Hall:248",
-    "Center_Hall:250",
-]
+MAX_PROFILES = 5
+MAX_USERS = 1000
 PROJECT_FOLDER = Path(__file__).parent.parent.absolute()
 EXAMPLES_DATA_FOLDER = PROJECT_FOLDER / "examples" / "data"
 _ = mongo_connection
@@ -55,8 +49,8 @@ def test_deco(name):
     return decorator
 
 
-def get_entities():
-    file = EXAMPLES_DATA_FOLDER / "center_hall.txt"
+def read_file(filename):
+    file = EXAMPLES_DATA_FOLDER / filename
     _entities = set()
     with file.open("r") as f:
         for line in f:
@@ -65,7 +59,8 @@ def get_entities():
     return _entities
 
 
-entities = list(get_entities())
+ENTITIES = list(read_file("center_hall.txt"))
+ROOMS = list(read_file("center_hall_rooms.txt"))
 
 
 async def benchmark(
@@ -81,33 +76,35 @@ async def benchmark(
 ):
     total_time = 0
     total_iterations = 0
-    samples = np.arange(0, len(entities))
+    samples = np.arange(0, len(ENTITIES))
     np.random.shuffle(samples)
     if warmup:
         logger.info("Precomputing Cache...")
     else:
         logger.info("Starting actual tests...")
-    async with httpx.AsyncClient(headers=headers, base_url=API_BASE) as client:
+    async with httpx.AsyncClient(base_url=API_BASE) as client:
         for i in tqdm(range(iterations)):
-            if generate_data >= 0:
+            # for test 2-4
+            if generate_data:
                 if random_data:
                     index = samples[i]
                 else:
                     index = i
-                data = {entities[index]: [16]}
+                data = {ENTITIES[index]: [16]}
+                _headers = headers
+            # for test 1
             else:
                 data = None
-            response = await client.request(method, url, json=data)
+                _headers = headers[i % len(headers)]
+            response = await client.request(method, url, json=data, headers=_headers)
             # logger.info(response.content)
             result = response.json()
             response_time = result["response_time"]
-            # print(response_time)
             if response_key is not None:
                 response_time = response_time[response_key]
             if iterations * 0.25 <= i < iterations * 0.75:
                 total_time += response_time
                 total_iterations += 1
-            # print(result)
 
     if not warmup:
         logger.info("{}: {} ms", description, total_time / total_iterations)
@@ -143,19 +140,27 @@ async def delete_domain_pre_actuation_policy(domain):
         await client.request("DELETE", f"/domains/{domain}/pre_actuation_policy")
 
 
-async def run_1(domain, user, description, iterations=100):
+# used in test 1
+async def run_1(domain, profile_num, description, iterations=100):
     # print(domain, user)
-    user_jwt = create_jwt_token(user_id=user, app_name=APP_NAME, domain=domain)
-    headers = {"Authorization": "Bearer " + user_jwt}
+    user_headers = []
+    for i in range(profile_num - 1, MAX_USERS, MAX_PROFILES):
+        user_jwt = create_jwt_token(
+            user_id=f"user{i}", app_name=APP_NAME, domain=domain
+        )
+        headers = {"Authorization": "Bearer " + user_jwt}
+        user_headers.append(headers)
+
     await benchmark(
         f"/user/domains/{domain}/permissions",
         "GET",
-        headers,
+        user_headers,
         description=description,
         iterations=iterations,
     )
 
 
+# used in test 2 -4
 async def run_2(
     domain, description, iterations=100, warmup=False, response_key="policy"
 ):
@@ -255,11 +260,11 @@ select distinct ?p where {
 
 @test_deco("Capability Derivation")
 async def test_1(iterations=1000, warmup=False):
-    for i, user_id in enumerate(USERS):
+    for i in range(1, MAX_PROFILES + 1):
         await run_1(
             domain=DOMAIN_NAME,
-            user=user_id,
-            description=f"{user_id} assigned with {i+1} permission profile(s)",
+            profile_num=i,
+            description=f"user assigned with {i} permission profile(s)",
             iterations=iterations,
         )
 
@@ -367,10 +372,10 @@ async def ensure_graphdb_upload(repository: str, name: str) -> None:
     logger.info("Check import schema succeeded")
 
 
-def ensure_user(user_id, is_admin=False):
+def create_user(user_id, is_admin=False):
     user = get_doc_or_none(User, user_id=user_id)
     if user is None:
-        create_user(
+        brick_create_user(
             name=user_id,
             user_id=user_id,
             email=f"{user_id}@gmail.com",
@@ -381,7 +386,7 @@ def ensure_user(user_id, is_admin=False):
         logger.info("User exists: {}", user_id)
 
 
-async def ensure_app(app_name):
+async def create_app(app_name):
     user_jwt = create_jwt_token(user_id="admin")
     headers = {"Authorization": "Bearer " + user_jwt}
     async with httpx.AsyncClient(headers=headers, base_url=API_BASE) as client:
@@ -417,7 +422,7 @@ async def ensure_app(app_name):
         logger.info("App approved: {}", app_name)
 
 
-async def ensure_domain(domain_name):
+async def create_domain(domain_name):
     user_jwt = create_jwt_token(user_id="admin")
     headers = {"Authorization": "Bearer " + user_jwt}
     async with httpx.AsyncClient(headers=headers, base_url=API_BASE) as client:
@@ -456,7 +461,7 @@ async def ensure_domain(domain_name):
             logger.info("Domain brick schema initialized: {}", domain_name)
 
 
-async def ensure_domain_app(domain_name, app_name):
+async def create_domain_app(domain_name, app_name):
     user_jwt = create_jwt_token(user_id="admin", domain=domain_name)
     headers = {"Authorization": "Bearer " + user_jwt}
     async with httpx.AsyncClient(headers=headers, base_url=API_BASE) as client:
@@ -473,7 +478,7 @@ async def ensure_domain_app(domain_name, app_name):
             logger.info("Domain app created: {}", domain_name, app_name)
 
 
-async def ensure_domain_user(user_id, domain_name):
+async def create_domain_user(user_id, domain_name):
     user_jwt = create_jwt_token(user_id="admin", domain=domain_name)
     headers = {"Authorization": "Bearer " + user_jwt}
     async with httpx.AsyncClient(headers=headers, base_url=API_BASE) as client:
@@ -488,10 +493,11 @@ async def ensure_domain_user(user_id, domain_name):
             logger.error("{} {}", resp, resp.request)
             exit(-1)
         else:
-            logger.info("Domain user created: {} {}", domain_name, user_id)
+            pass
+            # logger.info("Domain user created: {} {}", domain_name, user_id)
 
 
-async def ensure_domain_user_app(user_id, domain_name, app_name, room):
+async def create_domain_user_app(user_id, domain_name, app_name, room):
     user_jwt = create_jwt_token(user_id=user_id, domain=domain_name, app_name=app_name)
     headers = {"Authorization": "Bearer " + user_jwt}
     async with httpx.AsyncClient(headers=headers, base_url=API_BASE) as client:
@@ -508,9 +514,10 @@ async def ensure_domain_user_app(user_id, domain_name, app_name, room):
             logger.error("{} {}", resp, resp.request)
             exit(-1)
         else:
-            logger.info(
-                "Domain user app created: {} {} {}", domain_name, user_id, app_name
-            )
+            pass
+            # logger.info(
+            #     "Domain user app created: {} {} {}", domain_name, user_id, app_name
+            # )
 
         data = {"arguments": {"room": room}}
         resp = await client.post(
@@ -523,13 +530,14 @@ async def ensure_domain_user_app(user_id, domain_name, app_name, room):
             logger.error("{} {}", resp, resp.request)
             exit(-1)
         else:
-            logger.info(
-                "Domain user app set room: {} {} {} {}",
-                domain_name,
-                user_id,
-                app_name,
-                room,
-            )
+            pass
+            # logger.info(
+            #     "Domain user app set room: {} {} {} {}",
+            #     domain_name,
+            #     user_id,
+            #     app_name,
+            #     room,
+            # )
 
 
 async def create_permission_profile(user_id, domain_name, app_name, read, write):
@@ -566,35 +574,46 @@ async def create_domain_user_profile(user_id, domain_name, app_name, profile, ro
             logger.error("{} {}", resp, resp.request)
             exit(-1)
         else:
-            logger.info(
-                "Domain user profile created: {} {} {}", domain_name, user_id, room
-            )
+            pass
+            # logger.info(
+            # "Domain user profile created: {} {} {}", domain_name, user_id, room
+            # )
+
+
+profiles = []
+
+
+async def init_user(i):
+    user_id = f"user{i}"
+    create_user(user_id)
+    await create_domain_user(user_id, DOMAIN_NAME)
+    room = np.random.choice(ROOMS, 1)[0]
+    await create_domain_user_app(user_id, DOMAIN_NAME, APP_NAME, room)
+    rooms = np.random.choice(ROOMS, i % MAX_PROFILES + 1)
+    for j, room in enumerate(rooms):
+        await create_domain_user_profile(
+            user_id, DOMAIN_NAME, APP_NAME, profiles[j], room
+        )
 
 
 async def init_benchmark():
     logger.info("---------- Initialize benchmark ---------- ")
     reset_mongodb()
-    ensure_user("admin", is_admin=True)
-    await ensure_app(APP_NAME)
-    await ensure_domain(DOMAIN_NAME)
-    await ensure_domain_app(DOMAIN_NAME, APP_NAME)
-    await ensure_domain_user("admin", DOMAIN_NAME)
-    await ensure_domain_user_app("admin", DOMAIN_NAME, APP_NAME, ROOMS[0])
-    profiles = []
-    for i, user_id in enumerate(USERS):
-        ensure_user(user_id)
-        await ensure_domain_user(user_id, DOMAIN_NAME)
-        await ensure_domain_user_app(user_id, DOMAIN_NAME, APP_NAME, ROOMS[i])
+    create_user("admin", is_admin=True)
+    await create_app(APP_NAME)
+    await create_domain(DOMAIN_NAME)
+    await create_domain_app(DOMAIN_NAME, APP_NAME)
+    await create_domain_user("admin", DOMAIN_NAME)
+    await create_domain_user_app("admin", DOMAIN_NAME, APP_NAME, ROOMS[0])
+    for i in range(MAX_PROFILES):
         profiles.append(
             await create_permission_profile(
-                user_id, DOMAIN_NAME, APP_NAME, query_app_read, query_app_write
+                i, DOMAIN_NAME, APP_NAME, query_app_read, query_app_write
             )
         )
-        for j in range(i + 1):
-            await create_domain_user_profile(
-                user_id, DOMAIN_NAME, APP_NAME, profiles[j], ROOMS[j]
-            )
 
+    for i in tqdm(range(MAX_USERS)):
+        await init_user(i)
     logger.info("---------- Initialize benchmark completed ---------- ")
 
 
@@ -605,6 +624,7 @@ def cli_group():
 
 
 @click.command()
+@click.help_option("--help", "-h")
 def init():
     asyncio.run(init_benchmark())
 
@@ -612,6 +632,7 @@ def init():
 @click.command()
 @click.option("-i", "--iterations", type=int, default=0)
 @click.argument("name", required=True)
+@click.help_option("--help", "-h")
 def test(iterations, name):
     cache = os.getenv("CACHE") or "false"
     is_cache = cache.lower() == "true"
