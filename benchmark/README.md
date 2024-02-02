@@ -4,6 +4,10 @@ This artifact is for ICCPS'24 reproducibility evaluations on our paper titled "P
 
 ## Setup
 
+*Our system has been tested on various distros of Linux. We anticipate it would work with Windows but not guaranteed.*
+
+Prepare your platform with [Docker](https://docs.docker.com/engine/install/) and [Docker-compose](https://docs.docker.com/compose/install/). Get your working directory as where you place `docker-compose.yml` and `init_postgis.sh`.
+
 Caching is an option set at the system booting phase. To start playground with cache:
 
 ```bash
@@ -34,35 +38,35 @@ Below are commands for each microbenmark respectively. We have progress bar duri
 
 ### Capability Derivation
 
-The microbenchmark on capability derivation (Fig 7 left, Sec V.D second paragraph and appendix E).
+Reproduce the microbenchmark on capability derivation (Fig 7 left, Sec V.D second paragraph and appendix E).
 
 ```bash
 docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py test capability
 ```
 
 ### Validator mapping
-The microbenchmark on validator mapping (Fig 7 right, Sec V.D second paragraph and appendix E).
+Reproduce the microbenchmark on validator mapping (Fig 7 right, Sec V.D second paragraph and appendix E).
 
 ```bash
 docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py test validator
 ```
 
 ### Resource Spec Retrieval
-The microbenchmark on Resource Spec Retrieval (Sec V.D third paragraph and appendix E).
+Reproduce tThe microbenchmark on Resource Spec Retrieval (Sec V.D third paragraph and appendix E).
 
 ```bash
 docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py test resource
 ```
 
 ### Range Checker Validator
-The microbenchmark on Range Checker Validator (Sec V.D third paragraph and appendix E).
+Reproduce the microbenchmark on Range Checker Validator (Sec V.D third paragraph and appendix E).
 
 ```bash
 docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py test range
 ```
 
 ### Power Predictor Validator
-The microbenchmark on Power Predictor Validator (Sec V.D third paragraph and appendix E).
+Reproduce the microbenchmark on Power Predictor Validator (Sec V.D third paragraph and appendix E).
 
 ```bash
 docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py test predictor
