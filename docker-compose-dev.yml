@@ -20,3 +20,4 @@ services:
       - ./brick_server/playground:/root/brick-server-playground/brick_server/playground
       - ../brick-server-minimal/brick_server/minimal:/root/brick-server-minimal/brick_server/minimal
       - ./tests:/root/brick-server-playground/tests
+      - ./benchmark:/root/brick-server-playground/benchmark
