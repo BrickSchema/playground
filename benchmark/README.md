@@ -1,12 +1,12 @@
 # Brick Server Playground Artifact
 
-This artifact is for ICCPS'24 reproducibility evaluations on our paper titled "Playground: A Safe Building Operating System". The focus of this paper is the presentation of a novel building operating system design abstraction. Therefore quantitative reproducibility applies solely to the microbenchmarks, Sec V.D in this paper --- the script provided below will reproduce the experiment and results presented there. Since our microbenchmark majorly focus on the time consumption of a few critical system operations with and without caching and is highly dependendant on the hardware of the underlying platform, it is expectable that the exact time measurements will not be the same as in the paper --- instead, the relative pattern with and without caching will be preserved and should be the main takeaway.
+This artifact is for ICCPS'24 reproducibility evaluations on our paper titled "Playground: A Safe Building Operating System". The focus of this paper is the presentation of a novel building operating system design abstraction. Therefore quantitative reproducibility applies solely to the microbenchmarks (Sec V.D) in this paper --- the script provided below will reproduce the experiment and results presented there. Since our microbenchmark majorly focus on the time consumption of a few critical system operations with and without caching and is highly dependendant on the hardware of the underlying platform, it is expectable that the exact time measurements will not be the same as in the paper --- instead, the relative pattern with and without caching will be preserved and should be the main observation.
 
 ## Setup
 
 *Our system has been tested on various distros of Linux. We anticipate it would work with Windows but not guaranteed.*
 
-Prepare your platform with [Docker](https://docs.docker.com/engine/install/) and [Docker-compose](https://docs.docker.com/compose/install/). Get your working directory as where you place `docker-compose.yml` and `init_postgis.sh`.
+Prepare your platform with [Docker](https://docs.docker.com/engine/install/) and [Docker-compose](https://docs.docker.com/compose/install/). Get your working directory as where you place all provided files.
 
 Caching is an option set at the system booting phase. To start playground with cache:
 
@@ -74,4 +74,4 @@ docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py tes
 
 ## Note
 
-The last measurement described in the last paragraph of Sec V.D would require actual deployment of our system on real buildings and are not presentable here.
+The last measurement described in the last paragraph of Sec V.D would require actual deployment of our system on real buildings and are not presentable here. Readers with interest/knowledge in Brick ontology could edit the relevant queries for validator mappings and permission profiles in `benchmark.py` (check inline code comments) to extend the existing microbenmarks.
