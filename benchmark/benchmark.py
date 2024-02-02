@@ -222,7 +222,7 @@ async def delete_domain_pre_actuation_policy(domain):
 '''
 Execution wrapper for test 1
 '''
-async def run_1(domain, profile_num, description, iterations=100):
+async def run_1(domain, profile_num, description, iterations=100, warmup=False):
     # print(domain, user)
     user_headers = []
     for i in range(profile_num - 1, MAX_USERS, MAX_PROFILES):
@@ -231,7 +231,15 @@ async def run_1(domain, profile_num, description, iterations=100):
         )
         headers = {"Authorization": "Bearer " + user_jwt}
         user_headers.append(headers)
-
+    if warmup:
+        await benchmark(
+            f"/user/domains/{domain}/permissions",
+            "GET",
+            user_headers,
+            warmup=True,
+            description=description,
+            iterations=len(user_headers),
+        )
     await benchmark(
         f"/user/domains/{domain}/permissions",
         "GET",
@@ -284,6 +292,7 @@ async def test_1(iterations=1000, warmup=False):
             profile_num=i,
             description=f"user assigned with {i} permission profile(s)",
             iterations=iterations,
+            warmup=warmup
         )
 
 
