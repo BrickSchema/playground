@@ -31,8 +31,6 @@ DOMAIN_NAME = "Center_Hall"
 APP_NAME = "genie"
 PROJECT_FOLDER = Path(__file__).parent.parent.absolute()
 EXAMPLES_DATA_FOLDER = PROJECT_FOLDER / "examples" / "data"
-ENTITIES = list(read_file("center_hall.txt"))
-ROOMS = list(read_file("center_hall_rooms.txt"))
 
 logger.remove()
 logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
@@ -60,6 +58,9 @@ def read_file(filename):
             _entities.add(line.strip())
             # _entities.add(line.strip().replace("http://ucsd.edu/ontology/building/Center_Hall#", "Center_Hall:"))
     return _entities
+
+ENTITIES = list(read_file("center_hall.txt"))
+ROOMS = list(read_file("center_hall_rooms.txt"))
 
 
 '''microbenchmark configurations'''
