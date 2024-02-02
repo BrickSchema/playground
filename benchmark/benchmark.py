@@ -83,6 +83,10 @@ async def benchmark(
     total_iterations = 0
     samples = np.arange(0, len(entities))
     np.random.shuffle(samples)
+    if warmup:
+        logger.info("Precomputing Cache...")
+    else:
+        logger.info("Starting actual tests...")
     async with httpx.AsyncClient(headers=headers, base_url=API_BASE) as client:
         for i in tqdm(range(iterations)):
             if generate_data >= 0:
@@ -104,9 +108,8 @@ async def benchmark(
                 total_time += response_time
                 total_iterations += 1
             # print(result)
-    if warmup:
-        logger.info("{}: warmup", description)
-    else:
+
+    if not warmup:
         logger.info("{}: {} ms", description, total_time / total_iterations)
 
 
@@ -262,7 +265,7 @@ async def test_1(iterations=1000, warmup=False):
 
 
 @test_deco("Validator Mapping")
-async def test_2(iterations=1344, warmup=False):
+async def test_2(iterations=1000, warmup=False):
     await delete_domain_pre_actuation_policy(DOMAIN_NAME)
     await create_domain_pre_actuation_policy(DOMAIN_NAME, "default", query_default, 0)
     description = "validator assigned = Default"
@@ -282,7 +285,7 @@ async def test_2(iterations=1344, warmup=False):
 
 
 @test_deco("Resource Specification Retrieval")
-async def test_3(iterations=1344, warmup=False):
+async def test_3(iterations=1000, warmup=False):
     await delete_domain_pre_actuation_policy(DOMAIN_NAME)
     await create_domain_pre_actuation_policy(
         DOMAIN_NAME, "default", query_default, 0, ["ml"]
@@ -297,7 +300,7 @@ async def test_3(iterations=1344, warmup=False):
 
 
 @test_deco("Range Checker")
-async def test_4(iterations=1344, warmup=False):
+async def test_4(iterations=1000, warmup=False):
     await delete_domain_pre_actuation_policy(DOMAIN_NAME)
     await create_domain_pre_actuation_policy(
         DOMAIN_NAME, "default", query_default, 0, ["range_checker"]
@@ -312,7 +315,7 @@ async def test_4(iterations=1344, warmup=False):
 
 
 @test_deco("Power Predictor")
-async def test_5(iterations=1344, warmup=False):
+async def test_5(iterations=1000, warmup=False):
     await delete_domain_pre_actuation_policy(DOMAIN_NAME)
     await create_domain_pre_actuation_policy(DOMAIN_NAME, "default", query_default, 0)
     await run_2(
@@ -613,9 +616,9 @@ def test(iterations, name):
     cache = os.getenv("CACHE") or "false"
     is_cache = cache.lower() == "true"
     if is_cache:
-        logger.info("Cache enabled, warmup before microbenchmark")
+        logger.info("Cache enabled.")
     else:
-        logger.info("Cache disabled")
+        logger.info("Cache disabled.")
     tests = {
         "capability": test_1,
         "validator": test_2,
