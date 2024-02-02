@@ -52,7 +52,7 @@ docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py tes
 ```
 
 ### Resource Spec Retrieval
-Reproduce tThe microbenchmark on Resource Spec Retrieval (Sec V.D third paragraph and appendix E).
+Reproduce the microbenchmark on Resource Spec Retrieval (Sec V.D third paragraph and appendix E).
 
 ```bash
 docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py test resource
@@ -76,4 +76,4 @@ docker exec -it brick-server-playground-core-1 python benchmark/benchmark.py tes
 
 The last measurement described in the last paragraph of Sec V.D would require actual deployment of our system on real buildings and is not presentable here. 
 
-Readers with interest/knowledge in Brick ontology could edit the relevant queries for validator mappings and permission profiles in `benchmark.py` (check inline code comments) to extend the existing microbenmarks. The Brick representation of the building that we are working with (`center_hall.ttl`) is also provided as a reference.
+Readers with interest/knowledge in Brick ontology could edit the relevant queries for validator mappings and permission profiles in `benchmark.py` (check inline code comments) to extend the existing microbenmarks. A partial Brick representation of the building that we are working with (`center_hall.ttl`) is also provided as a reference.
