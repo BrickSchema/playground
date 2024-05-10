@@ -3,18 +3,13 @@ import time
 from typing import List, Optional, Tuple
 
 from brick_server.minimal.interfaces.cache import use_cache
-from brick_server.minimal.models import get_docs
-from brick_server.minimal.services.actuation import (
-    ActuationEntity,
-    actuation_router as actuation_router,
-)
+from brick_server.minimal.services.actuation import ActuationEntity, router
 from loguru import logger
 
-from brick_server.playground import models
-from brick_server.playground.interface.actuation_guards import actuation_guards
-from brick_server.playground.utils import parse_graphdb_result
+from brick_server.playground import models, schemas
+from brick_server.playground.interfaces.actuation_guard import actuation_guards
 
-_ = actuation_router
+_ = router
 
 
 async def execute_policy_query(
@@ -22,8 +17,8 @@ async def execute_policy_query(
     domain: models.Domain,
     policy: models.DomainPreActuationPolicy,
 ):
-    res = await self.graphdb.query(domain.name, policy.query)
-    parsed_res = parse_graphdb_result(res)
+    result, prefixes = await self.graphdb.query(domain.name, policy.query)
+    parsed_res = self.graphdb.parse_result(result, prefixes)
     assert len(parsed_res.keys()) == 1
     entity_ids = parsed_res[list(parsed_res.keys())[0]]
     return entity_ids
@@ -32,8 +27,10 @@ async def execute_policy_query(
 async def find_policy(
     self: ActuationEntity, domain: models.Domain, entity_id: str
 ) -> Optional[models.DomainPreActuationPolicy]:
-    policies: List[models.DomainPreActuationPolicy] = list(
-        get_docs(models.DomainPreActuationPolicy, domain=domain)
+    policies: List[models.DomainPreActuationPolicy] = (
+        await models.DomainPreActuationPolicy.find_many(
+            models.DomainPreActuationPolicy.domain.id == domain.id
+        ).to_list()
     )
     policies.sort(key=lambda x: -x.priority)
     # TODO: use multiple policies when entity_ids overlapping
@@ -97,3 +94,8 @@ async def guard_before_actuation(
 
 
 ActuationEntity.guard_before_actuation = guard_before_actuation
+
+
+@router.get("/guards")
+async def get_actuation_guards() -> schemas.StandardListResponse[str]:
+    return schemas.StandardListResponse(list(actuation_guards.keys()))

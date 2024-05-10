@@ -1,11 +1,11 @@
 import arrow
 import asyncpg
 from brick_server.minimal.interfaces.graphdb import GraphDB
-from fastapi_rest_framework.config import settings
 from mongoengine import connect as mongo_connect
 from tenacity import retry, stop_after_delay, wait_exponential
 
 from brick_server.playground.auth.jwt import create_jwt_token
+from brick_server.playground.config.manager import settings
 from brick_server.playground.models import App, Domain, User
 
 

@@ -12,8 +12,8 @@ from brick_server.minimal.exceptions import NotAuthorizedError
 from brick_server.minimal.models import get_doc, get_docs
 from fastapi import Depends, Path
 from fastapi.security import HTTPAuthorizationCredentials
-from fastapi_utils.cbv import cbv
-from fastapi_utils.inferring_router import InferringRouter
+from fastapi_restful.cbv import cbv
+from fastapi_restful.inferring_router import InferringRouter
 
 from brick_server.playground import models, schemas
 from brick_server.playground.auth.authorization import get_app

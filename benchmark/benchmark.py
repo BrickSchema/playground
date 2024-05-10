@@ -16,14 +16,14 @@ init_settings(FastAPIConfig)
 from brick_server.minimal.auth.authorization import create_user as brick_create_user
 from brick_server.minimal.auth.jwt import create_jwt_token
 from brick_server.minimal.dbs import mongo_connection
+
 _ = mongo_connection
 from brick_server.minimal.models import get_doc_or_none
 
 from brick_server.playground.dbs import init_mongodb
 from brick_server.playground.models import App, Domain, User
 
-
-'''global config'''
+"""global config"""
 API_BASE = "http://127.0.0.1:9000/brickapi/v1"
 REDIS_API_BASE = "http://redis-commander:8081"
 GRAPHDB_API_BASE = "http://graphdb:7200"
@@ -36,7 +36,9 @@ logger.remove()
 logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 
 
-'''util func'''
+"""util func"""
+
+
 def test_deco(name):
     def decorator(func):
         async def wrapper(*args, **kwargs):
@@ -59,16 +61,17 @@ def read_file(filename):
             # _entities.add(line.strip().replace("http://ucsd.edu/ontology/building/Center_Hall#", "Center_Hall:"))
     return _entities
 
+
 ENTITIES = list(read_file("center_hall.txt"))
 ROOMS = list(read_file("center_hall_rooms.txt"))
 
 
-'''microbenchmark configurations'''
+"""microbenchmark configurations"""
 # number of profiles used in capability derivation test
-MAX_PROFILES = 5  
+MAX_PROFILES = 5
 
 # number of users used in capability derivation test
-MAX_USERS = 1000 
+MAX_USERS = 1000
 
 # Permission profile for capability derivation microbenchmark
 query_app_read = """
@@ -139,9 +142,11 @@ select distinct ?p where {
 """
 
 
-'''
+"""
 Measurement unit for each microbenchmark
-'''
+"""
+
+
 async def benchmark(
     url,
     method,
@@ -219,9 +224,11 @@ async def delete_domain_pre_actuation_policy(domain):
         await client.request("DELETE", f"/domains/{domain}/pre_actuation_policy")
 
 
-'''
+"""
 Execution wrapper for test 1
-'''
+"""
+
+
 async def run_1(domain, profile_num, description, iterations=100, warmup=False):
     # print(domain, user)
     user_headers = []
@@ -249,9 +256,11 @@ async def run_1(domain, profile_num, description, iterations=100, warmup=False):
     )
 
 
-'''
+"""
 Execution wrapper for test 2 - 4
-'''
+"""
+
+
 async def run_2(
     domain, description, iterations=100, warmup=False, response_key="policy"
 ):
@@ -292,7 +301,7 @@ async def test_1(iterations=1000, warmup=False):
             profile_num=i,
             description=f"user assigned with {i} permission profile(s)",
             iterations=iterations,
-            warmup=warmup
+            warmup=warmup,
         )
 
 
@@ -360,8 +369,9 @@ async def test_5(iterations=1000, warmup=False):
 
 
 def reset_mongodb():
-    from fastapi_rest_framework.config import settings
     from mongoengine import connect as mongo_connect
+
+    from brick_server.playground.config.manager import settings
 
     logger.info("Reset database")
     db = mongo_connect(
