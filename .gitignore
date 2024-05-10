@@ -1,6 +1,9 @@
 poetry.toml
 .idea
 .DS_Store
+app_static
+backend.zip
+frontend.zip
 
 # Created by https://www.toptal.com/developers/gitignore/api/vscode,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=vscode,python

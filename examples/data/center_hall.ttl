@@ -7371,61 +7371,37 @@ Center_Hall:VAV-6.SAFLOW-SP a brick:Supply_Air_Flow_Setpoint ;
     brick:isPointOf Center_Hall:VAV-6 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "68ef9064-dacb-52e9-a14e-8f1eb3aa1c47" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "68ef9064-dacb-52e9-a14e-8f1eb3aa1c47" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "68ef9064-dacb-52e9-a14e-8f1eb3aa1c47" ] .
 
 Center_Hall:VAV-6.WC-ADJ a brick:Warm_Cool_Adjust_Sensor ;
     brick:isPointOf Center_Hall:VAV-6 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "9cdf62f5-b899-5af7-85e3-94c066cb87cd" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "9cdf62f5-b899-5af7-85e3-94c066cb87cd" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "9cdf62f5-b899-5af7-85e3-94c066cb87cd" ] .
 
 Center_Hall:VAV-6.ZN-CO2 a brick:CO2_Sensor ;
     brick:isPointOf Center_Hall:VAV-6 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "6a1e153e-6667-55a4-abe3-35c7f98b19dc" ]  ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "6a1e153e-6667-55a4-abe3-35c7f98b19dc" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "6a1e153e-6667-55a4-abe3-35c7f98b19dc" ] .
 
 Center_Hall:VAV-6.ZN-H a brick:Humidity_Sensor ;
     brick:isPointOf Center_Hall:VAV-6 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "01a317cc-dc1b-53fa-91ff-c663f35f2a5e" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "01a317cc-dc1b-53fa-91ff-c663f35f2a5e" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "01a317cc-dc1b-53fa-91ff-c663f35f2a5e" ] .
 
 Center_Hall:VAV-6.ZN-OCC-S a brick:Occupancy_Sensor ;
     brick:isPointOf Center_Hall:VAV-6 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "2548ce77-c148-524c-8ef7-4b757078cf1c" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "2548ce77-c148-524c-8ef7-4b757078cf1c" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "2548ce77-c148-524c-8ef7-4b757078cf1c" ] .
 
 Center_Hall:VAV-6.ZN-T a brick:Zone_Air_Temperature_Sensor ;
     brick:isPointOf Center_Hall:VAV-6 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "384e0d9e-b1e5-5809-a73f-0a5c485ba5e0" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "384e0d9e-b1e5-5809-a73f-0a5c485ba5e0" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "384e0d9e-b1e5-5809-a73f-0a5c485ba5e0" ] .
 
 Center_Hall:VAV-6.ZN-TOCC a brick:Point ;
     brick:isPointOf Center_Hall:VAV-6 .
@@ -7506,21 +7482,13 @@ Center_Hall:VAV-7.WC-ADJ a brick:Warm_Cool_Adjust_Sensor ;
     brick:isPointOf Center_Hall:VAV-7 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "d2db3865-0794-5a01-bcb0-fb32bfc17745" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "d2db3865-0794-5a01-bcb0-fb32bfc17745" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "d2db3865-0794-5a01-bcb0-fb32bfc17745" ] .
 
 Center_Hall:VAV-7.ZN-CO2 a brick:CO2_Sensor ;
     brick:isPointOf Center_Hall:VAV-7 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "e08d002a-3212-5c0f-a9c2-b9045809611a" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "e08d002a-3212-5c0f-a9c2-b9045809611a" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "e08d002a-3212-5c0f-a9c2-b9045809611a" ] .
 
 Center_Hall:VAV-7.ZN-H a brick:Humidity_Sensor ;
     brick:isPointOf Center_Hall:VAV-7 ;
@@ -7532,21 +7500,13 @@ Center_Hall:VAV-7.ZN-OCC-S a brick:Occupancy_Sensor ;
     brick:isPointOf Center_Hall:VAV-7 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "b0799565-9253-5932-9862-d3b6b8f6b226" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "b0799565-9253-5932-9862-d3b6b8f6b226" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "b0799565-9253-5932-9862-d3b6b8f6b226" ] .
 
 Center_Hall:VAV-7.ZN-T a brick:Zone_Air_Temperature_Sensor ;
     brick:isPointOf Center_Hall:VAV-7 ;
     ref:hasExternalReference [ a ref:MetasysReference ;
             ref:hostedAt "172.21.59.228" ;
-            ref:metasysID "3f67bbd9-3bc4-59d4-ac73-5d1ac7d82acb" ] ;
-    ref:hasTimeseriesReference [
-            a ref:TimeseriesReference ;
-            ref:hasTimeseriesId "3f67bbd9-3bc4-59d4-ac73-5d1ac7d82acb" ;
-            ref:storedAt "influxdb://1.2.3.4:5432/db1" ; ] .
+            ref:metasysID "3f67bbd9-3bc4-59d4-ac73-5d1ac7d82acb" ] .
 
 Center_Hall:VAV-7.ZN-TOCC a brick:Point ;
     brick:isPointOf Center_Hall:VAV-7 .

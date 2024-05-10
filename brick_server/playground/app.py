@@ -1,97 +1,56 @@
-import os
-
-from fastapi import FastAPI
+import fastapi
+from brick_server.minimal.utilities.logging import init_logging, intercept_all_loggers
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_rest_framework import config
-from fastapi_utils.timing import add_timing_middleware
+from fastapi_restful.timing import add_timing_middleware
 from loguru import logger
-from starlette.middleware.sessions import SessionMiddleware
-from starlette.staticfiles import StaticFiles
 
-from brick_server.playground.config import FastAPIConfig
-
-settings = config.init_settings(FastAPIConfig)
-# print(settings.dict())
-
-from brick_server.minimal.dependencies import update_dependency_supplier
-
-from brick_server.playground.auth.authorization import auth_logic
+from brick_server.playground.config.errors import register_error_handlers
+from brick_server.playground.config.events import (
+    execute_backend_server_event_handler,
+    terminate_backend_server_event_handler,
+)
+from brick_server.playground.config.manager import settings
+from brick_server.playground.securities.auth import auth_logic
+from brick_server.playground.utilities.dependencies import update_dependency_supplier
 
 update_dependency_supplier(auth_logic)
 
-# from brick_server import app as brick_server_app
-from brick_server.minimal.init import initialization
 
-# from brick_server.minimal.services.actuation import actuation_router
-from brick_server.minimal.services.data import data_router
-from brick_server.minimal.services.domain import domain_router
-from brick_server.minimal.services.entities import entity_router
-from brick_server.minimal.services.queries import query_router
+def initialize_backend_application() -> fastapi.FastAPI:
+    init_logging()
+    intercept_all_loggers()
+    app = fastapi.FastAPI(**settings.set_backend_app_attributes)  # type: ignore
 
-# from brick_server.playground.auth.auth_server import auth_router
-from brick_server.playground.dbs import init_mongodb
-from brick_server.playground.services.actuation import actuation_router
-from brick_server.playground.services.admins import admin_router
-from brick_server.playground.services.apps import app_router
-from brick_server.playground.services.domains import (
-    domain_router as playground_domain_router,
-)
-from brick_server.playground.services.market_apps import marketapp_router
-from brick_server.playground.services.profile import profile_router
-from brick_server.playground.services.scheduler import scheduler_router
-from brick_server.playground.services.users import user_router
+    add_timing_middleware(app, record=logger.info)
+    app.logger = logger
 
-# from brick_server.dummy_frontend import dummy_frontend_router
-# from brick_server.configs import configs
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.ALLOWED_ORIGINS,
+        allow_credentials=settings.IS_ALLOWED_CREDENTIALS,
+        allow_methods=settings.ALLOWED_METHODS,
+        allow_headers=settings.ALLOWED_HEADERS,
+    )
 
+    app.add_event_handler(
+        "startup",
+        execute_backend_server_event_handler(backend_app=app),
+    )
+    app.add_event_handler(
+        "shutdown",
+        terminate_backend_server_event_handler(backend_app=app),
+    )
 
-app = FastAPI(title="Brick Server Playground", openapi_url="/docs/openapi.json")
-origins = ["*"]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-add_timing_middleware(app, record=logger.info)
-app.logger = logger
+    register_error_handlers(app)
+
+    from brick_server.playground.services import router as api_endpoint_router
+
+    app.include_router(router=api_endpoint_router, prefix=settings.API_PREFIX)
+
+    return app
 
 
-@app.on_event("startup")
-async def startup_event() -> None:
-    await initialization()
-    init_mongodb()
+backend_app: fastapi.FastAPI = initialize_backend_application()
 
 
-app.include_router(data_router, prefix="/brickapi/v1/data")
-app.include_router(entity_router, prefix="/brickapi/v1/entities")
-app.include_router(query_router, prefix="/brickapi/v1/rawqueries")
-app.include_router(actuation_router, prefix="/brickapi/v1/actuation")
-app.include_router(domain_router, prefix="/brickapi/v1/domains")
-
-app.secret_key = os.urandom(24)
-app.add_middleware(SessionMiddleware, secret_key=os.urandom(24))
-
-# httphost = configs['hostname'].replace('https','http')
-# httpshost = configs['hostname']
-
-# @app.middleware("http")
-# async def change_redirect_to_https(request: Request, call_next):
-#     response = await call_next(request)
-#     if response.status_code >= 300 and response.status_code < 400 and response.headers.get('location'):
-#         response.headers['location'] = response.headers['location'].replace(httphost, httpshost)
-#
-#     return response
-
-
-app.include_router(app_router, prefix="/brickapi/v1/apps")
-app.include_router(marketapp_router, prefix="/brickapi/v1/market_apps")
-app.include_router(user_router, prefix="/brickapi/v1/user")
-# app.include_router(auth_router, prefix="/brickapi/v1/auth")
-app.include_router(admin_router, prefix="/brickapi/v1/admin")
-app.include_router(profile_router, prefix="/brickapi/v1/profiles")
-app.include_router(scheduler_router, prefix="/brickapi/v1/scheduler")
-app.include_router(playground_domain_router, prefix="/brickapi/v1/domains")
-
-app.mount("/brickapi/v1/appstatic", StaticFiles(directory="static"), name="static")
+# app.mount("/brickapi/v1/appstatic", StaticFiles(directory="static"), name="static")

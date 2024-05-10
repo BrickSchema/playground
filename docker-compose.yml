@@ -7,15 +7,15 @@ services:
       - POSTGRES_PASSWORD=brick-demo
       - POSTGRES_DB=brick
       - PGDATA=/var/lib/postgresql/data/pgdata
+      - |
+        INIT_POSTGIS=
+        #!/bin/bash
+        psql -U $$POSTGRES_USER $$POSTGRES_DB -c "CREATE EXTENSION IF NOT EXISTS postgis CASCADE;"
     networks:
       - brick-server-network
     ports:
       - "35432:5432"
-    volumes:
-      - type: bind
-        source: ./docker/init_postgis.sh
-        target: /docker-entrypoint-initdb.d/003_init_postgis.sh
-        read_only: true
+    command: /bin/bash -c "echo \"$$INIT_POSTGIS\" > /docker-entrypoint-initdb.d/002_init_postgis.sh; docker-entrypoint.sh postgres;"
   graphdb:
     image: w1zzard/graphdb-free:9.9.0
     networks:
@@ -23,7 +23,7 @@ services:
     ports:
       - "37200:7200"
   mongo:
-    image: mongo:4.2.3-bionic
+    image: mongo:5.0-focal
     networks:
       - brick-server-network
     ports:
@@ -62,6 +62,8 @@ services:
       - WORKERS=${WORKERS:-1}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-}
       - CACHE=${CACHE:-true}
+      - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID}
+      - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET}
 #      - GRAFANA_HOST=grafana
     depends_on:
       - graphdb
