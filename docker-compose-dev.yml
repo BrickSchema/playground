@@ -10,12 +10,9 @@ services:
     volumes:
       - ../mongoData:/data/db
   core:
-    build:
-      context: ..
-      dockerfile: ./brick-server-playground/Dockerfile
-      args:
-        DOCKER_BUILDKIT: 1
     environment:
+      DEBUG: true
+      WORKERS: 1
       FRONTEND_URL: http://localhost:8000
     volumes:
       - ./static:/root/brick-server-playground/static
