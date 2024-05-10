@@ -1,5 +1,9 @@
 # nopycln: file
 
+from brick_server.playground.utilities.exceptions import BizError
+
+_ = BizError
+
 from brick_server.minimal.schemas import *
 
 from brick_server.playground.schemas.app import (

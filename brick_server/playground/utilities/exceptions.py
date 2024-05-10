@@ -1,7 +1,11 @@
 from enum import Enum
 from typing import TYPE_CHECKING, Union
 
-from brick_server.minimal.utilities.exceptions import ErrorCode as MinimalErrorCode
+from brick_server.minimal.utilities.exceptions import (
+    BizError as MinimalBizError,
+    ErrorCode as MinimalErrorCode,
+    ErrorShowType,
+)
 
 
 def extend_enum(inherited_enum):
@@ -40,6 +44,23 @@ class ErrorCode(str, Enum):
     DomainPreActuationPolicyAlreadyExistsError = (
         "DomainPreActuationPolicyAlreadyExistsError"
     )
+
+
+class BizError(MinimalBizError):
+    def __init__(
+        self,
+        error_code: ErrorCode,
+        error_message: str = "",
+        show_type: ErrorShowType = ErrorShowType.ErrorMessage,
+    ):
+        super().__init__(error_code, error_message, show_type)
+
+
+# replace the definition of error in minimal for correct documentation in openapi.json
+import brick_server.minimal.utilities.exceptions
+
+brick_server.minimal.utilities.exceptions.BizError = BizError
+brick_server.minimal.utilities.exceptions.ErrorCode = ErrorCode
 
 
 if TYPE_CHECKING:
