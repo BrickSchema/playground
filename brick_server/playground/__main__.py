@@ -24,6 +24,8 @@ def serve() -> None:
         ],
         workers=settings.SERVER_WORKERS,
         log_level=settings.LOGGING_LEVEL,
+        proxy_headers=True,
+        forwarded_allow_ips="*",
     )
 
 
