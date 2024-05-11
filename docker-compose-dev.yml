@@ -1,14 +1,5 @@
 version: '3.5'
 services:
-  postgres:
-    volumes:
-      - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
-  graphdb:
-    volumes:
-      - ../graphdbData:/opt/graphdb/home
-  mongo:
-    volumes:
-      - ../mongoData:/data/db
   core:
     environment:
       DEBUG: true
