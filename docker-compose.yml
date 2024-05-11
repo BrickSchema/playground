@@ -15,6 +15,8 @@ services:
       - brick-server-network
     ports:
       - "35432:5432"
+    volumes:
+      - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
     command: /bin/bash -c "echo \"$$INIT_POSTGIS\" > /docker-entrypoint-initdb.d/002_init_postgis.sh; docker-entrypoint.sh postgres;"
   graphdb:
     image: w1zzard/graphdb-free:9.9.0
@@ -22,12 +24,16 @@ services:
       - brick-server-network
     ports:
       - "37200:7200"
+    volumes:
+      - ../graphdbData:/opt/graphdb/home
   mongo:
     image: mongo:5.0-focal
     networks:
       - brick-server-network
     ports:
       - "37017:27017"
+    volumes:
+      - ../mongoData:/data/db
   redis:
     image: 'redis:5.0.8'
     command: redis-server --requirepass brick-demo
