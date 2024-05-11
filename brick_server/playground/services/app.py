@@ -228,6 +228,9 @@ class AppRoute:
         "/{app}/approve",
         description="Approve an app (site admin).",
         name="apps:approve",
+        dependencies=[
+            Depends(PermissionChecker(permission_scope=schemas.PermissionScope.SITE))
+        ],
     )
     async def approve_app(
         self,
