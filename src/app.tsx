@@ -6,7 +6,7 @@ import { LinkOutlined, SmileOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings, MenuDataItem } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
-import { Link, history } from '@umijs/max';
+import { Link, history, useAccess } from '@umijs/max';
 import { Flex, Select, SelectProps, Typography } from 'antd';
 import { map, trimEnd } from 'lodash';
 import { useState } from 'react';
@@ -17,10 +17,12 @@ import hljsDefineSparql from '@/utils/sparql';
 import hljsDefineTurtle from '@/utils/turtle';
 import hljs from 'highlight.js/lib/core';
 import 'highlight.js/styles/github.css';
+
 hljsDefineTurtle(hljs);
 hljsDefineSparql(hljs);
 
 import json from 'highlight.js/lib/languages/json';
+
 hljs.registerLanguage('json', json);
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -95,6 +97,7 @@ export async function getInitialState(): Promise<{
 const Layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   const [domains, setDomains] = useState<API.DomainRead[]>([]);
   const domainName = useDomainName();
+  const access = useAccess();
 
   const domainOptions = map(domains, (domain: API.DomainRead) => ({
     value: domain.name,
@@ -129,18 +132,22 @@ const Layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
         ];
         const domainName = initialState?.currentDomain?.name;
         if (domainName) {
-          menu.push({
-            path: `/domain/${domainName}`,
-            name: 'domain',
-            children: [
-              {
-                path: `/domain/${domainName}/dashboard`,
-                name: 'dashboard',
-              },
-              {
-                path: `/domain/${domainName}/appstore`,
-                name: 'appstore',
-              },
+          let children = [
+            {
+              path: `/domain/${domainName}/dashboard`,
+              name: 'dashboard',
+            },
+            {
+              path: `/domain/${domainName}/appstore`,
+              name: 'appstore',
+            },
+            {
+              path: `/domain/${domainName}/app/:appName`,
+              hideInMenu: true,
+            },
+          ];
+          if (access.isDomainAdmin) {
+            children = children.concat([
               {
                 path: `/domain/${domainName}/settings`,
                 name: 'settings',
@@ -161,11 +168,12 @@ const Layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
                 path: `/domain/${domainName}/policies`,
                 name: 'policies',
               },
-              {
-                path: `/domain/${domainName}/app/:appName`,
-                hideInMenu: true,
-              },
-            ],
+            ]);
+          }
+          menu.push({
+            path: `/domain/${domainName}`,
+            name: 'domain',
+            children: children,
           });
         }
 
