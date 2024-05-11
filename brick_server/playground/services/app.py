@@ -1,3 +1,4 @@
+import asyncio
 import json
 import pathlib
 import subprocess
@@ -5,6 +6,7 @@ from shutil import rmtree
 
 import aiofiles
 import httpx
+from brick_server.minimal.interfaces.cache import clear_cache
 from brick_server.minimal.securities.checker import PermissionChecker
 from fastapi import (
     APIRouter,
@@ -272,6 +274,34 @@ class AppRoute:
         app.approved_data.permission_model = app.submitted_data.permission_model
         app.approved = True
         await app.save()
+
+        domains = (
+            await models.DomainApp.find_many(
+                models.DomainApp.app.id == app.id,
+            )
+            .aggregate(
+                [
+                    {"$group": {"_id": "$domain.$id"}},
+                    {
+                        "$lookup": {
+                            "from": "domains",
+                            "localField": "_id",
+                            "foreignField": "_id",
+                            "as": "domains",
+                        }
+                    },
+                    {"$replaceRoot": {"newRoot": {"$arrayElemAt": ["$domains", 0]}}},
+                ],
+                projection_model=models.Domain,
+            )
+            .to_list()
+        )
+
+        jobs = []
+        for domain in domains:
+            jobs.append(clear_cache(f"{domain.name}:authorized_entities:{app.name}"))
+        await asyncio.gather(*jobs)
+
         frontend_file = await db.gridfs_bucket.open_download_stream(
             app.approved_data.frontend
         )

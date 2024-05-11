@@ -17,7 +17,7 @@ SELECT * WHERE {{
         """.format(
             entity_id=entity_id
         )
-        cache_key = f"range_checker:Center_Hall:{entity_id}"
+        cache_key = f"Center_Hall:range_checker:{entity_id}"
 
         async def fallback_func():
             return await graphdb.query("Center_Hall", query)

@@ -1,3 +1,4 @@
+from brick_server.minimal.interfaces.cache import clear_cache
 from brick_server.minimal.securities.checker import PermissionChecker
 from brick_server.minimal.services.domain import router
 from fastapi import Body, Depends, Path
@@ -131,6 +132,8 @@ class DomainUserRoute:
         user: models.User = Depends(get_path_user),
     ) -> schemas.StandardResponse[schemas.DomainUserRead]:
         domain_user = await get_domain_user(domain, user)
+        if domain_user is None:
+            raise BizError(ErrorCode.DomainUserNotFoundError)
         domain_user.domain = domain
         domain_user.user = user
         return schemas.DomainUserRead.model_validate(domain_user.dict()).to_response()
@@ -192,6 +195,9 @@ class DomainUserProfileRoute:
         )
         try:
             await domain_user_profile.save()
+            await clear_cache(
+                f"{self.domain.name}:authorized_entities:_:{self.user.name}"
+            )
             return schemas.DomainUserProfileRead.model_validate(
                 domain_user_profile.dict()
             ).to_response()
@@ -220,6 +226,9 @@ class DomainUserProfileRoute:
         domain_user_profile.arguments = domain_user_profile_update.arguments
         try:
             await domain_user_profile.save()
+            await clear_cache(
+                f"{self.domain.name}:authorized_entities:_:{self.user.name}"
+            )
             domain_user_profile.domain = self.domain
             domain_user_profile.user = self.user
             domain_user_profile.profile = profile
@@ -265,6 +274,7 @@ class DomainUserProfileRoute:
         if domain_user_profile is None:
             raise BizError(ErrorCode.PermissionProfileNotFoundError)
         await domain_user_profile.delete()
+        await clear_cache(f"{self.domain.name}:authorized_entities:_:{self.user.name}")
         return schemas.StandardResponse()
 
     # @router.get("/{domain}/user_profiles_arguments")
@@ -327,6 +337,7 @@ class DomainPreActuationPolicy:
         except Exception as e:
             # TODO: catch the precise already exist exception
             raise BizError(ErrorCode.DomainPreActuationPolicyAlreadyExistsError)
+        await clear_cache(f"{self.domain.name}:policy")
         policy.domain = self.domain
         return schemas.DomainPreActuationPolicyRead.model_validate(
             policy.dict()
@@ -345,6 +356,8 @@ class DomainPreActuationPolicy:
     ) -> schemas.StandardResponse[schemas.DomainPreActuationPolicyRead]:
         policy_update.update_model(policy)
         await policy.save()
+        await clear_cache(f"{self.domain.name}:policy")
+        await clear_cache(f"{self.domain.name}:policy_query:{policy.id}")
         policy.domain = self.domain
         return schemas.DomainPreActuationPolicyRead.model_validate(
             policy.dict()
