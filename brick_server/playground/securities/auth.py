@@ -282,9 +282,11 @@ select distinct ?entity ?type where {{
 
         # only support one app instance in one domain per user
         if self.app is not None:
-            cache_key = f"authorized_entities:{self.domain.name}:{self.user.name}:{self.app.name}"
+            cache_key = f"authorized_entities:{self.domain.name}:{self.user.name}:{permission}:{self.app.name}"
         else:
-            cache_key = f"authorized_entities:{self.domain.name}:{self.user.name}"
+            cache_key = (
+                f"authorized_entities:{self.domain.name}:{self.user.name}:{permission}"
+            )
 
         result = await use_cache(cache_key, fallback_func)
         return result
