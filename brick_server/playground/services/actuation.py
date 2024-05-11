@@ -36,7 +36,7 @@ async def find_policy(
     # TODO: use multiple policies when entity_ids overlapping
     for policy in policies:
         if policy.query:
-            cache_key = f"policy_query:{domain.name}:{policy.id}"
+            cache_key = f"{domain.name}:policy_query:{policy.id}"
             entity_ids = await use_cache(
                 cache_key, execute_policy_query, self, domain, policy
             )
@@ -57,7 +57,7 @@ async def guard_before_actuation(
     # logger.info(domain)
     # logger.info(entity_id)
     start = time.time()
-    cache_key = f"policy:{domain.name}:{entity_id}"
+    cache_key = f"{domain.name}:policy:{entity_id}"
     policy = await use_cache(cache_key, find_policy, self, domain, entity_id)
     logger.info(policy)
     end = time.time()

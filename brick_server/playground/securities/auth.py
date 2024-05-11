@@ -242,7 +242,7 @@ select distinct ?entity ?type where {{
             logger.info("{} {} {}", template, arguments, query)
             return await self.query_entity_ids(query)
 
-        cache_key = f"permission_profile:{self.domain.name}:{profile.id}:{permission}:{json.dumps(arguments)}"
+        cache_key = f"{self.domain.name}:permission_profile:{profile.id}:{permission}:{json.dumps(arguments)}"
         # start = time.time()
         result = await use_cache(cache_key, fallback_func)
         logger.info("{}", result)
@@ -282,12 +282,10 @@ select distinct ?entity ?type where {{
 
         # only support one app instance in one domain per user
         if self.app is not None:
-            cache_key = f"authorized_entities:{self.domain.name}:{self.user.name}:{permission}:{self.app.name}"
+            app_name = self.app.name
         else:
-            cache_key = (
-                f"authorized_entities:{self.domain.name}:{self.user.name}:{permission}"
-            )
-
+            app_name = "_"
+        cache_key = f"{self.domain.name}:authorized_entities:{app_name}:{self.user.name}:{permission}"
         result = await use_cache(cache_key, fallback_func)
         return result
 
