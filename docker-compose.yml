@@ -51,6 +51,8 @@ services:
     restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./app_static:/root/brick-server-playground/app_static
+
     ports:
       - "9000:9000"
     networks:

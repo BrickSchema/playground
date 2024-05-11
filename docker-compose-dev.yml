@@ -7,7 +7,6 @@ services:
       FRONTEND_URL: http://localhost:8000
     volumes:
       - ./static:/root/brick-server-playground/static
-      - ./app_static:/root/brick-server-playground/app_static
       - ./brick_server/playground:/root/brick-server-playground/brick_server/playground
       - ../brick-server-minimal/brick_server/minimal:/root/brick-server-minimal/brick_server/minimal
       - ./tests:/root/brick-server-playground/tests
