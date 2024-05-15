@@ -78,6 +78,23 @@ services:
     privileged: true
     command: dockerize -wait http://graphdb:7200/rest/repositories python3 -m brick_server.playground
 #    entrypoint: /app/docker/start-reload.sh
+  mongo-express:
+    image: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME:-root}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD:-pass}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:-r  oot}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-pass}
+#      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME:-root}:${MONGO_PASSWORD:-pass}@mongo:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+    networks:
+      - brick-server-network
+    ports:
+      - "38082:8081"
+    depends_on:
+      - mongo
+
   redis-commander:
     image: ghcr.io/joeferner/redis-commander:latest
     restart: always
