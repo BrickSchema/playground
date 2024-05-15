@@ -1,12 +1,12 @@
 version: '3.5'
 services:
-  mongo:
-    image: mongo:5.0-focal
+#  mongo:
+#    image: mongo:5.0-focal
   core:
     environment:
       DEBUG: true
       WORKERS: 1
-      FRONTEND_URL: http://localhost:8000
+#      FRONTEND_URL: http://localhost:8000
     volumes:
       - ./static:/root/brick-server-playground/static
       - ./brick_server/playground:/root/brick-server-playground/brick_server/playground

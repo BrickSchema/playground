@@ -91,6 +91,22 @@ async def get_domain_user_app(
     return domain_user_app
 
 
+async def get_token_domain_user_app(
+    token: dict | None = Depends(get_jwt_payload),
+) -> DomainUserApp | None:
+    logger.info(token)
+    try:
+        domain_user_app_id = token.get("domain_user_app")
+        domain_user_app = await DomainUserApp.get(
+            domain_user_app_id, fetch_links=True, nesting_depth=1
+        )
+    except Exception:
+        domain_user_app = None
+    if domain_user_app is None:
+        raise BizError(ErrorCode.DomainUserAppNotFoundError)
+    return domain_user_app
+
+
 class Authorization:
     def __init__(
         self,
@@ -299,7 +315,15 @@ select distinct ?entity ?type where {{
         entity_ids, prefixes = await self.get_authorized_entities_in_profile(
             profile, arguments, permission
         )
-        return entity_id in entity_ids
+        entity_id_parsed = self.brick_db.parse_entity_with_prefixes(entity_id, prefixes)
+        logger.info(
+            "check_profile {}: {} ({}) {}",
+            profile.id,
+            entity_id,
+            entity_id_parsed,
+            entity_id_parsed in entity_ids,
+        )
+        return entity_id_parsed in entity_ids
 
     async def check_entities_permission(
         self, entity_ids: set[str], permission: PermissionType
@@ -350,12 +374,19 @@ select distinct ?entity ?type where {{
             # app must be installed by user
             if self.domain_user_app is None:
                 return False
+            profile = await self.app.approved_data.permission_profile.fetch()
             authed = await self.check_profile(
-                self.app.profile, self.domain_user_app.arguments, entity_id, permission
+                profile, self.domain_user_app.arguments, entity_id, permission
             )
-            if self.app.permission_model == PermissionModel.AUGMENTATION and authed:
+            if (
+                self.app.approved_data.permission_model == PermissionModel.AUGMENTATION
+                and authed
+            ):
                 return True
-            if self.app.permission_model == PermissionModel.INTERSECTION and not authed:
+            if (
+                self.app.approved_data.permission_model == PermissionModel.INTERSECTION
+                and not authed
+            ):
                 return False
 
         # check permission by domain_user profile

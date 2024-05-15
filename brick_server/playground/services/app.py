@@ -30,7 +30,7 @@ from starlette.responses import FileResponse, Response
 from brick_server.playground import models, schemas
 from brick_server.playground.config.manager import settings
 from brick_server.playground.interfaces.app_management import get_container_ip
-from brick_server.playground.securities.auth import Authorization
+from brick_server.playground.securities.auth import get_token_domain_user_app
 from brick_server.playground.utilities.dependencies import (
     AsyncDatabase,
     get_app_management_redis_db,
@@ -65,6 +65,68 @@ def ensure_safe_path(path, must_exist=False) -> pathlib.Path | None:
 
 
 @cbv(router)
+class AppApi:
+    caddr_db: StrictRedis = Depends(get_app_management_redis_db)
+
+    @router.api_route(
+        "/api/{path:path}",
+        methods=["GET", "POST", "DELETE", "PUT", "OPTIONS", "HEAD", "PATCH", "TRACE"],
+        description="Call a backend api of an app.",
+        name="apps:api",
+    )
+    async def app_api(
+        self,
+        request: Request,
+        path: str = Path(description="Api endpoint in the app"),
+        domain_user_app: models.DomainUserApp = Depends(get_token_domain_user_app),
+    ):
+        if path.startswith("/"):
+            path = path[1:]
+        # if checker.domain_user_app is None:
+        #     raise BizError(ErrorCode.DomainUserAppNotFoundError)
+
+        # TODO: cache cname or put in token
+        cname = domain_user_app.get_container_name()
+        container_ip = get_container_ip(cname)
+
+        if container_ip:
+            container_url = (
+                "http://" + container_ip + ":5000/"
+            )  # TODO: Configure the port
+        else:
+            raise BizError(ErrorCode.AppContainerNotFoundError)
+
+        dest = container_url + path
+        request_data = await request.body()
+        async with httpx.AsyncClient() as client:
+            api_resp = await client.request(
+                method=request.method,
+                url=dest,
+                # url=request.url.replace(request.host_url, container_url).replace(request.path, '/'+path),
+                headers={
+                    key: value
+                    for key, value in request.headers.items()
+                    if key != "Host"
+                },
+                params={key: value for key, value in request.query_params.items()},
+                content=request_data,
+                follow_redirects=False,
+            )
+            headers = {
+                name: value
+                for name, value in api_resp.headers.items()
+                if name.lower() not in EXCLUDED_HEADERS
+            }
+
+            resp = Response(
+                api_resp.content,
+                status_code=api_resp.status_code,
+                headers=headers,
+            )
+            return resp
+
+
+@cbv(router)
 class AppRoute:
 
     @router.get("/", description="Get all apps on the site.", name="apps:list")
@@ -94,6 +156,14 @@ class AppRoute:
         )
         await app.save()
         return schemas.AppRead.model_validate(app.dict()).to_response()
+
+    @router.get("/me", name="apps:current_app")
+    async def get_current_app(
+        self, domain_user_app: models.DomainUserApp = Depends(get_token_domain_user_app)
+    ) -> schemas.StandardResponse[schemas.DomainUserAppRead]:
+        return schemas.DomainUserAppRead.model_validate(
+            domain_user_app.dict()
+        ).to_response()
 
     @router.get(
         "/{app}",
@@ -430,65 +500,3 @@ EXCLUDED_HEADERS = [
     "transfer-encoding",
     "connection",
 ]
-
-
-@cbv(router)
-class AppApi:
-    caddr_db: StrictRedis = Depends(get_app_management_redis_db)
-
-    @router.api_route(
-        "/{app}/api/{path:path}",
-        methods=["GET", "POST", "DELETE", "PUT", "OPTIONS", "HEAD", "PATCH", "TRACE"],
-        description="Call a backend api of an app.",
-        name="apps:api",
-    )
-    async def app_api(
-        self,
-        request: Request,
-        path: str = Path(description="Api endpoint in the app"),
-        checker: Authorization = Depends(PermissionChecker()),
-    ):
-        if path.startswith("/"):
-            path = path[1:]
-        if checker.domain_user_app is None:
-            raise BizError(ErrorCode.DomainUserAppNotFoundError)
-
-        # TODO: cache cname or put in token
-        cname = checker.domain_user_app.get_container_name()
-        container_ip = get_container_ip(cname)
-
-        if container_ip:
-            container_url = (
-                "http://" + container_ip + ":5000/"
-            )  # TODO: Configure the port
-        else:
-            raise BizError(ErrorCode.AppContainerNotFoundError)
-
-        dest = container_url + path
-        request_data = await request.body()
-        async with httpx.AsyncClient() as client:
-            api_resp = await client.request(
-                method=request.method,
-                url=dest,
-                # url=request.url.replace(request.host_url, container_url).replace(request.path, '/'+path),
-                headers={
-                    key: value
-                    for key, value in request.headers.items()
-                    if key != "Host"
-                },
-                params={key: value for key, value in request.query_params.items()},
-                content=request_data,
-                follow_redirects=False,
-            )
-            headers = {
-                name: value
-                for name, value in api_resp.headers.items()
-                if name.lower() not in EXCLUDED_HEADERS
-            }
-
-            resp = Response(
-                api_resp.content,
-                status_code=api_resp.status_code,
-                headers=headers,
-            )
-            return resp
