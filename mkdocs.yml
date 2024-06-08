@@ -1,0 +1,20 @@
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - content.code.annotate
+site_name: Brick Server Playground
+docs_dir: docs
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      use_pygments: true
+      pygments_lang_class: true
+#      auto_title: true
+#      linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
