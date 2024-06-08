@@ -52,6 +52,8 @@ pytest-depends = "^1.0.1"
 pytest-env = "^0.6.2"
 pytest-ordering = "^0.6"
 tenacity = "^8.1.0"
+mkdocs-material = "^9.5.26"
+
 
 [tool.pycln]
 all = true
