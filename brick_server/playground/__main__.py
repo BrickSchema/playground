@@ -1,3 +1,5 @@
+import pathlib
+
 import click
 import uvicorn
 from click_default_group import DefaultGroup
@@ -27,6 +29,34 @@ def serve() -> None:
         proxy_headers=True,
         forwarded_allow_ips="*",
     )
+
+
+@click.command()
+def generate_docs():
+    from brick_server.minimal.config.settings.base import DatabaseMongoDBSettings
+    from settings_doc.main import generate
+
+    docs_classes = [DatabaseMongoDBSettings]
+
+    docs_generated_path = (
+        pathlib.Path(__file__).parent.parent.parent.absolute() / "docs" / "generated"
+    )
+    docs_generated_path.mkdir(parents=True, exist_ok=True)
+
+    for doc_class in docs_classes:
+        class_path = f"{doc_class.__module__}.{doc_class.__qualname__}"
+        output_path = docs_generated_path / f"{doc_class.__qualname__}.md"
+        output_path.touch(exist_ok=True)
+
+        generate(
+            class_path=class_path,
+            output_format="md",
+        )
+
+        print(class_path)
+        print(output_path)
+
+    pass
 
 
 # @click.command()
@@ -122,5 +152,6 @@ def serve() -> None:
 
 if __name__ == "__main__":
     cli_group.add_command(serve)
+    cli_group.add_command(generate_docs)
     # cli_group.add_command(generate_jwt)
     cli_group()

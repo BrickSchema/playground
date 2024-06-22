@@ -1,31 +1,37 @@
 import pathlib
 
-import decouple
 from brick_server.minimal.config.settings.base import (
-    BackendBaseSettings as BaseSettings,
+    BackendBaseSettings as MinimalSettings,
 )
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 ROOT_DIR: pathlib.Path = pathlib.Path(
     __file__
 ).parent.parent.parent.parent.parent.resolve()
 
 
-class BackendBaseSettings(BaseSettings):
+class BackendPlaygroundSettings(BaseSettings):
+    DEFAULT_ADMIN: str = Field(
+        default="example@gmail.com",
+        description="The email of default admin user. "
+        "(deprecated, we should remove it in future version)",
+    )
+    ISOLATED_NETWORK_NAME: str = Field(
+        default="isolated_nw", description="The name of the isolated network in docker."
+    )
+    DOCKER_PREFIX: str = Field(
+        default="brick-server-playground",
+        description="The docker prefix to use in app containers.",
+    )
+    APP_STATIC_DIR: pathlib.Path = Field(
+        default="app_static", description="The directory to save app static files."
+    )
+
+
+class BackendBaseSettings(BackendPlaygroundSettings, MinimalSettings):
     TITLE: str = "Brick Server Playground"
     VERSION: str = "0.1.0"
 
-    DEFAULT_ADMIN: str = decouple.config(
-        "DEFAULT_ADMIN", cast=str, default="example@gmail.com"
-    )
-    ISOLATED_NETWORK_NAME: str = decouple.config(
-        "ISOLATED_NETWORK_NAME", cast=str, default="isolated_nw"
-    )
-    DOCKER_PREFIX: str = decouple.config(
-        "DOCKER_PREFIX", cast=str, default="brick-server-playground"
-    )
-    APP_STATIC_DIR: str = decouple.config(
-        "APP_STATIC_DIR", cast=str, default=str(pathlib.Path("app_static").resolve())
-    )
-
-    class Config(BaseSettings.Config):
+    class Config(MinimalSettings.Config):
         env_file: str = f"{str(ROOT_DIR)}/.env"
