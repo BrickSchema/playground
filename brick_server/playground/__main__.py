@@ -3,6 +3,7 @@ import pathlib
 import click
 import uvicorn
 from click_default_group import DefaultGroup
+from loguru import logger
 
 from brick_server.playground.config.manager import settings
 
@@ -33,10 +34,26 @@ def serve() -> None:
 
 @click.command()
 def generate_docs():
-    from brick_server.minimal.config.settings.base import DatabaseMongoDBSettings
-    from settings_doc.main import generate
+    from brick_server.minimal.config.settings import base as minimal_base
+    from settings_doc.main import app
+    from typer.testing import CliRunner
 
-    docs_classes = [DatabaseMongoDBSettings]
+    from brick_server.playground.config.settings import base as playground_base
+
+    runner = CliRunner()
+    docs_classes = [
+        minimal_base.DatabaseMongoDBSettings,
+        minimal_base.DatabaseRedisSettings,
+        minimal_base.DatabaseTimescaleDBSettings,
+        minimal_base.DatabaseGraphDBSettings,
+        minimal_base.DatabaseInfluxDBSettings,
+        minimal_base.AuthGeneralSettings,
+        minimal_base.AuthCORSSettings,
+        minimal_base.AuthGoogleOAuthSettings,
+        minimal_base.BackendMinimalSettings,
+        minimal_base.BackendBrickSettings,
+        playground_base.BackendPlaygroundSettings,
+    ]
 
     docs_generated_path = (
         pathlib.Path(__file__).parent.parent.parent.absolute() / "docs" / "generated"
@@ -48,15 +65,23 @@ def generate_docs():
         output_path = docs_generated_path / f"{doc_class.__qualname__}.md"
         output_path.touch(exist_ok=True)
 
-        generate(
-            class_path=class_path,
-            output_format="md",
+        logger.info("Generate docs for class {} in {}", class_path, output_path)
+        result = runner.invoke(
+            app,
+            [
+                "generate",
+                "--class",
+                class_path,
+                "--output-format",
+                "markdown",
+                "--heading-offset",
+                "2",
+                "--update",
+                str(output_path),
+            ],
         )
-
-        print(class_path)
-        print(output_path)
-
-    pass
+        if result.exit_code != 0:
+            logger.error("Failed! Error message: {}", result.stdout)
 
 
 # @click.command()

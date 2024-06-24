@@ -3,6 +3,38 @@ theme:
   features:
     - content.code.copy
     - content.code.annotate
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+#    - navigation.tabs.sticky
+    - navigation.path
+    - navigation.top
+    - navigation.sections
+    - navigation.indexes
+    - navigation.expand
+    - toc.follow
+#    - toc.integrate
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      toggle:
+        icon: material/weather-night
+        name: Switch to system preference
 site_name: Brick Server Playground
 docs_dir: docs
 markdown_extensions:
@@ -20,3 +52,16 @@ markdown_extensions:
       alternate_style: true
 plugins:
   - include-markdown
+not_in_nav: /generated/**/*.md
+nav:
+  - Home: index.md
+  - Getting started:
+      - Deployment: deployment.md
+      - Initialization: init.md
+      - Configuration:
+          - config/index.md
+          - Database: config/db.md
+          - Authorization: config/auth.md
+          - Backend: config/backend.md
+  - Tutorial:
+      - BuildSys 2024: tutorial/buildsys2024.md
