@@ -1,7 +1,7 @@
 version: '3.5'
 services:
-  brick-server-postgres:
-    container_name: brick-server-postgres
+  sbos-postgres:
+    container_name: sbos-postgres
     image: timescale/timescaledb-postgis:latest-pg13
     environment: # Below secrets should be matched with the information in `.env` too.
       - POSTGRES_USER=bricker
@@ -9,7 +9,7 @@ services:
       - POSTGRES_DB=brick
       - PGDATA=/var/lib/postgresql/data/pgdata
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "35432:5432"
     volumes:
@@ -18,34 +18,34 @@ services:
         target: /docker-entrypoint-initdb.d/003_init_postgis.sh
         read_only: true
       - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
-  brick-server-graphdb:
-    container_name: brick-server-graphdb
+  sbos-graphdb:
+    container_name: sbos-graphdb
     image: w1zzard/graphdb-free:9.9.0
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "37200:7200"
-  brick-server-mongo:
-    container_name: brick-server-mongo
+  sbos-mongo:
+    container_name: sbos-mongo
     image: mongo:4.2.3-bionic
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "37017:27017"
-  brick-server-redis:
-    container_name: brick-server-redis
+  sbos-redis:
+    container_name: sbos-redis
     image: 'redis:5.0.8'
     command: redis-server --requirepass brick-demo
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "36379:6379"
-  brick-server:
-    container_name: brick-server
-    image: brick_server:minimal
+  sbos:
+    container_name: sbos
+    image: sbos:minimal
     restart: on-failure
     volumes:
-      - ./brick_server:/root/brick_server
+      - ./sbos:/root/sbos
       - ./tests:/root/tests
       - ./examples:/root/examples
       - /var/run/docker.sock:/var/run/docker.sock
@@ -56,24 +56,24 @@ services:
     ports:
       - "9000:9000"
     networks:
-      - brick-server-network
+      - sbos-network
       - isolated_nw
     environment:
       - DEBUG=true
-      - HOST=brick-server
-      - MONGO_HOST=brick-server-mongo
-      - TIMESCALE_HOST=brick-server-postgres
-      - BRICK_HOST=brick-server-virtuoso
-      - GRAPHDB_HOST=brick-server-graphdb
+      - HOST=sbos
+      - MONGO_HOST=sbos-mongo
+      - TIMESCALE_HOST=sbos-postgres
+      - BRICK_HOST=sbos-virtuoso
+      - GRAPHDB_HOST=sbos-graphdb
       - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID}
       - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET}
-    #      - GRAFANA_HOST=brick-server-grafana
+    #      - GRAFANA_HOST=sbos-grafana
     depends_on:
-      - brick-server-graphdb
+      - sbos-graphdb
     privileged: true
-    command: dockerize -wait http://brick-server-graphdb:7200/rest/repositories python3 -m brick_server.minimal
+    command: dockerize -wait http://sbos-graphdb:7200/rest/repositories python3 -m sbos.minimal
 #    entrypoint: /app/docker/start-reload.sh
 
 networks:
-  brick-server-network:
+  sbos-network:
   isolated_nw:

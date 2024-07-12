@@ -6,13 +6,13 @@ requires = ["poetry-core>=1.0.0"]
 
 [tool.poetry]
 authors = ["Brick Dev Team <x5fu@ucsd.edu>"]
-description = "brick server minimal"
+description = "sbos minimal"
 license = "BSD-3-Clause"
-name = "brick-server-minimal"
+name = "sbos-minimal"
 packages = [
-  {include = "brick_server"}
+  {include = "sbos"}
 ]
-repository = "https://gitlab.com/mesl/brickserver/brick-server-minimal"
+repository = "https://gitlab.com/mesl/brickserver/sbos-minimal"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
@@ -39,10 +39,10 @@ shapely = "^2.0.3"
 typing-inspect = "^0.9.0"
 uvicorn = {extras = ["standard"], version = "^0.29.0"}
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 asgi-lifespan = "^1.0.1"
 black = "^24.4.0"
-pre-commit = "^2.15.0"
+pre-commit = "^3.7.1"
 pytest = "^6.2.5"
 pytest-asyncio = "^0.15.1"
 pytest-depends = "^1.0.1"

@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     rm -rf /var/lib/apt/lists/*
 
 # install dockerize
-ENV DOCKERIZE_VERSION v0.6.1
+ENV DOCKERIZE_VERSION=v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -28,11 +28,11 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # install dependencies
 COPY pyproject.toml poetry.lock README.md /root/
-COPY brick_server/minimal/__init__.py /root/brick_server/minimal/
-RUN --mount=type=cache,target=/root/.cache poetry install --no-dev
+COPY sbos/minimal/__init__.py /root/sbos/minimal/
+RUN --mount=type=cache,target=/root/.cache poetry install --without dev
 COPY . /root
-RUN --mount=type=cache,target=/root/.cache poetry install --no-dev
+RUN --mount=type=cache,target=/root/.cache poetry install --without dev
 
 EXPOSE $PORT
 
-CMD python3 -m brick_server.minimal
+CMD python3 -m sbos.minimal

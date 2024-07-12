@@ -219,7 +219,7 @@
           "Entities"
         ],
         "summary": "Uplaod a Turtle file",
-        "description": "Upload a Turtle file. An example file: https://gitlab.com/jbkoh/brick-server-dev/blob/dev/examples/data/bldg.ttl",
+        "description": "Upload a Turtle file. An example file: https://gitlab.com/jbkoh/sbos-dev/blob/dev/examples/data/bldg.ttl",
         "operationId": "upload_brickapi_v1_entities_upload_post",
         "parameters": [
           {

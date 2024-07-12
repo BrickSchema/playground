@@ -6,12 +6,12 @@ from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
 from httpx import AsyncClient
 
-from brick_server.minimal.app import app as fastapi_app
-from brick_server.minimal.auth.jwt import create_jwt_token
-from brick_server.minimal.config.manager import settings
-from brick_server.minimal.interfaces.graphdb import GraphDB
-from brick_server.minimal.models import User
-from brick_server.minimal.schemas import Domain
+from sbos.minimal.app import app as fastapi_app
+from sbos.minimal.auth.jwt import create_jwt_token
+from sbos.minimal.config.manager import settings
+from sbos.minimal.interfaces.graphdb import GraphDB
+from sbos.minimal.models import User
+from sbos.minimal.schemas import Domain
 from tests.common import DOMAIN_BASE, TEST_DOMAIN_NAME
 from tests.utils import (
     create_postgres_db,

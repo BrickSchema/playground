@@ -3,9 +3,9 @@ import asyncpg
 from mongoengine import connect as mongo_connect
 from tenacity import retry, stop_after_delay, wait_exponential
 
-from brick_server.minimal.config.manager import settings
-from brick_server.minimal.interfaces.graphdb import GraphDB
-from brick_server.minimal.models import User
+from sbos.minimal.config.manager import settings
+from sbos.minimal.interfaces.graphdb import GraphDB
+from sbos.minimal.models import User
 
 
 def register_admin(user_id: str) -> User:
