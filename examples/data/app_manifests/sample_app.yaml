@@ -1,5 +1,5 @@
 name: bacnet_driver
-description: BACnet driver that can read data from devices and control them, connecting them with Brick Server.
+description: BACnet driver that can read data from devices and control them, connecting them with SBOS.
 permission_templates:
   all_points:
     queries:

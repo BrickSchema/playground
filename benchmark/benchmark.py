@@ -10,18 +10,18 @@ from loguru import logger
 from tenacity import retry, stop_after_delay, wait_exponential
 from tqdm import tqdm
 
-from brick_server.playground.config import FastAPIConfig
+from sbos.playground.config import FastAPIConfig
 
 init_settings(FastAPIConfig)
-from brick_server.minimal.auth.authorization import create_user as brick_create_user
-from brick_server.minimal.auth.jwt import create_jwt_token
-from brick_server.minimal.dbs import mongo_connection
+from sbos.minimal.auth.authorization import create_user as brick_create_user
+from sbos.minimal.auth.jwt import create_jwt_token
+from sbos.minimal.dbs import mongo_connection
 
 _ = mongo_connection
-from brick_server.minimal.models import get_doc_or_none
+from sbos.minimal.models import get_doc_or_none
 
-from brick_server.playground.dbs import init_mongodb
-from brick_server.playground.models import App, Domain, User
+from sbos.playground.dbs import init_mongodb
+from sbos.playground.models import App, Domain, User
 
 """global config"""
 API_BASE = "http://127.0.0.1:9000/brickapi/v1"
@@ -371,7 +371,7 @@ async def test_5(iterations=1000, warmup=False):
 def reset_mongodb():
     from mongoengine import connect as mongo_connect
 
-    from brick_server.playground.config.manager import settings
+    from sbos.playground.config.manager import settings
 
     logger.info("Reset database")
     db = mongo_connect(

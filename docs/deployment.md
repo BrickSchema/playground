@@ -2,7 +2,7 @@
 
 ## Clone the repositories
 
-First, we need to clone `brick-server-minimal`, `brick-server-playground`, `brick-server-frontend`, and `genie-brickified` repos into a same directory.
+First, we need to clone `sbos-minimal`, `sbos-playground`, `sbos-frontend`, and `genie-brickified` repos into a same directory.
 
 ```bash
 mkdir brick

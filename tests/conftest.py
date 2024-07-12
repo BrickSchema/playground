@@ -3,15 +3,15 @@ from typing import Any, AsyncGenerator, Generator
 
 import pytest
 from asgi_lifespan import LifespanManager
-from brick_server.minimal.app import app as fastapi_app
-from brick_server.minimal.auth.jwt import create_jwt_token
-from brick_server.minimal.interfaces.graphdb import GraphDB
-from brick_server.minimal.models import User
-from brick_server.minimal.schemas import Domain
 from fastapi import FastAPI
 from httpx import AsyncClient
+from sbos.minimal.app import app as fastapi_app
+from sbos.minimal.auth.jwt import create_jwt_token
+from sbos.minimal.interfaces.graphdb import GraphDB
+from sbos.minimal.models import User
+from sbos.minimal.schemas import Domain
 
-from brick_server.playground.config.manager import settings
+from sbos.playground.config.manager import settings
 from tests.common import DOMAIN_BASE, TEST_DOMAIN_NAME
 from tests.utils import (
     create_postgres_db,

@@ -12,7 +12,7 @@ services:
         #!/bin/bash
         psql -U $$POSTGRES_USER $$POSTGRES_DB -c "CREATE EXTENSION IF NOT EXISTS postgis CASCADE;"
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "35432:5432"
     volumes:
@@ -21,7 +21,7 @@ services:
   graphdb:
     image: w1zzard/graphdb-free:9.9.0
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "37200:7200"
     volumes:
@@ -29,7 +29,7 @@ services:
   mongo:
     image: mongo:4.4-focal
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "37017:27017"
     volumes:
@@ -38,25 +38,25 @@ services:
     image: 'redis:5.0.8'
     command: redis-server --requirepass brick-demo
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "36379:6379"
   core:
-    image: tcimba/brick-server:playground
+    image: tcimba/sbos:playground
     build:
       context: ..
-      dockerfile: ./brick-server-playground/Dockerfile
+      dockerfile: ./sbos-playground/Dockerfile
       args:
         DOCKER_BUILDKIT: 1
     restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./app_static:/root/brick-server-playground/app_static
+      - ./app_static:/root/sbos-playground/app_static
 
     ports:
       - "9000:9000"
     networks:
-      - brick-server-network
+      - sbos-network
       - isolated_nw
     environment:
       - DEBUG=false
@@ -66,7 +66,7 @@ services:
       - TIMESCALE_HOST=postgres
       - GRAPHDB_HOST=graphdb
       - REDIS_HOST=redis
-      - ISOLATED_NETWORK_NAME=brick-server-playground_isolated_nw
+      - ISOLATED_NETWORK_NAME=sbos-playground_isolated_nw
       - WORKERS=${WORKERS:-4}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-}
       - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID:-}
@@ -76,7 +76,7 @@ services:
     depends_on:
       - graphdb
     privileged: true
-    command: dockerize -wait http://graphdb:7200/rest/repositories python3 -m brick_server.playground
+    command: dockerize -wait http://graphdb:7200/rest/repositories python3 -m sbos.playground
 #    entrypoint: /app/docker/start-reload.sh
   mongo-express:
     image: mongo-express
@@ -89,7 +89,7 @@ services:
 #      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME:-root}:${MONGO_PASSWORD:-pass}@mongo:27017/
       ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "38082:8081"
     depends_on:
@@ -103,10 +103,10 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=brick-demo
     networks:
-      - brick-server-network
+      - sbos-network
     ports:
       - "38081:8081"
 
 networks:
-  brick-server-network:
+  sbos-network:
   isolated_nw:

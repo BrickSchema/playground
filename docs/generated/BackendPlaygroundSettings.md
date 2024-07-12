@@ -12,7 +12,7 @@ The name of the isolated network in docker.
 
 ### `DOCKER_PREFIX`
 
-*Optional*, default value: `brick-server-playground`
+*Optional*, default value: `sbos-playground`
 
 The docker prefix to use in app containers.
 

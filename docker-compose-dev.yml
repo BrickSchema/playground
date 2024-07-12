@@ -8,8 +8,8 @@ services:
       WORKERS: 1
 #      FRONTEND_URL: http://localhost:8000
     volumes:
-      - ./static:/root/brick-server-playground/static
-      - ./brick_server/playground:/root/brick-server-playground/brick_server/playground
-      - ../brick-server-minimal/brick_server/minimal:/root/brick-server-minimal/brick_server/minimal
-      - ./tests:/root/brick-server-playground/tests
-      - ./benchmark:/root/brick-server-playground/benchmark
+      - ./static:/root/sbos-playground/static
+      - ./sbos/playground:/root/sbos-playground/sbos/playground
+      - ../sbos-minimal/sbos/minimal:/root/sbos-minimal/sbos/minimal
+      - ./tests:/root/sbos-playground/tests
+      - ./benchmark:/root/sbos-playground/benchmark

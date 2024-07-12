@@ -6,20 +6,20 @@ requires = ["poetry-core>=1.0.0"]
 
 [tool.poetry]
 authors = ["Brick Dev Team <x5fu@ucsd.edu>"]
-description = "brick server playground"
+description = "sbos playground"
 license = "BSD-3-Clause"
-name = "brick-server-playground"
+name = "sbos-playground"
 packages = [
-  {include = "brick_server"}
+  {include = "sbos"}
 ]
-repository = "https://gitlab.com/mesl/brickserver/brick-server-playground"
+repository = "https://gitlab.com/mesl/brickserver/sbos-playground"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-brick-server-minimal = {develop = true, path = "../brick-server-minimal"}
-docker = "^6.1.3"
+docker = "^7.1.0"
 patool = "^2.2.0"
 python = "^3.10"
+sbos-minimal = {develop = true, path = "../sbos-minimal"}
 # torch = {version = "^2.2.0+cpu", source = "pytorch-cpu", markers = "extra!='cuda'"}
 #
 # [tool.poetry.group.remote]
@@ -42,12 +42,12 @@ python = "^3.10"
 # priority = "explicit"
 tqdm = "^4.66.1"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 asgi-lifespan = "^1.0.1"
 black = "^24.4.0"
 mkdocs-include-markdown-plugin = "^6.2.1"
 mkdocs-material = "^9.5.26"
-pre-commit = "^3.7.0"
+pre-commit = "^3.7.1"
 pytest = "^6.2.5"
 pytest-asyncio = "^0.15.1"
 pytest-depends = "^1.0.1"

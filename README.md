@@ -2,7 +2,7 @@
 
 1. git clone both minimal, playground, brick-frontend, and genie-brickified repo into a same directory
 2. cd into playground and `docker-compose up --build -d` (make sure the context is correct if not using `docker-compose` but `docker build` and make sure the `docker-compose` version is at least `v2`)
-3. docker exec and `python -m brick_server.playground generate-jwt --user-id=admin --create` and authorize with it in the swagger UI
+3. docker exec and `python -m sbos.playground generate-jwt --user-id=admin --create` and authorize with it in the swagger UI
 4. create domain and then init domain
 5. through graphdb UI import ref-schema
 6. upload .ttl
@@ -15,4 +15,4 @@
 
 ## Play
 
-`python -m brick_server.playground generate-jwt --user-id=admin --app-name=genie --domain-name=Center_Hall --create`
+`python -m sbos.playground generate-jwt --user-id=admin --app-name=genie --domain-name=Center_Hall --create`

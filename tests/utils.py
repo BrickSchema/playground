@@ -1,12 +1,12 @@
 import arrow
 import asyncpg
-from brick_server.minimal.interfaces.graphdb import GraphDB
 from mongoengine import connect as mongo_connect
+from sbos.minimal.interfaces.graphdb import GraphDB
 from tenacity import retry, stop_after_delay, wait_exponential
 
-from brick_server.playground.auth.jwt import create_jwt_token
-from brick_server.playground.config.manager import settings
-from brick_server.playground.models import App, Domain, User
+from sbos.playground.auth.jwt import create_jwt_token
+from sbos.playground.config.manager import settings
+from sbos.playground.models import App, Domain, User
 
 
 def register_user(user_id: str, admin: bool = False) -> User:
