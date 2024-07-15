@@ -1,0 +1,44 @@
+{
+  "name": "genie_revamp",
+  "version": "0.1.0",
+  "private": false,
+  "dependencies": {
+    "axios": "^1.4.0",
+    "faker": "^4.1.0",
+    "history": "^4.9.0",
+    "install": "^0.12.2",
+    "jsonwebtoken": "^8.5.1",
+    "jwt-decode": "^2.2.0",
+    "react": "^16.8.6",
+    "react-cookie": "^4.0.3",
+    "react-dom": "^16.8.6",
+    "react-input-slider": "^5.0.8",
+    "react-live-clock": "^3.1.0",
+    "react-meter-bar": "^1.0.2",
+    "react-router": "^3.2.0",
+    "react-router-dom": "^5.0.0",
+    "react-scripts": "2.1.8",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^0.86.0"
+  },
+  "scripts": {
+    "start": "cross-env HOST=127.0.0.1 HTTPS=false PORT=11003 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "proxy": "https://0.0.0.0:5000",
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "homepage": "http://127.0.0.1:9000/brickapi/v1/apps/genie/static/"
+}
