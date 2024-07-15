@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+message Cname {
+    string container_name = 1;
+}
+
+message RevokeAllRequest {
+    string container_name = 1;
+    int32 option = 2;
+}
+
+message Response {
+    int32 status = 1;
+}
+
+message ExternalAccessRequest {
+    string container_name = 1;
+    string container_ip = 2;
+    string protocol = 3;
+    string dst_ip = 4;
+    string dst_port = 5;
+}
+
+message HostAccessRequest {
+    string container_name = 1;
+    string container_ip = 2;
+    string protocol = 3;
+    string dst_port = 4;
+}
+
+service IptablesManager {
+    rpc CreateChain(Cname) returns (Response) {}
+    rpc DeleteChain(Cname) returns (Response) {}
+    rpc GrantExternalAccess(ExternalAccessRequest) returns (Response) {}
+    rpc RevokeExternalAccess(ExternalAccessRequest) returns (Response) {}
+    rpc GrantHostAccess(HostAccessRequest) returns (Response) {}
+    rpc RevokeHostAccess(HostAccessRequest) returns (Response) {}
+    rpc RevokeAllAccess(RevokeAllRequest) returns (Response) {}
+}

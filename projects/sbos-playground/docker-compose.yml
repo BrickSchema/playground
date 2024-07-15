@@ -1,0 +1,112 @@
+version: '3.5'
+services:
+  postgres:
+    image: timescale/timescaledb-postgis:latest-pg13
+    environment: # Below secrets should be matched with the information in `.env` too.
+      - POSTGRES_USER=bricker
+      - POSTGRES_PASSWORD=brick-demo
+      - POSTGRES_DB=brick
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - |
+        INIT_POSTGIS=
+        #!/bin/bash
+        psql -U $$POSTGRES_USER $$POSTGRES_DB -c "CREATE EXTENSION IF NOT EXISTS postgis CASCADE;"
+    networks:
+      - sbos-network
+    ports:
+      - "35432:5432"
+    volumes:
+      - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
+    command: /bin/bash -c "echo \"$$INIT_POSTGIS\" > /docker-entrypoint-initdb.d/002_init_postgis.sh; docker-entrypoint.sh postgres;"
+  graphdb:
+    image: w1zzard/graphdb-free:9.9.0
+    networks:
+      - sbos-network
+    ports:
+      - "37200:7200"
+    volumes:
+      - ../graphdbData:/opt/graphdb/home
+  mongo:
+    image: mongo:4.4-focal
+    networks:
+      - sbos-network
+    ports:
+      - "37017:27017"
+    volumes:
+      - ../mongoData:/data/db
+  redis:
+    image: 'redis:5.0.8'
+    command: redis-server --requirepass brick-demo
+    networks:
+      - sbos-network
+    ports:
+      - "36379:6379"
+  core:
+    image: tcimba/sbos:playground
+    build:
+      context: ..
+      dockerfile: ./sbos-playground/Dockerfile
+      args:
+        DOCKER_BUILDKIT: 1
+    restart: on-failure
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./app_static:/root/sbos-playground/app_static
+
+    ports:
+      - "9000:9000"
+    networks:
+      - sbos-network
+      - isolated_nw
+    environment:
+      - DEBUG=false
+      - CACHE=${CACHE:-true}
+      - HOST=0.0.0.0
+      - MONGO_HOST=mongo
+      - TIMESCALE_HOST=postgres
+      - GRAPHDB_HOST=graphdb
+      - REDIS_HOST=redis
+      - ISOLATED_NETWORK_NAME=sbos-playground_isolated_nw
+      - WORKERS=${WORKERS:-4}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-}
+      - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID:-}
+      - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8000}
+#      - GRAFANA_HOST=grafana
+    depends_on:
+      - graphdb
+    privileged: true
+    command: dockerize -wait http://graphdb:7200/rest/repositories python3 -m sbos.playground
+#    entrypoint: /app/docker/start-reload.sh
+  mongo-express:
+    image: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME:-root}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD:-pass}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME:-r  oot}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-pass}
+#      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME:-root}:${MONGO_PASSWORD:-pass}@mongo:27017/
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+    networks:
+      - sbos-network
+    ports:
+      - "38082:8081"
+    depends_on:
+      - mongo
+
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=brick-demo
+    networks:
+      - sbos-network
+    ports:
+      - "38081:8081"
+
+networks:
+  sbos-network:
+  isolated_nw:

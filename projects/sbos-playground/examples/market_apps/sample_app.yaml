@@ -1,0 +1,15 @@
+name: bacnet_driver
+description: BACnet driver that can read data from devices and control them, connecting them with SBOS.
+permission_templates:
+  all_points:
+    queries:
+      - brickdb: >
+         select ?point where {
+           ?point a/rdfs:subClassOf* brick:Point.
+         }
+    common_variables:
+      - - ?point
+    target_variables:
+      - ?point
+    permission_type: AWRO
+callback_url: https://bd-datas2.ucsd.edu:9001/apps/bacnet_driver

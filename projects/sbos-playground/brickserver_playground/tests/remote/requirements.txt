@@ -1,0 +1,10 @@
+arrow
+authlib
+cryptography
+PyJWT<2.0.0
+pytest
+pytest-env
+pytest-order
+PyYAML
+rdflib
+requests

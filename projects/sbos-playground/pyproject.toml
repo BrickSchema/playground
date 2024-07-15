@@ -1,0 +1,64 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool]
+
+[tool.poetry]
+authors = ["Brick Dev Team <x5fu@ucsd.edu>"]
+description = "sbos playground"
+license = "BSD-3-Clause"
+name = "sbos-playground"
+packages = [
+  {include = "sbos"}
+]
+repository = "https://gitlab.com/mesl/brickserver/sbos-playground"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+docker = "^7.1.0"
+patool = "^2.2.0"
+python = "^3.10"
+sbos-minimal = {develop = true, path = "../sbos-minimal"}
+# torch = {version = "^2.2.0+cpu", source = "pytorch-cpu", markers = "extra!='cuda'"}
+#
+# [tool.poetry.group.remote]
+# optional = true
+#
+# [tool.poetry.group.remote.dependencies]
+# torch = {version = "^2.2.0+cu121", source = "pytorch-cu121", markers = "extra=='cuda'"}
+#
+# [tool.poetry.extras]
+# cuda = []
+#
+# [[tool.poetry.source]]
+# name = "pytorch-cpu"
+# url = "https://download.pytorch.org/whl/cpu"
+# priority = "explicit"
+#
+# [[tool.poetry.source]]
+# name = "pytorch-cu121"
+# url = "https://download.pytorch.org/whl/cu121"
+# priority = "explicit"
+tqdm = "^4.66.1"
+
+[tool.poetry.group.dev.dependencies]
+asgi-lifespan = "^1.0.1"
+black = "^24.4.0"
+mkdocs-include-markdown-plugin = "^6.2.1"
+mkdocs-material = "^9.5.26"
+pre-commit = "^3.7.1"
+pytest = "^6.2.5"
+pytest-asyncio = "^0.15.1"
+pytest-depends = "^1.0.1"
+pytest-env = "^0.6.2"
+pytest-ordering = "^0.6"
+settings-doc = "^4.0.1"
+tenacity = "^8.1.0"
+
+[tool.pycln]
+all = true
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore::DeprecationWarning"
+log_cli = 1
