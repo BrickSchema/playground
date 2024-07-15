@@ -1,0 +1,58 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool]
+
+[tool.poetry]
+authors = ["Brick Dev Team <x5fu@ucsd.edu>"]
+description = "sbos minimal"
+license = "BSD-3-Clause"
+name = "sbos-minimal"
+packages = [
+  {include = "sbos"}
+]
+repository = "https://gitlab.com/mesl/brickserver/sbos-minimal"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+aiocache = {extras = ["redis"], version = "^0.12.1"}
+aiofiles = "^0.7.0"
+arrow = "^1.3.0"
+asyncpg = "^0.29.0"
+click-default-group = "^1.2.2"
+fastapi = "^0.110.1"
+fastapi-restful = "^0.5.0"
+fastapi-users = {extras = ["beanie", "oauth"], version = "^13.0.0"}
+grpcio = "^1.63.0"
+httpx = "^0.27.0"
+influxdb-client = {extras = ["async"], version = "^1.37.0"}
+loguru = "^0.7.2"
+protobuf = "^3.17.3"
+pydantic = "^2.7.0"
+pydantic-settings = "^2.2.1"
+pyhumps = "^3.8.0"
+python = "^3.10"
+python-decouple = "^3.8"
+python-multipart = "^0.0.9"
+shapely = "^2.0.3"
+typing-inspect = "^0.9.0"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+
+[tool.poetry.group.dev.dependencies]
+asgi-lifespan = "^1.0.1"
+black = "^24.4.0"
+pre-commit = "^3.7.1"
+pytest = "^6.2.5"
+pytest-asyncio = "^0.15.1"
+pytest-depends = "^1.0.1"
+pytest-env = "^0.6.2"
+pytest-ordering = "^0.6"
+tenacity = "^8.1.0"
+
+[tool.pycln]
+all = true
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore::DeprecationWarning"
+log_cli = 1
