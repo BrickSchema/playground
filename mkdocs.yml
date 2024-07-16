@@ -24,7 +24,7 @@ theme:
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: black
+      primary: indigo
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
@@ -54,14 +54,15 @@ plugins:
   - include-markdown
 not_in_nav: /generated/**/*.md
 nav:
-  - Home: index.md
+  - Home: about.md
   - Getting started:
       - Deployment: deployment.md
       - Initialization: init.md
       - Configuration:
-          - config/index.md
+          # - config/index.md
           - Database: config/db.md
           - Authorization: config/auth.md
           - Backend: config/backend.md
-  - Tutorial:
-      - BuildSys 2024: tutorial/buildsys2024.md
+  - Tutorials:
+      - Tutorial@BuildSys24!: tutorial/buildsys2024.md
+      - Write a Brick based building app: tutorial/write_an_app.md
