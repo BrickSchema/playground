@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "sbos"
+version = "0.1.0"
+description = ""
+authors = ["Liu Yihao <liuyh970615@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mkdocs-material = "^9.5.29"
+mkdocs-include-markdown-plugin = "^6.2.1"
+sbos-minimal = {develop = true, path = "projects/sbos-minimal"}
+sbos-playground = {develop = true, path = "projects/sbos-playground"}
+settings-doc = "^4.0.1"
+poethepoet = "^0.27.0"
+
+[tool.poe.tasks."minimal:build"]
+cmd = "docker build . -t tcimba/sbos:minimal"
+cwd = "projects/sbos-minimal"
+
+[tool.poe.tasks."_playground:build"]
+cmd = "docker build . -t tcimba/sbos:playground"
+cwd = "projects/sbos-playground"
+
+[tool.poe.tasks."playground:dev"]
+cmd = "docker compose -f docker-compose.yml -f docker-compose-dev.yml up -d --build"
+cwd = "projects/sbos-playground"
+
+[tool.poe.tasks."_playground:prod"]
+cmd = "docker compose up -d"
+cwd = "projects/sbos-playground"
+
+[tool.poe.tasks]
+"doc:gen" = "python -m sbos.playground generate-docs"
+"_doc:dev" = "mkdocs serve"
+"doc:dev" = ["doc:gen", "_doc:dev"]
+"playground:build" = ["minimal:build", "_playground:build"]
+"playground:prod" = ["playground:build", "_playground:prod"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

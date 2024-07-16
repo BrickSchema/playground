@@ -2,7 +2,7 @@
 FROM tiangolo/uvicorn-gunicorn:python3.10-slim
 
 ENV HOME="/root"
-WORKDIR /root
+WORKDIR /root/sbos-minimal
 
 # install apt dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
@@ -27,10 +27,10 @@ RUN python3 -m virtualenv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # install dependencies
-COPY pyproject.toml poetry.lock README.md /root/
-COPY sbos/minimal/__init__.py /root/sbos/minimal/
+COPY pyproject.toml poetry.lock README.md /root/sbos-minimal/
+COPY sbos/minimal/__init__.py /root/sbos-minimal/sbos/minimal/
 RUN --mount=type=cache,target=/root/.cache poetry install --without dev
-COPY . /root
+COPY . /root/sbos-minimal
 RUN --mount=type=cache,target=/root/.cache poetry install --without dev
 
 EXPOSE $PORT

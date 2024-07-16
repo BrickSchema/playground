@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     rm -rf /var/lib/apt/lists/*
 
 # install dockerize
-ENV DOCKERIZE_VERSION v0.6.1
+ENV DOCKERIZE_VERSION=v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -36,16 +36,17 @@ RUN python3 -m virtualenv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # install dependencies
-COPY ./sbos-minimal/pyproject.toml ./sbos-minimal/poetry.lock ./sbos-minimal/README.md /root/sbos-minimal/
-COPY ./sbos-playground/pyproject.toml ./sbos-playground/poetry.lock ./sbos-playground/README.md /root/sbos-playground/
-COPY ./sbos-minimal/sbos/minimal/__init__.py /root/sbos-minimal/sbos/minimal/
-COPY ./sbos-playground/sbos/playground/__init__.py /root/sbos-playground/sbos/playground/
+COPY pyproject.toml poetry.lock README.md /root/sbos-playground/
+COPY sbos/playground/__init__.py /root/sbos-playground/sbos/playground/
+COPY --from=sbos:minimal /root/sbos-minimal/pyproject.toml /root/sbos-minimal/poetry.lock /root/sbos-minimal/README.md /root/sbos-minimal/
+COPY --from=sbos:minimal /root/sbos-minimal/sbos/minimal/__init__.py /root/sbos-minimal/sbos/minimal/
 RUN --mount=type=cache,target=/root/.cache poetry install --without dev
 RUN --mount=type=cache,target=/root/.cache pip3 install torch --index-url https://download.pytorch.org/whl/cpu
-COPY ./sbos-minimal /root/sbos-minimal/
-COPY ./sbos-playground /root/sbos-playground/
-# RUN rm /root/sbos-playground/.env/
+COPY . /root/sbos-playground
+COPY --from=sbos:minimal /root/sbos-minimal /root/sbos-minimal
 RUN --mount=type=cache,target=/root/.cache poetry install --without dev
+
+# RUN rm /root/sbos-playground/.env/
 
 EXPOSE $PORT
 

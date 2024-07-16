@@ -7,6 +7,7 @@ poetry.toml
 venv
 .git
 app_static
+data
 
 # Created by https://www.toptal.com/developers/gitignore/api/vscode,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=vscode,python

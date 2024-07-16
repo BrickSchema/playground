@@ -2,7 +2,17 @@ version: '3.5'
 services:
 #  mongo:
 #    image: mongo:5.0-focal
+  core-minimal:
+    image: tcimba/sbos:minimal
+    build:
+      context: ../sbos-minimal
+      args:
+        DOCKER_BUILDKIT: 1
+    restart: no
+    entrypoint: [ "echo", "core-minimal is a dummy service for development" ]
   core:
+    depends_on:
+      - core-minimal
     environment:
       DEBUG: true
       WORKERS: 1

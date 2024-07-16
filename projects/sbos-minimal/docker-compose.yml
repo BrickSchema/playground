@@ -1,7 +1,6 @@
 version: '3.5'
 services:
-  sbos-postgres:
-    container_name: sbos-postgres
+  postgres:
     image: timescale/timescaledb-postgis:latest-pg13
     environment: # Below secrets should be matched with the information in `.env` too.
       - POSTGRES_USER=bricker
@@ -18,34 +17,30 @@ services:
         target: /docker-entrypoint-initdb.d/003_init_postgis.sh
         read_only: true
       - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
-  sbos-graphdb:
-    container_name: sbos-graphdb
+  graphdb:
     image: w1zzard/graphdb-free:9.9.0
     networks:
       - sbos-network
     ports:
       - "37200:7200"
-  sbos-mongo:
-    container_name: sbos-mongo
+  mongo:
     image: mongo:4.2.3-bionic
     networks:
       - sbos-network
     ports:
       - "37017:27017"
-  sbos-redis:
-    container_name: sbos-redis
+  redis:
     image: 'redis:5.0.8'
     command: redis-server --requirepass brick-demo
     networks:
       - sbos-network
     ports:
       - "36379:6379"
-  sbos:
-    container_name: sbos
-    image: sbos:minimal
+  core:
+    image: tcimba/sbos:minimal
     restart: on-failure
     volumes:
-      - ./sbos:/root/sbos
+      - ./sbos/minimal:/root/sbos-minimal/sbos/minimal
       - ./tests:/root/tests
       - ./examples:/root/examples
       - /var/run/docker.sock:/var/run/docker.sock
@@ -60,11 +55,11 @@ services:
       - isolated_nw
     environment:
       - DEBUG=true
-      - HOST=sbos
-      - MONGO_HOST=sbos-mongo
-      - TIMESCALE_HOST=sbos-postgres
-      - BRICK_HOST=sbos-virtuoso
-      - GRAPHDB_HOST=sbos-graphdb
+      - HOST=core
+      - MONGO_HOST=mongo
+      - TIMESCALE_HOST=postgres
+      - BRICK_HOST=virtuoso
+      - GRAPHDB_HOST=graphdb
       - OAUTH_GOOGLE_CLIENT_ID=${OAUTH_GOOGLE_CLIENT_ID}
       - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET}
     #      - GRAFANA_HOST=sbos-grafana

@@ -56,7 +56,7 @@ def generate_docs():
     ]
 
     docs_generated_path = (
-        pathlib.Path(__file__).parent.parent.parent.absolute() / "docs" / "generated"
+        pathlib.Path.cwd() / "docs" / "generated"
     )
     docs_generated_path.mkdir(parents=True, exist_ok=True)
 

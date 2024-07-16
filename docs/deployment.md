@@ -2,24 +2,20 @@
 
 ## Clone the repositories
 
-First, we need to clone `sbos-minimal`, `sbos-playground`, `sbos-frontend`, and `genie-brickified` repos into a same directory.
+First, we need to clone the repository and work in the project directory.
 
 ```bash
-mkdir brick
-git clone https://github.com/BrickSchema/brick-example-server
 git clone https://github.com/BrickSchema/playground
-git clone
+cd playground
 ```
 
 ## Configuration
 
-Create a `.env` file in the playground directory. The file can be used to configure the playground server.
+Create a `.env` file in the project root directory. The file can be used to configure the playground server.
 The detailed configurable items can be found [here](config/index.md).
 
 ```bash
-cd playground
 touch .env
-
 ```
 
 ## Deploy the server

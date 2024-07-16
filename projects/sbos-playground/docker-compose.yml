@@ -16,7 +16,7 @@ services:
     ports:
       - "35432:5432"
     volumes:
-      - ../psqlData:/var/lib/postgresql/data # change the path to yours accordingly
+      - ./data/psqlData:/var/lib/postgresql/data # change the path to yours accordingly
     command: /bin/bash -c "echo \"$$INIT_POSTGIS\" > /docker-entrypoint-initdb.d/002_init_postgis.sh; docker-entrypoint.sh postgres;"
   graphdb:
     image: w1zzard/graphdb-free:9.9.0
@@ -25,7 +25,7 @@ services:
     ports:
       - "37200:7200"
     volumes:
-      - ../graphdbData:/opt/graphdb/home
+      - ./data/graphdbData:/opt/graphdb/home
   mongo:
     image: mongo:4.4-focal
     networks:
@@ -33,7 +33,7 @@ services:
     ports:
       - "37017:27017"
     volumes:
-      - ../mongoData:/data/db
+      - ./data/mongoData:/data/db
   redis:
     image: 'redis:5.0.8'
     command: redis-server --requirepass brick-demo
@@ -44,15 +44,13 @@ services:
   core:
     image: tcimba/sbos:playground
     build:
-      context: ..
-      dockerfile: ./sbos-playground/Dockerfile
+      context: .
       args:
         DOCKER_BUILDKIT: 1
     restart: on-failure
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./app_static:/root/sbos-playground/app_static
-
     ports:
       - "9000:9000"
     networks:
