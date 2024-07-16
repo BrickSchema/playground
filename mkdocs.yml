@@ -54,7 +54,7 @@ plugins:
   - include-markdown
 not_in_nav: /generated/**/*.md
 nav:
-  - Home: about.md
+  - Home: index.md
   - Getting started:
       - Deployment: deployment.md
       - Initialization: init.md
