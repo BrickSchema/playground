@@ -1,29 +1,50 @@
 # Configuration
 
-Usually a `.env` file is created in the project root directory. 
+## Setup
+
+### Env File
+
+Usually a `.env` file is created in the directory **`projects/sbos-playground`**. 
 The file can be used to configure the playground server.
 
-For example, if the default server port should be changed from `9000` to `10000`, 
-the following line can be added in the `.env` file:
+!!! warning
 
-```dotenv title=".env"
-SERVER_PORT=10000
-```
+    Make sure you place the `.env` file in the correct directory.
+
+
+!!! example
+
+    If the default server port should be changed from `9000` to `10000`, 
+    the following line can be added in the `.env` file:
+    
+    ```dotenv title=".env"
+    SERVER_PORT=10000
+    ```
+
+### Environment Variables
 
 Alternatively, environment variables can also be used, and its priority is higher.
 
-```bash
-export SERVER_PORT=10000
-```
+!!! example
+
+    ```bash
+    export SERVER_PORT=10000
+    ```
+
+### Other
+
+Configuration can also be setup in other places.
 
 For detailed environment variables precedence rules, check the section [Environment Variables Precedence](#environment-variables-precedence).
+
+
+## Configuration List
 
 !!! note
 
     If docker-compose is used to deploy the service, and the configuration entry is not listed in the compose file,
     the entry should be added to the "environment" section manually.
 
-## Configuration List
 
 There are three types of configurations:
 

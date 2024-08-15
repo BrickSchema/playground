@@ -11,12 +11,9 @@ cd playground
 
 ## Configuration
 
-Create a `.env` file in the project root directory. The file can be used to configure the playground server.
-The detailed configurable items can be found [here](config/index.md).
+Playground can be configured with various options. 
+Please follow this [guide](config/index.md) to configure it.
 
-```bash
-touch .env
-```
 
 ## Deploy the server
 
@@ -32,8 +29,15 @@ touch .env
         and make sure the `docker-compose` version is at least `v2`
 
 === "Direct"
-
+    
     (Not yet completed)
+    
+    The project is managed by `poetry` and `poe`.
+    
+    ```bash
+    poetry install
+    poe 
+    ```
 
 Then, open `http://localhost:9000/brickapi/v1/docs`. If the swagger API page is shown, congratulations!
 Now you can move to the [next step](init.md) in initialize playground.

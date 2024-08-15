@@ -28,6 +28,9 @@ cwd = "projects/sbos-playground"
 cmd = "docker compose -f docker-compose.yml -f docker-compose-dev.yml up -d --build"
 cwd = "projects/sbos-playground"
 
+[tool.poe.tasks."playground:dev:local"]
+cmd = "python -m sbos.playground serve"
+
 [tool.poe.tasks."_playground:prod"]
 cmd = "docker compose up -d"
 cwd = "projects/sbos-playground"
