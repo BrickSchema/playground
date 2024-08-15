@@ -39,6 +39,10 @@ site_name: SBOS Playground
 docs_dir: docs
 markdown_extensions:
   - admonition
+  - attr_list
+  - def_list
+  - toc:
+      permalink: true
   - pymdownx.details
   - pymdownx.highlight:
       anchor_linenums: true
@@ -50,6 +54,7 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.magiclink
 plugins:
   - include-markdown
 not_in_nav: /generated/**/*.md
@@ -59,7 +64,7 @@ nav:
       - Deployment: deployment.md
       - Initialization: init.md
       - Configuration:
-          # - config/index.md
+          - config/index.md
           - Database: config/db.md
           - Authorization: config/auth.md
           - Backend: config/backend.md

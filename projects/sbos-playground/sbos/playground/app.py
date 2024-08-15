@@ -43,9 +43,10 @@ def initialize_backend_application() -> fastapi.FastAPI:
 
     register_error_handlers(app)
 
-    from sbos.playground.services import router as api_endpoint_router
+    from sbos.playground.services import router as api_endpoint_router, redirect_docs
 
     app.include_router(router=api_endpoint_router, prefix=settings.API_PREFIX)
+    app.get("/", include_in_schema=False)(redirect_docs)
 
     return app
 

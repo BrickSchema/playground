@@ -1,8 +1,8 @@
 # Deployment
 
-## Clone the repositories
+## Clone the repository
 
-First, we need to clone the repository and work in the project directory.
+SBOS is managed as a mono-repo. Clone the repository and work in the project directory.
 
 ```bash
 git clone https://github.com/BrickSchema/playground
@@ -20,7 +20,7 @@ touch .env
 
 ## Deploy the server
 
-=== "Docker (recommended)"
+=== "Docker Compose (recommended)"
 
     In the playground directory, run
 
