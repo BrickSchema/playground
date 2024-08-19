@@ -45,5 +45,5 @@ Please follow this [guide](config/index.md) to configure it.
     poe 
     ```
 
-Then, open `http://localhost:9000/brickapi/v1/docs`. If the swagger API page is shown, congratulations!
+Then, open <http://localhost:9000/brickapi/v1/docs>. If the swagger API page is shown, congratulations!
 Now you can move to the [next step](init.md) in initialize playground.
