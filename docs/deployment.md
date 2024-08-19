@@ -6,7 +6,7 @@ SBOS is managed as a mono-repo. Clone the repository and work in the project dir
 
 ```bash
 git clone https://github.com/BrickSchema/playground
-cd playground
+cd projects/sbos-playground
 ```
 
 ## Configuration
@@ -19,7 +19,7 @@ Please follow this [guide](config/index.md) to configure it.
 
 === "Docker Compose (recommended)"
 
-    In the playground directory, run
+    In the playground directory (`projects/sbos-playground`), run
 
     ```bash
     docker-compose up --build -d # (1)!
@@ -27,6 +27,12 @@ Please follow this [guide](config/index.md) to configure it.
 
     1.  make sure the context is correct if not using `docker-compose` but `docker build`
         and make sure the `docker-compose` version is at least `v2`
+
+    In development mode, run
+    
+    ```bash
+    docker compose -f docker-compose.yml -f docker-compose-dev.yml up -d --build
+    ```
 
 === "Direct"
     

@@ -38,12 +38,12 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # install dependencies
 COPY pyproject.toml poetry.lock README.md /root/sbos-playground/
 COPY sbos/playground/__init__.py /root/sbos-playground/sbos/playground/
-COPY --from=sbos:minimal /root/sbos-minimal/pyproject.toml /root/sbos-minimal/poetry.lock /root/sbos-minimal/README.md /root/sbos-minimal/
-COPY --from=sbos:minimal /root/sbos-minimal/sbos/minimal/__init__.py /root/sbos-minimal/sbos/minimal/
+COPY --from=tcimba/sbos:minimal /root/sbos-minimal/pyproject.toml /root/sbos-minimal/poetry.lock /root/sbos-minimal/README.md /root/sbos-minimal/
+COPY --from=tcimba/sbos:minimal /root/sbos-minimal/sbos/minimal/__init__.py /root/sbos-minimal/sbos/minimal/
 RUN --mount=type=cache,target=/root/.cache poetry install --without dev
 RUN --mount=type=cache,target=/root/.cache pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 COPY . /root/sbos-playground
-COPY --from=sbos:minimal /root/sbos-minimal /root/sbos-minimal
+COPY --from=tcimba/sbos:minimal /root/sbos-minimal /root/sbos-minimal
 RUN --mount=type=cache,target=/root/.cache poetry install --without dev
 
 # RUN rm /root/sbos-playground/.env/
