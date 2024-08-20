@@ -108,21 +108,18 @@ class SegmentComponent extends Component {
     this.get_room_temperature.bind(this)
   }
 
-  get_statuses(option, user_email) {
-    this.get_room_temperature(option, user_email);
-    this.get_energy_usage(option, user_email);
+  get_statuses(option) {
+    this.get_room_temperature(option);
+    this.get_energy_usage(option);
   }
 
 
-  get_energy_usage(option, user_email) {
+  get_energy_usage(option) {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
     axios.get(BASE_API_URL+'/api/point/energy/' + roomkey, {
-    	params: {
-		user_email: user_email.data,
-    },
-    headers: getBrickHeaders()
+        headers: getBrickHeaders()
     })
         .then(res => {
             if(res != null 
@@ -139,14 +136,11 @@ class SegmentComponent extends Component {
         })
   }
 
-  get_room_temperature(option, user_email) {
+  get_room_temperature(option) {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
     axios.get(BASE_API_URL+'/api/point/temp/' + roomkey, {
-    	params: {
-		  user_email: user_email.data
-        },
         headers: getBrickHeaders()
     })
         .then(res => {
@@ -180,35 +174,15 @@ class SegmentComponent extends Component {
   }
 
   componentDidMount(prevProps, prevState) {
-    const { option, user_email } = this.props;
-    var intervalId;
-    if(user_email != null) {
-      if(typeof prevProps === 'undefined' || user_email !== prevProps.user_email) {
-    //this.get_statuses(option, user_email);
-    intervalId = setInterval(this.get_statuses.bind(this), 3000, option, user_email);
-          /*
-	this.get_energy_usage(option, user_email);
-	this.get_room_temperature(option, user_email);
-    */
-      }
-    }
-    else if(localStorage.getItem('user_id')) {
-        let user_id = JSON.parse(localStorage.getItem('user_id'))
-    //this.get_statuses(option, user_id);
-    intervalId = setInterval(this.get_statuses.bind(this), 3000, option, user_id);
-        /*
-	this.get_energy_usage(option, user_id);
-	this.get_room_temperature(option, user_id);
-    */
-    } else {
-        console.log('THIS SHOULD NOT BE REACHED')
-    }
+    const { option } = this.props;
+    const intervalId = setInterval(this.get_statuses.bind(this), 60000, option);
     this.setState({intervalId: intervalId});
+    this.get_statuses(option);
   }
 
   render() {
     const { energy_value, temperature_value, energy_error, temperature_error } = this.state;
-    const energy_progress = energy_value / 10.0 * 100.0;
+    const energy_progress = energy_value / 1600 * 100;
     const temperature_progress = (temperature_value - 60.0) / 20.0 * 100.0;
     const mobile_labels = (this.props.mobile) ? [60,65,70,75,80] : [60,64,68,72,76,80];
     const EnergyPanel = (energy_error) ? (
@@ -217,7 +191,7 @@ class SegmentComponent extends Component {
     ) : (
         <SegmentObject icon={"tachometer alternate"} color={"rgb(216, 151, 235)"} 
         title={"CO₂"} value={energy_value} label={"ppm"}
-        labels={[400,800,1200,1600,2000]} progress={energy_progress}
+        labels={[0,400,800,1200,1600]} progress={energy_progress}
         mobile={this.props.mobile} />
     );
     const TemperaturePanel = (temperature_error) ? (

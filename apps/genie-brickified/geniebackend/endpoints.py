@@ -10,15 +10,13 @@ from flask_cors import CORS
 from werkzeug import exceptions
 
 from .app import app
-from .api import json_response, get_user, query_sparql, query_actuation, query_data, query_entity_tagset, \
-    iterate_extract, get_zone_temperature_sensor, get_occupancy_command, get_temperature_setpoint, \
-    get_thermal_power_sensor, API_URL, get_token, cid, csec, parse_api_token, get_headers, query_user_profiles_arguments
+from .api import *
 from .configs import config
 
-INDEX_URL = config['genie_index']
-AUTH_URL = config['brickapi']['AUTH_URL'].format(API_URL=API_URL)
-ebu3b_prefix = 'http://ucsd.edu/building/ontology/ebu3b#'
-mock_prefix = 'ebu3b:EBU3B_Rm_'
+# INDEX_URL = config['genie_index']
+# AUTH_URL = config['brickapi']['AUTH_URL'].format(API_URL=API_URL)
+# ebu3b_prefix = 'http://ucsd.edu/building/ontology/ebu3b#'
+# mock_prefix = 'ebu3b:EBU3B_Rm_'
 
 production = False
 
@@ -85,16 +83,18 @@ def get_all_rooms():
     resp = query_user_profiles_arguments(api_token)
     if resp is None:
         return json_response({'message': 'error'}, 200)
-    # print(resp)
+    print(resp)
     rooms = []
-    for arguments_dict in resp:
-        for value in arguments_dict.values():
-            rooms.append({
-                'room': value,
-                'college': 'UCSD',
-                'campus': 'Warren',
-                'building': 'BLDG',
-            })
+    rooms.append({
+        'room': resp["data"]["arguments"]["room"],
+        'college': 'UCSD',
+        'campus': 'Central',
+        'building': resp["data"]["domain"]["name"],
+    })
+    # for arguments_dict in resp:
+    #     print(arguments_dict)
+    #     for value in arguments_dict.values():
+            
     # res = resp['results']['bindings']
     # rooms = iterate_extract(res, ebu3b_prefix) if res else []
     # print(rooms)
@@ -143,9 +143,11 @@ def get_temp_setpoint(room):
 def set_temp_setpoint(room):
     api_token = config["api_token"]
     uuid = get_temperature_setpoint(room, api_token)
+    print(uuid)
     if not uuid:
         return json_response({'value': None})
     req_data = request.get_json()
+    # req_data = {"value": 1}
     query_actuation(uuid, req_data['value'], api_token)
     return json_response({'value': req_data['value']})
 
@@ -155,6 +157,7 @@ def get_room_temperature(room):
     api_token = config["api_token"]
     uuid = get_zone_temperature_sensor(room, api_token)
     # uuid = bldg:BLDG_RM101_ZN_T
+    print(uuid)
     if not uuid:
         return json_response({'value': None})
     # app_token = session['app_token']
@@ -164,16 +167,16 @@ def get_room_temperature(room):
 
 
 @app.route("/api/point/energy/<room>", methods=["GET"])
-def get_energy_usage(room):
+def get_energy_usage(room): # too lazy change the function name
     api_token = config["api_token"]
-    uuid = get_thermal_power_sensor(room, api_token)
+    uuid = get_zone_carbon_sensor(room, api_token)
     # app.logger.info(f"get_energy_usage of {uuid}")
     # uuid = bldg:BLDG_RM101_MTR
     if not uuid:
         return json_response({'value': None})
     # app_token = session['app_token']
     value = query_data(uuid, api_token)
-    app.logger.info('get_energy_usage: %s', value)
+    app.logger.info('get_co2: %s', value)
     return json_response({'value': value})
 
 
@@ -194,17 +197,17 @@ def get_status(room):
     return resp
 
 
-@app.route("/api/point/status/<room>", methods=["POST"])
-def set_status(room):
-    api_token = config["api_token"]
-    uuid = get_occupancy_command(room, api_token)
-    # uuid = bldg:BLDG_RM101_ONOFF
-    if not uuid:
-        return json_response({'value': None})
-    req_data = request.get_json()
-    # 3 means on, 1 means off
-    resp = query_actuation(uuid, req_data['value'], api_token)
-    return json_response({'value': req_data['value']})
+# @app.route("/api/point/status/<room>", methods=["POST"])
+# def set_status(room):
+#     api_token = config["api_token"]
+#     uuid = get_occupancy_command(room, api_token)
+#     # uuid = bldg:BLDG_RM101_ONOFF
+#     if not uuid:
+#         return json_response({'value': None})
+#     req_data = request.get_json()
+#     # 3 means on, 1 means off
+#     resp = query_actuation(uuid, req_data['value'], api_token)
+#     return json_response({'value': req_data['value']})
 
 
 @app.route("/api/user", methods=["GET"])

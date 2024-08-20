@@ -197,11 +197,11 @@ class DesktopContainer extends Component {
                 <Menu.Item name="about" as="a" onClick={() => this.setState({about: true, activeItem: "about"})} active={activeItem === "about"}>
                   About
                 </Menu.Item>
-                <Menu.Item position="right">
+                {/* <Menu.Item position="right">
                   <Button as="a" inverted={!fixed} onClick={this.setRedirect}>
                     Log in
                   </Button>
-                </Menu.Item>
+                </Menu.Item> */}
               </Container>
             </Menu>
             {heading}
@@ -299,11 +299,11 @@ class MobileContainer extends Component {
                   <Menu.Item onClick={this.handleToggle}>
                     <Icon name="sidebar" />
                   </Menu.Item>
-                  <Menu.Item position="right">
+                  {/* <Menu.Item position="right">
                     <Button as="a" inverted onClick={this.setRedirect}>
                       Log in
                     </Button>
-                  </Menu.Item>
+                  </Menu.Item> */}
                 </Menu>
               </Container>
               {heading}

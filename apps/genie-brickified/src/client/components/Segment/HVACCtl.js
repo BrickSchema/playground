@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import axios from 'axios';
 import { Grid, Icon, Header, Segment, Divider, Statistic, Button, Message } from 'semantic-ui-react';
 import './Segment.css';
@@ -46,7 +46,12 @@ const WarningObject = ({icon, color, title, mobile, msg}) => (
     </Segment>
 );
 
-const SegmentObject = ({icon, color, title, value, label, handleChangeTemp, mobile}) => (
+const SegmentObject = ({icon, color, title, value, label, handleChangeTemp, mobile}) => {
+    const [newValue, setNewValue] = React.useState(value);
+    useEffect(() => {
+        setNewValue(value);
+    }, [value])
+    return (
     <Segment className={"glowfloat"} raised style={{minHeight: "204px"}} color="violet">
         <Grid>
             <Grid.Row>
@@ -85,25 +90,37 @@ const SegmentObject = ({icon, color, title, value, label, handleChangeTemp, mobi
                                 }
                             }}
                             axis="x"
-                            xmin={67}
-                            xmax={73}
+                            xmin={-3}
+                            xmax={3}
                             xstep={0.5}
-                            x={value}
-                            onChange={({x}) => handleChangeTemp(x)}
+                            x={newValue}
+                            onChange={async ({x}) => {
+                                console.log("onChange", x);
+                                setNewValue(x)
+                            }}
+                            onDragEnd={async (e) => {
+                                console.log("onDragEnd", newValue)
+                                console.log(e);
+                                setTimeout(() => {
+                                    console.log("onDragEndDelay", newValue)
+                                    handleChangeTemp(newValue);
+                                }, 0.05)
+                            }}
                         />
                     </Grid.Row>
                     <Grid.Row style={{
                         marginTop: 20,
                     }} >
                       <Statistic size="small" horizontal floated={"right"} >
-                          <Statistic.Value>{value}<span style={{ fontSize:12 }}>{label}</span></Statistic.Value>
+                          <Statistic.Value>{newValue}<span style={{ fontSize:12 }}>{label}</span></Statistic.Value>
                       </Statistic>
                     </Grid.Row>
                 </Grid.Column>
             </Grid.Row>
         </Grid>
     </Segment>
-);
+)
+};
 
 const SwitchObject = ({icon, color, title, value, toggleStatus, mobile, loading}) => (
     <Segment className={"glowfloat"} raised style={{minHeight: "204px"}} color="teal">
@@ -144,7 +161,7 @@ const SwitchObject = ({icon, color, title, value, toggleStatus, mobile, loading}
                         marginTop: 20,
                     }} >
                       <Statistic size="small" horizontal floated={"left"}>  
-                        <Statistic.Value>{value}</Statistic.Value>
+                        <Statistic.Value>{value === "ON" ? "Occupied": "Unoccupied"}</Statistic.Value>
                       </Statistic>
                     </Grid.Row>
                 </Grid.Column>
@@ -158,7 +175,7 @@ class SegmentComponent extends Component {
     super(props, context)
     this.state = {
         status: 1,
-        temperature: 73,
+        temperature: 0,
         status_error: false,
         setpoint_error: false,
         loading: false
@@ -171,25 +188,25 @@ class SegmentComponent extends Component {
     const { option, user_email } = this.props;
     const status = (this.state.status === 3) ? 1 : 3
     this.setState({loading: true})
-    this.set_status(option, status.toString(), status, user_email)
+    this.set_status(option, status.toString(), status)
   }
 
   handleChangeTemp = (temperature) => {
-      const { option, user_email } = this.props;
-      this.set_temp_setpoint(option, temperature, user_email)
-      this.setState({
-        temperature: temperature
-      })
+      const { option } = this.props;
+      if (this.state.temperature !== temperature) {
+        console.log("handleChangeTemp", temperature);
+        this.setState({
+            temperature: temperature
+        });
+        this.set_temp_setpoint(option, temperature);
+      }
   }
 
-  get_status(option, user_email) {
+  get_status(option) {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
     axios.get(BASE_API_URL+'/api/point/status/' + roomkey, {
-      params: {
-		user_email: user_email.data
-	  },
       headers: getBrickHeaders(),
     }).then(res => {
             if (res.data.status_code === 401) {
@@ -207,14 +224,11 @@ class SegmentComponent extends Component {
     })
   }
 
-  get_temp_setpoint(option, user_email) {
+  get_temp_setpoint(option) {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
     axios.get(BASE_API_URL+'/api/point/setpoint/' + roomkey, {
-   	  params: {
-		user_email: user_email.data
-	  },
       headers: getBrickHeaders(),
     })
         .then(res => {
@@ -235,14 +249,11 @@ class SegmentComponent extends Component {
         })
   }
 
-  set_status(option, status, numStatus, user_email) {
+  set_status(option, status, numStatus) {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
     axios.post(BASE_API_URL+'/api/point/status/' + roomkey, { value: status }, {
-	    params: {
-	    	user_email: user_email.data
-	    },
         headers: getBrickHeaders(),
     })
         .then(res => {
@@ -256,14 +267,11 @@ class SegmentComponent extends Component {
         });
   }
 
-  set_temp_setpoint(option, temp, user_email) {
+  set_temp_setpoint(option, temp) {
     //const roomkey = option.building.value.toLowerCase() + ':' +
     //    option.building.value + '_Rm_' + option.room.value
     const roomkey = option.room.value
     axios.post(BASE_API_URL+'/api/point/setpoint/' + roomkey, { value: temp }, {
-   	  params: {
-		user_email: user_email.data
-	  },
       headers: getBrickHeaders(),
     })
         .then(function (response) {
@@ -289,34 +297,17 @@ class SegmentComponent extends Component {
     return null;
   }
 
-  get_ctrls(option, user_email) {
-      this.get_status(option, user_email);
+  get_ctrls(option) {
+      this.get_status(option);
       // this.get_temp_setpoint(option, user_email);
   }
 
   componentDidMount(prevProps, prevState) {
-    const { option, user_email } = this.props;
-    var intervalId;
-    if(user_email != null) {
-      if(typeof prevProps === 'undefined' || user_email !== prevProps.user_email) {
-          /*
-	this.get_status(option, user_email);
-	this.get_temp_setpoint(option, user_email);
-    */
-        this.get_temp_setpoint(option, user_email);
-        intervalId = setInterval(this.get_ctrls.bind(this), 3000, option, user_email);
-      }
-    }
-    else if(localStorage.getItem('user_id')) {
-	let user_id = JSON.parse(localStorage.getItem('user_id'))
-        this.get_temp_setpoint(option, user_id);
-        intervalId = setInterval(this.get_ctrls.bind(this), 3000, option, user_id);
-          /*
-	this.get_status(option, user_id);
-	this.get_temp_setpoint(option, user_id);
-    */
-    }
+    const { option } = this.props;
+    const intervalId = setInterval(this.get_ctrls.bind(this), 60000, option);
     this.setState({intervalId: intervalId});
+    this.get_status(option);
+    this.get_temp_setpoint(option);
   }
 
   render() {
@@ -336,7 +327,7 @@ class SegmentComponent extends Component {
     } else {
         StatusPanel = (
             <SwitchObject icon={"power off"} color={"rgb(143, 201, 251)"}
-            title={"Occupancy Status"} value={(status === 3) ? "ON" : "OFF"}
+            title={"Occupancy Status"} value={(status === "unoccOccEnumSet.1") ? "ON" : "OFF"}
             toggleStatus={this.toggleStatus} mobile={this.props.mobile} loading={loading} />
         );
     }
@@ -354,17 +345,17 @@ class SegmentComponent extends Component {
     if (setpoint_error === 401) {
     	SetpointPanel = (
         <WarningObject icon={"thermometer quarter"} color={"rgb(248, 200, 46)"}
-        title={"Temperature"} mobile={this.props.mobile} msg={"Unauthorized"}/>
+        title={"Warm Cool Adjust"} mobile={this.props.mobile} msg={"Unauthorized"}/>
         )
     } else if (setpoint_error === 400) {
     	SetpointPanel = (
         <WarningObject icon={"thermometer quarter"} color={"rgb(248, 200, 46)"}
-        title={"Temperature"} mobile={this.props.mobile} msg={"No data found"}/>
+        title={"Warm Cool Adjust"} mobile={this.props.mobile} msg={"No data found"}/>
         )
     } else {
     	SetpointPanel = (
             <SegmentObject icon={"thermometer quarter"} color={"rgb(248, 200, 46)"}
-	    title={"Temperature"} value={temperature} label={"°F"}
+	    title={"Warm Cool Adjust"} value={temperature} label={"°F"}
 	    handleChangeTemp={this.handleChangeTemp} mobile={this.props.mobile} />
         )
     }

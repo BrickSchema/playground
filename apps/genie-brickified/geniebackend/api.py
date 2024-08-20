@@ -14,18 +14,19 @@ from .app import app
 
 API_URL = config['brickapi']['API_URL']
 bs_url = config['brickapi']['API_URL']
-rawqueries_url = bs_url + '/rawqueries'
+rawqueries_url = bs_url + ''
 entity_url = bs_url + '/entities'
 user_url = bs_url + '/user'  # TODO: This should be updated.
 ts_url = bs_url + '/data/timeseries'
 actuation_url = bs_url + '/actuation'
 domain_url = bs_url + '/domains'
+app_url = bs_url + '/apps'
 
-brick_prefix = config['brick']['brick_prefix']
-ebu3b_prefix = config['brick']['building_prefix']
+# brick_prefix = config['brick']['brick_prefix']
+# ebu3b_prefix = config['brick']['building_prefix']
 
-cid = config['google_oauth']['client_id']
-csec = config['google_oauth']['client_secret']
+# cid = config['google_oauth']['client_id']
+# csec = config['google_oauth']['client_secret']
 
 production = False
 
@@ -34,17 +35,17 @@ def parse_header_token():
     return request.headers['Authorization'][7:]
 
 
-def get_token():
-    user_token = parse_header_token()
-    body = {
-        'user_access_token': user_token,
-        'client_id': cid,
-        'client_secret': csec,
-    }
-    url = API_URL + '/auth/get_token'
-    resp = requests.post(url, json=body, verify=False)
-    token = resp.json()['token']
-    return token
+# def get_token():
+#     user_token = parse_header_token()
+#     body = {
+#         'user_access_token': user_token,
+#         'client_id': cid,
+#         'client_secret': csec,
+#     }
+#     url = API_URL + '/auth/get_token'
+#     resp = requests.post(url, json=body, verify=False)
+#     token = resp.json()['token']
+#     return token
 
 
 def parse_api_token(api_token):
@@ -84,7 +85,7 @@ def query_sparql(qstr, api_token):
 def query_user_profiles_arguments(api_token):
     payload = parse_api_token(api_token)
     resp = requests.get(
-        f"{domain_url}/{payload['domain']}/user_profiles_arguments",
+        f"{app_url}/me",
         headers=get_headers(api_token),
         verify=False
     )
@@ -98,25 +99,11 @@ def query_user_profiles_arguments(api_token):
 
 def query_data(uuid, api_token, value_type="number"):
     payload = parse_api_token(api_token)
-    if production:
-        start_time = arrow.get().shift(minutes=-30).timestamp
-        end_time = arrow.get().timestamp
-    else:
-        # start_time = arrow.get(2019,3,1).timestamp
-        start_time = 1581161300
-        # end_time = arrow.get(2019,3,30).timestamp
-        end_time = 2581161311
-
-    params = {
-        'start_time': start_time,
-        'end_time': end_time,
-        'entity_id': uuid,
-        'value_types': value_type,
-    }
-    query_url = f"{ts_url}/domains/{payload['domain']}"
-    resp = requests.get(
+    query_url = f"{actuation_url}/domains/{payload['domain']}/read"
+    body = {f'{uuid}': [""]}
+    resp = requests.post(
         query_url,
-        params=params,
+        json=body,
         headers=get_headers(api_token),
         verify=False,
     )
@@ -125,18 +112,16 @@ def query_data(uuid, api_token, value_type="number"):
     app.logger.info("query data result: %s", resp.json())
     if resp.status_code != 200:
         return None
-    data = resp.json()["data"]
-    if data:
-        data.sort(key=lambda d: d[1], reverse=True)
-        app.logger.debug(data[0][2])
-        return data[0][2]
-    else:
+    if "results" not in resp.json()["data"]:
         return None
+    data = resp.json()["data"]["results"]
+    print(data)
+    return float(data[0]["detail"])
 
 
 def query_actuation(uuid, value, api_token):
     payload = parse_api_token(api_token)
-    body = {uuid: [value]}
+    body = {f'{uuid}': [str(value)]}
     resp = requests.post(
         f"{actuation_url}/domains/{payload['domain']}",
         json=body,
@@ -191,8 +176,8 @@ def iterate_extract(list, prefix_tagset):
         res.append({
             'room': s['s']['value'],
             'college': 'UCSD',
-            'campus': 'Warren',
-            'building': 'BLDG',
+            'campus': 'Central',
+            'building': 'Center Hall',
         })
     return res
 
@@ -210,31 +195,30 @@ def get_user(jwt_token):
         return None
 
 
-def _get_hvac_zone_point(tagset, room, api_token):
-    q = f"""
-    select ?s where {{
-        <{room}> rdf:type brick:HVAC_Zone .
-        <{room}> brick:hasPoint ?s.
-        ?s rdf:type brick:{tagset} .
-    }}
-    """
-    resp = query_sparql(q, api_token)
-    if resp == None:
-        return None
-    # res = resp['tuples']
-    # return extract(res[0][0], ebu3b_prefix)
-    res = resp['results']['bindings'][0]
-    return res['s']['value']
+# def _get_hvac_zone_point(tagset, room, api_token):
+#     q = f"""
+#     select ?s where {{
+#         # <{room}> rdf:type brick:HVAC_Zone .
+#         ?e brick:feeds {room} . 
+#         ?p brick:isPointOf ?e . 
+#         ?p a {tagset} .
+#     }}
+#     """
+#     resp = query_sparql(q, api_token)
+#     if resp == None:
+#         return None
+#     res = resp["data"]
+#     print(res)
+#     return res['s']
 
 
 def _get_vav_point(tagset, room, api_token):
     q = f"""
     select ?s where {{
-        <{room}> rdf:type brick:HVAC_Zone .
-        ?vav brick:feeds <{room}> .
-        ?vav rdf:type brick:VAV .
+        ?vav brick:feeds {room} .
+        ?vav a brick:Equipment .
         ?vav brick:hasPoint ?s .
-        ?s rdf:type brick:{tagset} .
+        ?s a brick:{tagset} .
     }}
     """
     # print(q)
@@ -242,13 +226,14 @@ def _get_vav_point(tagset, room, api_token):
     if resp == None:
         return None
     # res = resp['tuples']
-    # print(resp)
-    res = resp['results']['bindings'][0]
-    return res['s']['value']
+    res = resp["data"]
+    print(res)
+    if len(res.get('s', [])) > 0:
+        return res['s'][0]
 
 
 def get_temperature_setpoint(room, api_token):
-    tagset = 'Zone_Air_Temperature_Setpoint'
+    tagset = 'Warm_Cool_Adjust_Sensor'
     return _get_vav_point(tagset, room, api_token)
 
 
@@ -256,33 +241,36 @@ def get_zone_temperature_sensor(room, api_token):
     tagset = 'Zone_Air_Temperature_Sensor'
     return _get_vav_point(tagset, room, api_token)
 
+def get_zone_carbon_sensor(room, api_token):
+    tagset = 'CO2_Sensor'
+    return _get_vav_point(tagset, room, api_token)
 
-def get_thermal_power_sensor(room, api_token):
-    #    q = """
-    #    select ?s where {{
-    #        <{0}> user:hasOffice {1} .
-    #        {1} rdf:type brick:HVAC_Zone .
-    #        ?vav brick:feeds {1}.
-    #        ?vav brick:hasPoint ?s.
-    #        ?s a/rdfs:subClassOf* brick:Thermal_Power_Sensor .
-    #    }}
-    #    """.format(user_email, room)
-    q = f"""
-    select ?s where {{
-    ?vav brick:feeds <{room}>.
-    ?vav brick:hasPoint ?s.
-    ?s a brick:Thermal_Power_Sensor.
-    }}
-    """
-    resp = query_sparql(q, api_token)
-    if resp is None:
-        return None
-    # res = resp['tuples']
-    # return res[0][0]
-    res = resp['results']['bindings'][0]
-    return res['s']['value']
+# def get_thermal_power_sensor(room, api_token):
+#     #    q = """
+#     #    select ?s where {{
+#     #        <{0}> user:hasOffice {1} .
+#     #        {1} rdf:type brick:HVAC_Zone .
+#     #        ?vav brick:feeds {1}.
+#     #        ?vav brick:hasPoint ?s.
+#     #        ?s a/rdfs:subClassOf* brick:Thermal_Power_Sensor .
+#     #    }}
+#     #    """.format(user_email, room)
+#     q = f"""  
+#     select ?s where {{
+#     ?vav brick:feeds {room}.
+#     ?vav brick:hasPoint ?s.
+#     ?s a brick:Thermal_Power_Sensor.
+#     }}
+#     """
+#     resp = query_sparql(q, api_token)
+#     if resp is None:
+#         return None
+#     # res = resp['tuples']
+#     # return res[0][0]
+#     res = resp['results']['bindings'][0]
+#     return res['s']['value']
 
 
 def get_occupancy_command(room, api_token):
-    tagset = 'On_Off_Command'
+    tagset = 'Occupancy_Sensor'
     return _get_vav_point(tagset, room, api_token)
