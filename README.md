@@ -6,9 +6,7 @@ PlayGround is a safe building operating system (SBOS), that incorporates a struc
 
 ## Why does this matter?
 
-Despite technological and standardization victories, the pace of innovation and the adoption rate of smart building applications in the real world remains low due to safety reasons. 
-
-> I bet very few have used a real building application in the wild.
+Despite technological and standardization victories, the pace of innovation and the adoption rate of smart building applications in the real world remains low due to safety reasons. Very few have used a real building application in the wild.
 
 Building managers are naturally reluctant to deploy third party building applications which are unvetted and possibly buggy. The inability of modern buildings to properly restrict an application's permissions also makes the application's execution generally opaque to the manager, unless intensive manual effort is invested to monitor them.
 
