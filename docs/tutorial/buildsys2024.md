@@ -1,4 +1,4 @@
-# Tutorial@BuildSys24 (Hangzhou!)
+# Tutorial@CPS-IoT Week 25 (Irvine!)
 
 ## What is Playground and why does it matter?
 Adoption of building apps in practice is slow for two safety reasons:
