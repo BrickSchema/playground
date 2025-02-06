@@ -69,5 +69,5 @@ nav:
           - Authorization: config/auth.md
           - Backend: config/backend.md
   - Tutorials:
-      - Tutorial@BuildSys24!: tutorial/buildsys2024.md
+      - Tutorial@CPSIoT25!: tutorial/cpsiot25.md
       - Write a Brick based building app: tutorial/write_an_app.md
