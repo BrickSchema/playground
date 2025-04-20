@@ -94,7 +94,7 @@ class ActuationGuardML(ActuationGuard):
         import __main__
 
         setattr(__main__, "VAE", VAE)
-        self.model = torch.load(model_file, map_location=device)
+        self.model = torch.load(model_file, map_location=device, weights_only=False)
 
     # def inference(self, input):
     #     prediction = self.model.decode(torch.FloatTensor(input).reshape(1, -1).to(device))

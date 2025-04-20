@@ -1,6 +1,6 @@
 import pathlib
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 from sbos.minimal.config.settings.base import BackendBaseSettings as MinimalSettings
 
@@ -13,7 +13,7 @@ class BackendPlaygroundSettings(BaseSettings):
     DEFAULT_ADMIN: str = Field(
         default="example@gmail.com",
         description="The email of default admin user. "
-        "(deprecated, we should remove it in future version)",
+                    "(deprecated, we should remove it in future version)",
     )
     ISOLATED_NETWORK_NAME: str = Field(
         default="isolated_nw", description="The name of the isolated network in docker."
@@ -25,6 +25,11 @@ class BackendPlaygroundSettings(BaseSettings):
     APP_STATIC_DIR: pathlib.Path = Field(
         default="app_static", description="The directory to save app static files."
     )
+
+    @field_validator('APP_STATIC_DIR')
+    @classmethod
+    def validate_app_static_dir(cls, v: pathlib.Path):
+        return v.absolute()
 
 
 class BackendBaseSettings(BackendPlaygroundSettings, MinimalSettings):

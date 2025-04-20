@@ -7,6 +7,7 @@ from docker.models.containers import Container
 from docker.models.images import Image
 
 import docker
+import docker.errors
 from sbos.playground.config.manager import settings
 from sbos.playground.schemas import DockerStatus
 
@@ -238,7 +239,11 @@ def start_container(container_name: str) -> Container:
         raise TypeError("container name is expected to be str")
     # subprocess.run(["docker", "start", container_id])
     container = docker_client.containers.get(container_name)
-    container.start()
+    try:
+        container.start()
+    except docker.errors.DockerException as e:
+        rm_container(container_name)
+        raise e
     return container
 
 

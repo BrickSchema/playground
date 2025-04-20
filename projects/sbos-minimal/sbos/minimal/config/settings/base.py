@@ -160,7 +160,8 @@ class BackendMinimalSettings(BaseSettings):
 class BackendBrickSettings(BaseSettings):
     BRICK_VERSION: str = Field(default="1.3", description="Brick version used.")
     DEFAULT_BRICK_URL: AnyUrl = Field(
-        default="https://brickschema.org/schema/Brick", description="Brick schema URL."
+        default="https://github.com/BrickSchema/Brick/releases/download/v1.4.0/Brick.ttl",
+        description="Brick schema URL."
     )
     DEFAULT_REF_SCHEMA_URL: AnyUrl = Field(
         default="https://gist.githubusercontent.com/tc-imba/714c2043e893b1538406a9113140a4fe/"

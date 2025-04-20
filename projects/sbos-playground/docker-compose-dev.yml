@@ -15,10 +15,11 @@ services:
       - core-minimal
     environment:
       DEBUG: true
+      CACHE: false
       SERVER_WORKERS: 1
 #      FRONTEND_URL: http://localhost:8000
     volumes:
-      - ./static:/root/sbos-playground/static
+      - ./app_static:/root/sbos-playground/app_static
       - ./sbos/playground:/root/sbos-playground/sbos/playground
       - ../sbos-minimal/sbos/minimal:/root/sbos-minimal/sbos/minimal
       - ./tests:/root/sbos-playground/tests

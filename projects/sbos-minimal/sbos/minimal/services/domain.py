@@ -42,9 +42,9 @@ class DomainRoute:
         ]
         await asyncio.gather(*tasks)
         graphs = await self.graphdb.list_graphs(domain.name)
-        await self.initialize_rdf_schema(graphs, domain, settings.DEFAULT_BRICK_URL)
+        await self.initialize_rdf_schema(graphs, domain, str(settings.DEFAULT_BRICK_URL))
         await self.initialize_rdf_schema(
-            graphs, domain, settings.DEFAULT_REF_SCHEMA_URL
+            graphs, domain, str(settings.DEFAULT_REF_SCHEMA_URL)
         )
         domain.initialized = True
         await domain.save()
