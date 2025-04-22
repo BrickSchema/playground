@@ -1,3 +1,4 @@
+import asyncio
 import time
 
 from loguru import logger
@@ -55,7 +56,8 @@ class ActuationInterface:
                 cache_key, get_external_references, domain, entity_id
             )
             driver = await self.get_actuation_driver(external_references)
-            success, detail = await driver.read(entity_id, external_references)
+            future = driver.read(entity_id, external_references)
+            success, detail = await asyncio.wait_for(future, timeout=10)
         except Exception as e:
             success, detail = False, f"{e}"
             logger.exception(e)

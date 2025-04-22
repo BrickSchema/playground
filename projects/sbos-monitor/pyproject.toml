@@ -1,0 +1,34 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool]
+
+[tool.poetry]
+authors = ["Brick Dev Team <x5fu@ucsd.edu>"]
+description = "sbos playground"
+license = "BSD-3-Clause"
+name = "sbos-monitor"
+packages = [
+  {include = "sbos"}
+]
+repository = "https://github.com/BrickSchema/playground/tree/master/projects/sbos-monitor"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+httpx = "^0.27.0"
+motor = "^3.7.0"
+pydantic = "^2.11.3"
+loguru = "^0.7.3"
+pydantic-settings = "^2.9.1"
+
+[tool.poetry.group.dev.dependencies]
+
+
+[tool.pycln]
+all = true
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore::DeprecationWarning"
+log_cli = 1

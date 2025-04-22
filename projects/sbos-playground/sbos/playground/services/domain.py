@@ -1,5 +1,10 @@
+import asyncio
+from typing import Dict, Union, Tuple
+
 from fastapi import Body, Depends, Path
 from fastapi_restful.cbv import cbv
+from loguru import logger
+
 from sbos.minimal.interfaces.cache import clear_cache
 from sbos.minimal.securities.checker import PermissionChecker
 from sbos.minimal.services.domain import router
@@ -446,22 +451,35 @@ class DomainResourceRoute:
         await resource.delete()
         return schemas.StandardResponse()
 
-    @router.post("/{domain}/resources/{entity_id}/notify")
+
+    async def notify_resource_entity(self, entity_id, value):
+        try:
+            resource = await models.DomainResourceConstraint.find_one(
+                models.DomainResourceConstraint.domain.id == self.domain.id,
+                models.DomainResourceConstraint.entity_id == entity_id,
+            )
+            if resource is None:
+                raise BizError(ErrorCode.ResourceConstraintNotFoundError)
+            policy = SchedulingPolicyNaive(self.domain, self.ts_db, self.actuation_iface)
+            await policy.schedule(
+                schemas.ResourceConstraintRead(
+                    entity_id=entity_id, value=value
+                )
+            )
+        except Exception as e:
+            logger.exception(e)
+
+    @router.post("/{domain}/resources")
     async def notify_resource(
         self,
-        entity_id: str = Path(),
-        resource_update: schemas.ResourceConstraintUpdate = Body(),
+        # entity_id: str = Path(),
+        actuation_request: Dict[str, Union[Tuple[str], Tuple[str, str]]] = Body(...),
+        # resource_update: schemas.ResourceConstraintUpdate = Body(),
     ) -> schemas.StandardResponse[schemas.Empty]:
-        resource = await models.DomainResourceConstraint.find_one(
-            models.DomainResourceConstraint.domain.id == self.domain.id,
-            models.DomainResourceConstraint.entity_id == entity_id,
-        )
-        if resource is None:
-            raise BizError(ErrorCode.ResourceConstraintNotFoundError)
-        policy = SchedulingPolicyNaive(self.domain, self.ts_db, self.actuation_iface)
-        await policy.schedule(
-            schemas.ResourceConstraintRead(
-                entity_id=entity_id, value=resource_update.value
-            )
-        )
+        entity_ids = list(actuation_request.keys())
+        tasks = []
+        for entity_id in entity_ids:
+            value = float(actuation_request[entity_id][0])
+            tasks.append(self.notify_resource_entity(entity_id, value))
+        await asyncio.gather(*tasks)
         return schemas.StandardResponse()

@@ -12,7 +12,7 @@ name = "sbos-playground"
 packages = [
   {include = "sbos"}
 ]
-repository = "https://gitlab.com/mesl/brickserver/sbos-playground"
+repository = "https://github.com/BrickSchema/playground/tree/master/projects/sbos-playground"
 version = "0.1.0"
 
 [tool.poetry.dependencies]

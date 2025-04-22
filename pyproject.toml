@@ -12,6 +12,7 @@ python = "^3.10"
 mkdocs-material = "^9.5.29"
 mkdocs-include-markdown-plugin = "^6.2.1"
 sbos-minimal = {develop = true, path = "projects/sbos-minimal"}
+sbos-monitor = {develop = true, path = "projects/sbos-monitor"}
 sbos-playground = {develop = true, path = "projects/sbos-playground"}
 settings-doc = "^4.0.1"
 poethepoet = "^0.27.0"

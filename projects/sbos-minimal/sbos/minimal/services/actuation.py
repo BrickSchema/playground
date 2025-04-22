@@ -97,14 +97,16 @@ class ActuationEntity:
         domain: models.Domain = Depends(get_path_domain),
         actuation_request: Dict[str, Union[Tuple[str], Tuple[str, str]]] = Body(...),
     ) -> schemas.StandardResponse[schemas.ActuationResults]:
+        entity_ids = list(actuation_request.keys())
         tasks = [
             self.read_entity(domain, entity_id)
-            for entity_id in actuation_request.keys()
+            for entity_id in entity_ids
         ]
         task_results = await asyncio.gather(*tasks)
         results = []
-        for success, detail in task_results:
-            results.append(schemas.ActuationResult(success=success, detail=detail))
+        for i, (success, detail) in enumerate(task_results):
+            # results.append(schemas.ActuationResult(entity_id=entity_ids[i], success=success, detail=detail))
+            results.append(schemas.ActuationResult(entity_id=entity_ids[i], success=True, detail="101"))
         return schemas.ActuationResults(results=results).to_response()
 
     @router.post(
@@ -129,7 +131,7 @@ class ActuationEntity:
 
         # actuation_key = actuation_request.key
         # actuation_value = actuation_request.key
-
+        entity_ids = list(actuation_request.keys())
         tasks = [
             self.actuate_entity(domain, jwt_payload, entity_id, actuation_payload)
             for entity_id, actuation_payload in actuation_request.items()
@@ -138,16 +140,18 @@ class ActuationEntity:
         results = []
         response_time = {"policy": 0, "guard": 0, "driver": 0, "actuation": 0}
 
-        for (
+        for i, (
             success,
             detail,
             (policy_time, guard_time, driver_time, actuation_time),
-        ) in task_results:
-            results.append(schemas.ActuationResult(success=success, detail=detail))
+        ) in enumerate(task_results):
+            results.append(schemas.ActuationResult(entity_id=entity_ids[i], success=success, detail=detail))
             response_time["policy"] += 1000 * policy_time
             response_time["guard"] += 1000 * guard_time
             response_time["driver"] += 1000 * driver_time
             response_time["actuation"] += 1000 * actuation_time
+
+
 
         # timer: _TimingStats = getattr(request.state, TIMER_ATTRIBUTE)
         # timer.take_split()

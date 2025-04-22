@@ -76,6 +76,18 @@ services:
     privileged: true
     command: dockerize -wait http://graphdb:7200/rest/repositories python3 -m sbos.playground
 #    entrypoint: /app/docker/start-reload.sh
+  monitor:
+    image: tcimba/sbos:monitor
+    build:
+      context: ../sbos-monitor
+      args:
+        DOCKER_BUILDKIT: 1
+    restart: on-failure
+    networks:
+      - sbos-network
+    environment:
+      - MONGO_HOST=mongo
+      - PLAYGROUND_HOST=core
   mongo-express:
     image: mongo-express
     restart: always

@@ -24,3 +24,4 @@ services:
       - ../sbos-minimal/sbos/minimal:/root/sbos-minimal/sbos/minimal
       - ./tests:/root/sbos-playground/tests
       - ./benchmark:/root/sbos-playground/benchmark
+
