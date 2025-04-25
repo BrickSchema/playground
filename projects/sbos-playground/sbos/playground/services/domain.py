@@ -408,23 +408,22 @@ class DomainResourceRoute:
         )
 
     @router.post(
-        "/{domain}/resources/{entity_id}",
+        "/{domain}/resources",
         dependencies=[
             Depends(PermissionChecker(permission_scope=schemas.PermissionScope.DOMAIN))
         ],
     )
     async def update_resource(
         self,
-        entity_id: str = Path(),
         resource_update: schemas.ResourceConstraintUpdate = Body(),
     ) -> schemas.StandardResponse[schemas.ResourceConstraintRead]:
         resource = await models.DomainResourceConstraint.find_one(
             models.DomainResourceConstraint.domain.id == self.domain.id,
-            models.DomainResourceConstraint.entity_id == entity_id,
+            models.DomainResourceConstraint.entity_id == resource_update.entity_id,
         )
         if resource is None:
             resource = models.DomainResourceConstraint(
-                domain=self.domain, entity_id=entity_id, value=resource_update.value
+                domain=self.domain, entity_id=resource_update.entity_id, value=resource_update.value
             )
         else:
             resource.value = resource_update.value
@@ -434,17 +433,18 @@ class DomainResourceRoute:
         )
 
     @router.delete(
-        "/{domain}/resources/{entity_id}",
+        "/{domain}/resources",
         dependencies=[
             Depends(PermissionChecker(permission_scope=schemas.PermissionScope.DOMAIN))
         ],
     )
     async def delete_resource(
-        self, entity_id: str = Path()
+        self,
+        resource_delete: schemas.ResourceConstraintDelete = Body(),
     ) -> schemas.StandardResponse[schemas.Empty]:
         resource = await models.DomainResourceConstraint.find_one(
             models.DomainResourceConstraint.domain.id == self.domain.id,
-            models.DomainResourceConstraint.entity_id == entity_id,
+            models.DomainResourceConstraint.entity_id == resource_delete.entity_id,
         )
         if resource is None:
             raise BizError(ErrorCode.ResourceConstraintNotFoundError)
@@ -469,7 +469,7 @@ class DomainResourceRoute:
         except Exception as e:
             logger.exception(e)
 
-    @router.post("/{domain}/resources")
+    @router.post("/{domain}/resources/notify")
     async def notify_resource(
         self,
         # entity_id: str = Path(),

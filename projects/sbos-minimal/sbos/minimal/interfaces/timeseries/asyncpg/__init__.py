@@ -404,6 +404,7 @@ DROP TABLE {temp_table};
     ):
         table_name = self.get_history_table_name(domain_name)
         async with self.pool.acquire() as conn:
+            logger.info("{}", domain_name)
             res = await conn.execute(
                 f"""INSERT INTO {table_name} (uuid, user_id, app_name, domain_user_app, time, value)
                 VALUES ('{entity_id}', '{user_id}', '{app_name}', '{domain_user_app}', '{time}', '{value}');"""

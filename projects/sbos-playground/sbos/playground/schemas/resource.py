@@ -9,7 +9,12 @@ class ResourceConstraintRead(BaseModel):
 
 
 class ResourceConstraintUpdate(BaseModel):
+    entity_id: str
     value: float
+
+class ResourceConstraintDelete(BaseModel):
+    entity_id: str
+
 
 
 class DomainResourceConstraintRead(ResourceConstraintRead):

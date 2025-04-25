@@ -51,9 +51,10 @@ async def validate_resources_in_domain(domain, domain_data):
                     violated_constraints[entity_id] = real_value
         else:
             logger.error(response)
+            logger.error(response_dict)
 
         if len(violated_constraints) > 0:
-            url = f"{playground_api_base}/domains/{domain}/resources"
+            url = f"{playground_api_base}/domains/{domain}/resources/notify"
             data = {k: [str(v)] for k, v in violated_constraints.items()}
             response = await client.post(url, json=data, headers=headers)
             response_dict = response.json()

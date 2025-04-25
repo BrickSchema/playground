@@ -40,4 +40,5 @@ from sbos.playground.schemas.resource import (
     DomainResourceConstraintRead,
     ResourceConstraintRead,
     ResourceConstraintUpdate,
+    ResourceConstraintDelete,
 )

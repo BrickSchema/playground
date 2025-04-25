@@ -5,6 +5,7 @@ import arrow
 from fastapi import APIRouter, Body, Depends
 from fastapi_restful.cbv import cbv
 from starlette.requests import Request
+from loguru import logger
 
 from sbos.minimal import models, schemas
 from sbos.minimal.interfaces import ActuationInterface, BaseTimeseries, GraphDB
@@ -66,11 +67,12 @@ class ActuationEntity:
             ) = await self.actuation_iface.actuate(
                 domain, entity_id, actuation_payload[0]
             )
+            logger.info("success: {}, detail: {}", success, detail)
             await self.ts_db.add_history_data(
                 domain.name,
                 entity_id,
                 jwt_payload["sub"],
-                jwt_payload["app_name"],
+                jwt_payload["app"],
                 jwt_payload.get("domain_user_app", ""),
                 arrow.now(),
                 actuation_payload[0],
@@ -81,6 +83,7 @@ class ActuationEntity:
                 (policy_time, guard_time, driver_time, actuation_time),
             )
         except Exception as e:
+            logger.exception(e)
             return False, f"{e}", (policy_time, guard_time, driver_time, actuation_time)
 
     @router.post(

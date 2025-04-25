@@ -45,6 +45,7 @@ class ActuationInterface:
             )
             actuation_time = time.time() - start  # for benchmark
         except Exception as e:
+            logger.exception(e)
             success, detail = False, f"{e}"
         return success, detail, driver_time, actuation_time
 

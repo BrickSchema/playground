@@ -24,7 +24,7 @@ class MonitorBaseSettings(DatabaseMongoDBSettings):
     # VERSION: str = "0.1.0"
     PLAYGROUND_HOST: str = Field(default="localhost", description="The hostname of playground server.")
     PLAYGROUND_PORT: int = Field(default=9000, description="The port of playground server")
-    PLAYGROUND_JWT_TOKEN: str = Field(default="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiYXVkIjpbImJyaWNrIl0sImV4cCI6MTc0NjM4MDAzMX0.LQ8k5qEBTo_6abTNzPdmX3Vkty6iP678Hb2w51NWclo")
+    PLAYGROUND_JWT_TOKEN: str = Field(default="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsaXV5aDk3MDYxNUBnbWFpbC5jb20iLCJhdWQiOlsiYnJpY2siXSwiZXhwIjoxNzQ2ODI1MzgyfQ.f2p6KSknZ0oWWY769mpZzZWEqDb4HK3h40WhF0Tlj7Q")
     POLLING_INTERVAL: float = Field(default=5, description="The interval of polling in seconds.")
 
     class Config:
