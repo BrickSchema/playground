@@ -105,8 +105,8 @@ class ActuationEntity:
         task_results = await asyncio.gather(*tasks)
         results = []
         for i, (success, detail) in enumerate(task_results):
-            # results.append(schemas.ActuationResult(entity_id=entity_ids[i], success=success, detail=detail))
-            results.append(schemas.ActuationResult(entity_id=entity_ids[i], success=True, detail="101"))
+            results.append(schemas.ActuationResult(entity_id=entity_ids[i], success=success, detail=detail))
+            # results.append(schemas.ActuationResult(entity_id=entity_ids[i], success=True, detail="101"))
         return schemas.ActuationResults(results=results).to_response()
 
     @router.post(
