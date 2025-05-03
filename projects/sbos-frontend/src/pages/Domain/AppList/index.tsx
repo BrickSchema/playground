@@ -24,7 +24,7 @@ const AppList: React.FC = () => {
   );
   const { data: apps, refresh: reloadApps } = useRequest(
     async () => {
-      return await appsListBrickapiV1AppsGet();
+      return await appsListBrickapiV1AppsGet({all_apps: true});
     },
     {
       // manual: true,

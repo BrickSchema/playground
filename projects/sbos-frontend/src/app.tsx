@@ -2,7 +2,7 @@ import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/comp
 import { useDomainName } from '@/hooks';
 import { listDomainsBrickapiV1DomainsGet } from '@/services/brick-server-playground/domains';
 import { usersCurrentUserBrickapiV1UsersMeGet as queryCurrentUser } from '@/services/brick-server-playground/users';
-import { LinkOutlined, SmileOutlined } from '@ant-design/icons';
+import {CodeOutlined, LinkOutlined, SmileOutlined, BuildOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings, MenuDataItem } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
@@ -22,8 +22,10 @@ hljsDefineTurtle(hljs);
 hljsDefineSparql(hljs);
 
 import json from 'highlight.js/lib/languages/json';
+import plaintext from 'highlight.js/lib/languages/plaintext';
 
 hljs.registerLanguage('json', json);
+hljs.registerLanguage('plaintext', plaintext);
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -168,15 +170,39 @@ const Layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
                 path: `/domain/${domainName}/policies`,
                 name: 'policies',
               },
+              {
+                path: `/domain/${domainName}/profiles`,
+                name: 'profiles',
+              },
             ]);
           }
           menu.push({
             path: `/domain/${domainName}`,
             name: 'domain',
             children: children,
+            icon: <BuildOutlined />,
           });
         }
-
+        menu.push({
+          name: 'developer',
+          children: [
+            {
+              path: '/developer/apps',
+              name: 'apps'
+            }
+          ],
+          icon: <CodeOutlined />,
+        });
+        menu.push({
+          name: 'admin',
+          children: [
+            {
+              path: '/admin/apps',
+              name: 'apps'
+            }
+          ],
+          icon: <ThunderboltOutlined />,
+        });
         return menu;
       },
     },

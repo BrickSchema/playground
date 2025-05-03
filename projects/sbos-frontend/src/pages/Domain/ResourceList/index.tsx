@@ -1,8 +1,8 @@
 import { useDomainName } from '@/hooks';
 import {
-  deleteResourceBrickapiV1DomainsDomainResourcesEntityIdDelete,
+  deleteResourceBrickapiV1DomainsDomainResourcesDelete,
   listResourcesBrickapiV1DomainsDomainResourcesGet,
-  updateResourceBrickapiV1DomainsDomainResourcesEntityIdPost,
+  updateResourceBrickapiV1DomainsDomainResourcesPost,
 } from '@/services/brick-server-playground/domains';
 import { PlusOutlined } from '@ant-design/icons';
 import {
@@ -21,21 +21,31 @@ const ResourceList: React.FC = () => {
   const domainName = useDomainName();
   const actionRef = useRef<ActionType>();
   const [isAddResourceOpen, setIsAddResourceOpen] = useState<boolean>(false);
+  const [currentResource, setCurrentResource] = useState<API.ResourceConstraintRead | undefined>(
+    undefined,
+  );
 
   const onClickAddResource = async () => {
+    setCurrentResource(undefined);
     setIsAddResourceOpen(true);
   };
 
+  const onClickEditResource =  async(resource: API.ResourceConstraintRead) => {
+    setCurrentResource(resource);
+    setIsAddResourceOpen(true);
+  }
+
   const onFinishAddResource = async (values: { entityId: string; value: number }) => {
     console.log(values);
-    const result = await updateResourceBrickapiV1DomainsDomainResourcesEntityIdPost(
-      { domain: domainName, entity_id: values.entityId },
-      { value: values.value },
+    const result = await updateResourceBrickapiV1DomainsDomainResourcesPost(
+      { domain: domainName },
+      { entityId: values.entityId, value: values.value },
     );
     if (result.errorCode !== 'Success') {
       message.error(`Error: ${result.errorCode}`);
     }
     await actionRef.current?.reload();
+    setCurrentResource(undefined);
     setIsAddResourceOpen(false);
   };
 
@@ -44,10 +54,9 @@ const ResourceList: React.FC = () => {
   };
 
   const onDeleteResource = async (resource: API.ResourceConstraintRead) => {
-    const result = await deleteResourceBrickapiV1DomainsDomainResourcesEntityIdDelete({
+    const result = await deleteResourceBrickapiV1DomainsDomainResourcesDelete({
       domain: domainName,
-      entity_id: resource.entityId,
-    });
+    }, {entityId: resource.entityId,});
     if (result.errorCode !== 'Success') {
       message.error(`Error: ${result.errorCode}`);
     }
@@ -67,7 +76,9 @@ const ResourceList: React.FC = () => {
       title: 'Operations',
       valueType: 'option',
       render: (text, record, _, action) => [
-        // <a key="add_profile" onClick={() => onClickAddProfile(record)}>Add Profile</a>,
+        <a key="add_profile" onClick={() => onClickEditResource(record)}>
+          Edit
+        </a>,
         <Popconfirm
           key="delete"
           title="Delete the Resource Constraint"
@@ -117,6 +128,7 @@ const ResourceList: React.FC = () => {
             label="Entity"
             name="entityId"
             width="md"
+            initialValue={currentResource?.entityId || ""}
             rules={[
               {
                 required: true,
@@ -128,6 +140,7 @@ const ResourceList: React.FC = () => {
             label="Value"
             name="value"
             width="md"
+            initialValue={currentResource?.value || ""}
             rules={[
               {
                 required: true,

@@ -14,9 +14,9 @@ def get_app_management_redis_db():
 
 async def get_path_app(app: str = Path(...)) -> models.App:
     if ObjectId.is_valid(app):
-        app_model = await models.App.get(app)
+        app_model = await models.App.get(app, fetch_links=True, nesting_depth=1)
     else:
-        app_model = await models.App.find_one(models.App.name == app)
+        app_model = await models.App.find_one(models.App.name == app, fetch_links=True, nesting_depth=1)
     if app_model is None:
         raise BizError(ErrorCode.AppNotFoundError)
     return app_model

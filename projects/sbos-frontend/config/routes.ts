@@ -35,6 +35,10 @@ export default [
     // component: './Domain/DomainList',
     routes: [
       {
+        path: '/domain/:domainName',
+        redirect: '/domain/:domainName/dashboard',
+      },
+      {
         name: 'dashboard',
         path: '/domain/:domainName/dashboard',
         component: './Domain/Dashboard',
@@ -63,15 +67,21 @@ export default [
         access: 'isDomainAdmin',
       },
       {
-        name: 'apps',
+        name: 'resources',
         path: '/domain/:domainName/resources',
         component: './Domain/ResourceList',
         access: 'isDomainAdmin',
       },
       {
-        name: 'apps',
+        name: 'policies',
         path: '/domain/:domainName/policies',
         component: './Domain/PolicyList',
+        access: 'isDomainAdmin',
+      },
+      {
+        name: 'profiles',
+        path: '/domain/:domainName/profiles',
+        component: './Domain/ProfileList',
         access: 'isDomainAdmin',
       },
       {
@@ -81,6 +91,27 @@ export default [
         hideInMenu: true,
       },
     ],
+  },
+  {
+    name: 'developer',
+    routes: [
+      {
+        name: 'apps',
+        path: '/developer/apps',
+        component: './Developer/AppList',
+      },
+    ]
+  },
+  {
+    name: 'admin',
+    routes: [
+      {
+        name: 'apps',
+        path: '/admin/apps',
+        component: './Admin/AppList',
+        access: 'isSiteAdmin',
+      },
+    ]
   },
   {
     path: '/admin',

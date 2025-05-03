@@ -14,7 +14,7 @@ from fastapi import (
     File,
     Form,
     Path,
-    UploadFile,
+    UploadFile, Query,
 )
 from fastapi.concurrency import run_in_threadpool
 from fastapi_restful.cbv import cbv
@@ -23,6 +23,7 @@ from motor.motor_asyncio import AsyncIOMotorGridOut
 from patoolib import extract_archive
 from redis import StrictRedis
 from sbos.minimal.interfaces.cache import clear_cache
+from sbos.minimal.securities.auth import get_token_user
 from sbos.minimal.securities.checker import PermissionChecker
 from starlette.requests import Request
 from starlette.responses import FileResponse, Response
@@ -75,10 +76,10 @@ class AppApi:
         name="apps:api",
     )
     async def app_api(
-        self,
-        request: Request,
-        path: str = Path(description="Api endpoint in the app"),
-        domain_user_app: models.DomainUserApp = Depends(get_token_domain_user_app),
+            self,
+            request: Request,
+            path: str = Path(description="Api endpoint in the app"),
+            domain_user_app: models.DomainUserApp = Depends(get_token_domain_user_app),
     ):
         if path.startswith("/"):
             path = path[1:]
@@ -91,7 +92,7 @@ class AppApi:
 
         if container_ip:
             container_url = (
-                "http://" + container_ip + ":5000/"
+                    "http://" + container_ip + ":5000/"
             )  # TODO: Configure the port
         else:
             raise BizError(ErrorCode.AppContainerNotFoundError)
@@ -129,17 +130,32 @@ class AppApi:
 @cbv(router)
 class AppRoute:
 
-    @router.get("/", description="Get all apps on the site.", name="apps:list")
-    async def list_apps(self) -> schemas.StandardListResponse[schemas.AppRead]:
-        apps = await models.App.find_all().to_list()
+    @router.get(
+        "/",
+        description="Get all apps on the site.",
+        name="apps:list",
+        dependencies=[
+            Depends(PermissionChecker(permission_scope=schemas.PermissionScope.USER))
+        ]
+    )
+    async def list_apps(
+            self,
+            all_apps: bool = Query(False),
+            user: models.User = Depends(get_token_user),
+    ) -> schemas.StandardListResponse[schemas.AppRead]:
+        if all_apps and user.is_superuser:
+            apps = await models.App.find_all(fetch_links=True).to_list()
+        else:
+            apps = await models.App.find_many(models.App.developer.id == user.id, fetch_links=True).to_list()
         return schemas.StandardListResponse(
             [schemas.AppRead.model_validate(app.dict()) for app in apps]
         )
 
     @router.post("/", description="Register an app.", name="apps:registration")
     async def register_app(
-        self,
-        app_create: schemas.AppCreate = Body(...),
+            self,
+            app_create: schemas.AppCreate = Body(...),
+            user: models.User = Depends(get_token_user),
     ) -> schemas.StandardResponse[schemas.AppRead]:
         app = await models.App.find_one(models.App.name == app_create.name)
         if app is not None:
@@ -152,6 +168,7 @@ class AppRoute:
         app = models.App(
             name=app_create.name,
             description=app_create.description,
+            developer=user,
             approved=False,
         )
         await app.save()
@@ -159,7 +176,7 @@ class AppRoute:
 
     @router.get("/me", name="apps:current_app")
     async def get_current_app(
-        self, domain_user_app: models.DomainUserApp = Depends(get_token_domain_user_app)
+            self, domain_user_app: models.DomainUserApp = Depends(get_token_domain_user_app)
     ) -> schemas.StandardResponse[schemas.DomainUserAppRead]:
         return schemas.DomainUserAppRead.model_validate(
             domain_user_app.dict()
@@ -171,14 +188,18 @@ class AppRoute:
         name="apps:get",
     )
     async def get_app(
-        self,
-        app: models.App = Depends(get_path_app),
-    ) -> schemas.StandardResponse[schemas.AppReadWithApprovedData]:
+            self,
+            app: models.App = Depends(get_path_app),
+    ) -> schemas.StandardResponse[schemas.AppReadWithAllData]:
         if app.approved_data is not None:
             app.approved_data.permission_profile = (
                 await app.approved_data.permission_profile.fetch()
             )
-        return schemas.AppReadWithApprovedData.model_validate(app.dict()).to_response()
+        if app.submitted_data is not None:
+            app.submitted_data.permission_profile = (
+                await app.submitted_data.permission_profile.fetch()
+            )
+        return schemas.AppReadWithAllData.model_validate(app.dict()).to_response()
 
     @router.delete(
         "/{app}",
@@ -186,8 +207,8 @@ class AppRoute:
         name="apps:delete",
     )
     async def delete_app(
-        self,
-        app: models.App = Depends(get_path_app),
+            self,
+            app: models.App = Depends(get_path_app),
     ) -> schemas.StandardResponse[schemas.Empty]:
         # TODO: remove all domain_apps, domain_user_apps and containers
         await app.delete()
@@ -195,7 +216,7 @@ class AppRoute:
 
     @staticmethod
     async def replace_file(
-        db: AsyncDatabase, app: models.App, file: UploadFile | None, name: str
+            db: AsyncDatabase, app: models.App, file: UploadFile | None, name: str
     ):
         if file is not None:
             submitted_file_id = getattr(app.submitted_data, name)
@@ -223,15 +244,15 @@ class AppRoute:
         name="apps:submit_data",
     )
     async def submit_app_data(
-        self,
-        app: models.App = Depends(get_path_app),
-        frontend_file: UploadFile = File(None),
-        backend_file: UploadFile = File(None),
-        permission_profile_read: str = Form(),
-        permission_profile_write: str = Form(),
-        permission_profile_arguments: str = Form(),
-        permission_model: schemas.PermissionModel = Form(),
-        db: AsyncDatabase = Depends(get_mongodb),
+            self,
+            app: models.App = Depends(get_path_app),
+            frontend_file: UploadFile = File(None),
+            backend_file: UploadFile = File(None),
+            permission_profile_read: str = Form(),
+            permission_profile_write: str = Form(),
+            permission_profile_arguments: str = Form(),
+            permission_model: schemas.PermissionModel = Form(),
+            db: AsyncDatabase = Depends(get_mongodb),
     ) -> schemas.StandardResponse[schemas.AppReadWithAllData]:
         permission_profile_arguments = json.loads(permission_profile_arguments)
         if app.submitted_data is None:
@@ -267,7 +288,7 @@ class AppRoute:
 
     @staticmethod
     async def approve_app_background(
-        app: models.App, frontend_file: AsyncIOMotorGridOut
+            app: models.App, frontend_file: AsyncIOMotorGridOut
     ) -> None:
         async with aiofiles.tempfile.TemporaryDirectory() as src_dir:
             frontend_file_path = pathlib.Path(src_dir) / frontend_file.filename
@@ -305,15 +326,15 @@ class AppRoute:
         ],
     )
     async def approve_app(
-        self,
-        background_tasks: BackgroundTasks,
-        app: models.App = Depends(get_path_app),
-        db: AsyncDatabase = Depends(get_mongodb),
+            self,
+            background_tasks: BackgroundTasks,
+            app: models.App = Depends(get_path_app),
+            db: AsyncDatabase = Depends(get_mongodb),
     ) -> schemas.StandardResponse[schemas.AppReadWithApprovedData]:
         if (
-            app.submitted_data is None
-            or app.submitted_data.backend is None
-            or app.submitted_data.frontend is None
+                app.submitted_data is None
+                or app.submitted_data.backend is None
+                or app.submitted_data.frontend is None
         ):
             raise BizError(ErrorCode.AppDataNotFoundError)
         submitted_permission_profile = (
@@ -382,7 +403,7 @@ class AppRoute:
 
     @staticmethod
     async def build_app_background(
-        app: models.App, backend_file: AsyncIOMotorGridOut
+            app: models.App, backend_file: AsyncIOMotorGridOut
     ) -> schemas.AppBuild:
         async with aiofiles.tempfile.TemporaryDirectory() as src_dir:
             backend_file_path = pathlib.Path(src_dir) / backend_file.filename
@@ -425,9 +446,9 @@ class AppRoute:
         name="apps:build",
     )
     async def build_app(
-        self,
-        app: models.App = Depends(get_path_app),
-        db: AsyncDatabase = Depends(get_mongodb),
+            self,
+            app: models.App = Depends(get_path_app),
+            db: AsyncDatabase = Depends(get_mongodb),
     ) -> schemas.StandardResponse[schemas.AppBuild]:
         if app.approved_data is None or app.approved_data.backend is None:
             raise BizError(ErrorCode.AppBackendNotFoundError)
@@ -444,16 +465,16 @@ class AppStatic:
     @router.get(
         "/{app}/static/{path:path}",
         description="Serve the frontend static files of the apps. "
-        "We should move this part to an nginx container instead.",
+                    "We should move this part to an nginx container instead.",
         name="apps:static",
     )
     def get_static(
-        self,
-        # request: Request,
-        app: str = Path(..., description="TODO"),
-        path: str = Path(..., description="TODO"),
-        # app_token: str = Cookie(None),
-        # app_token_query: str = Query(None),
+            self,
+            # request: Request,
+            app: str = Path(..., description="TODO"),
+            path: str = Path(..., description="TODO"),
+            # app_token: str = Cookie(None),
+            # app_token_query: str = Query(None),
     ) -> FileResponse:
         # TODO: parse paths andread and return the right HTMLResponse
         # path_splits = [item for item in os.path.split(path) if item]

@@ -2,6 +2,7 @@ from beanie import PydanticObjectId
 from sbos.minimal.schemas.base import BaseModel
 
 from sbos.playground.schemas.permission import PermissionModel, PermissionProfileRead
+from sbos.minimal.schemas.user import UserRead
 
 
 class AppCreate(BaseModel):
@@ -22,6 +23,9 @@ class AppRead(BaseModel):
     name: str
     description: str
     approved: bool
+
+class AppReadWithDeveloper(AppRead):
+    developer: UserRead | None
 
 
 class AppData(BaseModel):

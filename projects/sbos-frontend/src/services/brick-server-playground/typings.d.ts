@@ -1,5 +1,7 @@
 declare namespace API {
   type ActuationResult = {
+    /** Entityid */
+    entityId: string;
     /** Success */
     success: boolean;
     /** Detail */
@@ -71,6 +73,7 @@ declare namespace API {
     name: string;
     /** Description */
     description: string;
+    developer: UserRead | null;
     /** Approved */
     approved: boolean;
   };
@@ -105,6 +108,7 @@ declare namespace API {
     name: string;
     /** Description */
     description: string;
+    developer: UserRead | null;
     /** Approved */
     approved: boolean;
     approvedData?: AppData | null;
@@ -126,6 +130,7 @@ declare namespace API {
     name: string;
     /** Description */
     description: string;
+    developer: UserRead | null;
     /** Approved */
     approved: boolean;
     approvedData?: AppData | null;
@@ -139,27 +144,27 @@ declare namespace API {
     data?: AppReadWithApprovedData | null;
   };
 
-  type appsApiBrickapiV1AppsAppApiPathGetParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsAppApiPathGetParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsAppApiPathGetParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsAppApiPathGetParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsAppApiPathGetParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
@@ -178,6 +183,10 @@ declare namespace API {
 
   type appsGetBrickapiV1AppsAppGetParams = {
     app: string;
+  };
+
+  type appsListBrickapiV1AppsGetParams = {
+    all_apps?: boolean;
   };
 
   type appsStaticBrickapiV1AppsAppStaticPathGetParams = {
@@ -324,8 +333,7 @@ declare namespace API {
     profile: string;
   };
 
-  type deleteResourceBrickapiV1DomainsDomainResourcesEntityIdDeleteParams = {
-    entity_id: string;
+  type deleteResourceBrickapiV1DomainsDomainResourcesDeleteParams = {
     domain: string;
   };
 
@@ -628,7 +636,24 @@ declare namespace API {
     | 'DomainAlreadyExistsError'
     | 'GraphDBError'
     | 'ActuationDriverNotFoundError'
-    | 'TimeseriesDriverNotFoundError';
+    | 'TimeseriesDriverNotFoundError'
+    | 'AppNotFoundError'
+    | 'AppNotApprovedError'
+    | 'AppAlreadyExistsError'
+    | 'AppDataNotFoundError'
+    | 'AppStaticFileNotFoundError'
+    | 'AppContainerNotFoundError'
+    | 'DomainAppNotFoundError'
+    | 'DomainAppAlreadyExistsError'
+    | 'DomainUserNotFoundError'
+    | 'DomainUserAlreadyExistsError'
+    | 'DomainUserAppNotFoundError'
+    | 'DomainUserAppAlreadyExistsError'
+    | 'PermissionProfileNotFoundError'
+    | 'PermissionProfileAlreadyExistsError'
+    | 'ResourceConstraintNotFoundError'
+    | 'DomainPreActuationPolicyNotFoundError'
+    | 'DomainPreActuationPolicyAlreadyExistsError';
 
   type ErrorModel = {
     /** Detail */
@@ -690,8 +715,7 @@ declare namespace API {
     domain: string;
   };
 
-  type notifyResourceBrickapiV1DomainsDomainResourcesEntityIdNotifyPostParams = {
-    entity_id: string;
+  type notifyResourceBrickapiV1DomainsDomainResourcesNotifyPostParams = {
     domain: string;
   };
 
@@ -795,6 +819,15 @@ declare namespace API {
     domain: string;
   };
 
+  type readBrickapiV1ActuationDomainsDomainReadPostParams = {
+    domain: string;
+  };
+
+  type ResourceConstraintDelete = {
+    /** Entityid */
+    entityId: string;
+  };
+
   type ResourceConstraintRead = {
     /** Entityid */
     entityId: string;
@@ -826,6 +859,8 @@ declare namespace API {
   };
 
   type ResourceConstraintUpdate = {
+    /** Entityid */
+    entityId: string;
     /** Value */
     value: number;
   };
@@ -878,8 +913,7 @@ declare namespace API {
     profile: string;
   };
 
-  type updateResourceBrickapiV1DomainsDomainResourcesEntityIdPostParams = {
-    entity_id: string;
+  type updateResourceBrickapiV1DomainsDomainResourcesPostParams = {
     domain: string;
   };
 

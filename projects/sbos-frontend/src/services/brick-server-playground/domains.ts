@@ -386,7 +386,121 @@ export async function listResourcesBrickapiV1DomainsDomainResourcesGet2(
   });
 }
 
-/** Uplaod a Turtle file Upload a Turtle file. An example file: https://gitlab.com/jbkoh/brick-server-dev/blob/dev/examples/data/bldg.ttl POST /brickapi/v1/domains/${param0}/upload */
+/** Update Resource POST /brickapi/v1/domains/${param0}/resources */
+export async function updateResourceBrickapiV1DomainsDomainResourcesPost(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.updateResourceBrickapiV1DomainsDomainResourcesPostParams,
+  body: API.ResourceConstraintUpdate,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, ...queryParams } = params;
+  return request<API.ResourceConstraintReadResp>(`/brickapi/v1/domains/${param0}/resources`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Update Resource POST /brickapi/v1/domains/${param0}/resources */
+export async function updateResourceBrickapiV1DomainsDomainResourcesPost2(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.updateResourceBrickapiV1DomainsDomainResourcesPostParams,
+  body: API.ResourceConstraintUpdate,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, ...queryParams } = params;
+  return request<API.ResourceConstraintReadResp>(`/brickapi/v1/domains/${param0}/resources`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Delete Resource DELETE /brickapi/v1/domains/${param0}/resources */
+export async function deleteResourceBrickapiV1DomainsDomainResourcesDelete(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.deleteResourceBrickapiV1DomainsDomainResourcesDeleteParams,
+  body: API.ResourceConstraintDelete,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, ...queryParams } = params;
+  return request<API.EmptyResp>(`/brickapi/v1/domains/${param0}/resources`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Delete Resource DELETE /brickapi/v1/domains/${param0}/resources */
+export async function deleteResourceBrickapiV1DomainsDomainResourcesDelete2(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.deleteResourceBrickapiV1DomainsDomainResourcesDeleteParams,
+  body: API.ResourceConstraintDelete,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, ...queryParams } = params;
+  return request<API.EmptyResp>(`/brickapi/v1/domains/${param0}/resources`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Notify Resource POST /brickapi/v1/domains/${param0}/resources/notify */
+export async function notifyResourceBrickapiV1DomainsDomainResourcesNotifyPost(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.notifyResourceBrickapiV1DomainsDomainResourcesNotifyPostParams,
+  body: Record<string, any>,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, ...queryParams } = params;
+  return request<API.EmptyResp>(`/brickapi/v1/domains/${param0}/resources/notify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Notify Resource POST /brickapi/v1/domains/${param0}/resources/notify */
+export async function notifyResourceBrickapiV1DomainsDomainResourcesNotifyPost2(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.notifyResourceBrickapiV1DomainsDomainResourcesNotifyPostParams,
+  body: Record<string, any>,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, ...queryParams } = params;
+  return request<API.EmptyResp>(`/brickapi/v1/domains/${param0}/resources/notify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Uplaod a Turtle file Upload a Turtle file. An example file: https://gitlab.com/jbkoh/sbos-dev/blob/dev/examples/data/bldg.ttl POST /brickapi/v1/domains/${param0}/upload */
 export async function uploadTurtleFileBrickapiV1DomainsDomainUploadPost(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.uploadTurtleFileBrickapiV1DomainsDomainUploadPostParams,
@@ -426,7 +540,7 @@ export async function uploadTurtleFileBrickapiV1DomainsDomainUploadPost(
   });
 }
 
-/** Uplaod a Turtle file Upload a Turtle file. An example file: https://gitlab.com/jbkoh/brick-server-dev/blob/dev/examples/data/bldg.ttl POST /brickapi/v1/domains/${param0}/upload */
+/** Uplaod a Turtle file Upload a Turtle file. An example file: https://gitlab.com/jbkoh/sbos-dev/blob/dev/examples/data/bldg.ttl POST /brickapi/v1/domains/${param0}/upload */
 export async function uploadTurtleFileBrickapiV1DomainsDomainUploadPost2(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.uploadTurtleFileBrickapiV1DomainsDomainUploadPostParams,
@@ -704,114 +818,4 @@ export async function updateDomainUserProfileBrickapiV1DomainsDomainUsersUserPro
       ...(options || {}),
     },
   );
-}
-
-/** Update Resource POST /brickapi/v1/domains/${param1}/resources/${param0} */
-export async function updateResourceBrickapiV1DomainsDomainResourcesEntityIdPost(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.updateResourceBrickapiV1DomainsDomainResourcesEntityIdPostParams,
-  body: API.ResourceConstraintUpdate,
-  options?: { [key: string]: any },
-) {
-  const { entity_id: param0, domain: param1, ...queryParams } = params;
-  return request<API.ResourceConstraintReadResp>(
-    `/brickapi/v1/domains/${param1}/resources/${param0}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      params: { ...queryParams },
-      data: body,
-      ...(options || {}),
-    },
-  );
-}
-
-/** Update Resource POST /brickapi/v1/domains/${param1}/resources/${param0} */
-export async function updateResourceBrickapiV1DomainsDomainResourcesEntityIdPost2(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.updateResourceBrickapiV1DomainsDomainResourcesEntityIdPostParams,
-  body: API.ResourceConstraintUpdate,
-  options?: { [key: string]: any },
-) {
-  const { entity_id: param0, domain: param1, ...queryParams } = params;
-  return request<API.ResourceConstraintReadResp>(
-    `/brickapi/v1/domains/${param1}/resources/${param0}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      params: { ...queryParams },
-      data: body,
-      ...(options || {}),
-    },
-  );
-}
-
-/** Delete Resource DELETE /brickapi/v1/domains/${param1}/resources/${param0} */
-export async function deleteResourceBrickapiV1DomainsDomainResourcesEntityIdDelete(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.deleteResourceBrickapiV1DomainsDomainResourcesEntityIdDeleteParams,
-  options?: { [key: string]: any },
-) {
-  const { entity_id: param0, domain: param1, ...queryParams } = params;
-  return request<API.EmptyResp>(`/brickapi/v1/domains/${param1}/resources/${param0}`, {
-    method: 'DELETE',
-    params: { ...queryParams },
-    ...(options || {}),
-  });
-}
-
-/** Delete Resource DELETE /brickapi/v1/domains/${param1}/resources/${param0} */
-export async function deleteResourceBrickapiV1DomainsDomainResourcesEntityIdDelete2(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.deleteResourceBrickapiV1DomainsDomainResourcesEntityIdDeleteParams,
-  options?: { [key: string]: any },
-) {
-  const { entity_id: param0, domain: param1, ...queryParams } = params;
-  return request<API.EmptyResp>(`/brickapi/v1/domains/${param1}/resources/${param0}`, {
-    method: 'DELETE',
-    params: { ...queryParams },
-    ...(options || {}),
-  });
-}
-
-/** Notify Resource POST /brickapi/v1/domains/${param1}/resources/${param0}/notify */
-export async function notifyResourceBrickapiV1DomainsDomainResourcesEntityIdNotifyPost(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.notifyResourceBrickapiV1DomainsDomainResourcesEntityIdNotifyPostParams,
-  body: API.ResourceConstraintUpdate,
-  options?: { [key: string]: any },
-) {
-  const { entity_id: param0, domain: param1, ...queryParams } = params;
-  return request<API.EmptyResp>(`/brickapi/v1/domains/${param1}/resources/${param0}/notify`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    params: { ...queryParams },
-    data: body,
-    ...(options || {}),
-  });
-}
-
-/** Notify Resource POST /brickapi/v1/domains/${param1}/resources/${param0}/notify */
-export async function notifyResourceBrickapiV1DomainsDomainResourcesEntityIdNotifyPost2(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.notifyResourceBrickapiV1DomainsDomainResourcesEntityIdNotifyPostParams,
-  body: API.ResourceConstraintUpdate,
-  options?: { [key: string]: any },
-) {
-  const { entity_id: param0, domain: param1, ...queryParams } = params;
-  return request<API.EmptyResp>(`/brickapi/v1/domains/${param1}/resources/${param0}/notify`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    params: { ...queryParams },
-    data: body,
-    ...(options || {}),
-  });
 }
