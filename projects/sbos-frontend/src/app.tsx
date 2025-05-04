@@ -199,6 +199,10 @@ const Layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
             {
               path: '/admin/apps',
               name: 'apps'
+            },
+             {
+              path: '/admin/domains',
+              name: 'domains'
             }
           ],
           icon: <ThunderboltOutlined />,

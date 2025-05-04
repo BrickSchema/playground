@@ -111,6 +111,12 @@ export default [
         component: './Admin/AppList',
         access: 'isSiteAdmin',
       },
+       {
+        name: 'apps',
+        path: '/admin/domains',
+        component: './Admin/DomainList',
+        access: 'isSiteAdmin',
+      },
     ]
   },
   {
