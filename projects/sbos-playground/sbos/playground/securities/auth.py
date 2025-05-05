@@ -280,14 +280,15 @@ select distinct ?entity ?type where {{
                 entity_ids.update(entity_ids_domain_user)
                 prefixes.update(prefixes_domain_user)
             if self.domain_user_app is not None:
+                profile = await self.app.approved_data.permission_profile.fetch()
                 entity_ids_app, prefixes_app = (
                     await self.get_authorized_entities_in_profile(
-                        self.app.profile, self.domain_user_app.arguments, permission
+                        profile, self.domain_user_app.arguments, permission
                     )
                 )
-                if self.app.permission_model == PermissionModel.AUGMENTATION:
+                if self.app.approved_data.permission_model == PermissionModel.AUGMENTATION:
                     entity_ids.update(entity_ids_app)
-                elif self.app.permission_model == PermissionModel.INTERSECTION:
+                elif self.app.approved_data.permission_model == PermissionModel.INTERSECTION:
                     entity_ids.intersection_update(entity_ids_app)
                 prefixes.update(prefixes_app)
             return entity_ids, prefixes

@@ -214,7 +214,7 @@ class GraphDB:
         )
         query_str = resp.content.decode("utf-8")
         query_str = ast.literal_eval(query_str)
-        # logger.debug(query_str)
+        logger.debug(query_str)
         data = {
             "query": query_str,
             "infer": True,
@@ -243,8 +243,9 @@ class GraphDB:
             prefixes = self.parse_prefix(query_str)
         else:
             prefixes = {}
+        logger.debug(result)
+        logger.debug(prefixes)
         return result, prefixes
-        # logger.debug(result)
         # parsed_result = self.parse_result(result, prefixes)
         # logger.debug(parsed_result)
         # return parsed_result

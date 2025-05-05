@@ -234,21 +234,23 @@ class UserApps:
         container_name = domain_user_app.get_container_name()
         container = get_container(container_name)
         try:
+            if operation == "create" or operation == "start":
+                await domain_user_app.fetch_all_links()
+                token = await create_jwt_token(
+                    domain=domain_user_app.domain,
+                    user=domain_user_app.user,
+                    app=domain_user_app.app,
+                    domain_user_app=domain_user_app,
+                )
+                logger.info("app token: {}", token)
+                domain_user_app.token = token
             if container is None:
                 if operation == "create" or operation == "start":
-                    await domain_user_app.fetch_all_links()
-                    token = await create_jwt_token(
-                        domain=domain_user_app.domain,
-                        user=domain_user_app.user,
-                        app=domain_user_app.app,
-                        domain_user_app=domain_user_app,
-                    )
-                    domain_user_app.token = token
                     container = spawn_app(
                         domain_user_app.app.name,
                         container_name,
                         start=start,
-                        token=token,
+                        token=domain_user_app.token,
                     )
             else:
                 if operation == "start" and container.status != DockerStatus.RUNNING:
