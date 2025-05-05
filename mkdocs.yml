@@ -71,3 +71,4 @@ nav:
   - Tutorials:
       - Tutorial@CPSIoT25!: tutorial/cpsiot25.md
       - Write a Brick based building app: tutorial/write_an_app.md
+      - Write a Permission Profile: tutorial/write_a_permission_profile.md
