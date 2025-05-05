@@ -40,9 +40,10 @@ async def find_policy(
             entity_ids = await use_cache(
                 cache_key, execute_policy_query, self, domain, policy
             )
-            logger.info(entity_id)
-            logger.info(entity_id in entity_ids)
-            logger.info(len(entity_ids))
+            logger.info("entity id: {} {}", entity_id, entity_id in entity_ids)
+            logger.info("policy entity ids: {}", entity_ids)
+            # logger.info(entity_id in entity_ids)
+            # logger.info(len(entity_ids))
             if entity_id not in entity_ids:
                 continue
         logger.info("{} {} {}", domain.name, policy.name, entity_id)
@@ -79,14 +80,14 @@ async def guard_before_actuation(
                 result = await func(entity_id, value)
             else:
                 result = func(entity_id, value)
-            result = bool(value)
+            result = bool(result)
         except Exception as e:
             # use next guard if the entity_id and value cannot be handled
             logger.exception(e)
             pass
         logger.info("check with {}, result = {}", guard_name, result)
         if result is False:
-            detail = "actuate {entity_id} with value {value} blocked by guard {guard_name} in policy {policy.name}"
+            detail = f"actuate {entity_id} with value {value} blocked by guard {guard_name} in policy {policy.name}"
             return False, detail, policy_time, time.time() - start
         if result is True:
             return True, "", policy_time, time.time() - start

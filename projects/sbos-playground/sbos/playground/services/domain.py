@@ -125,6 +125,47 @@ class DomainUserRoute:
         domain_user.user = user
         return schemas.DomainUserRead.model_validate(domain_user.dict()).to_response()
 
+    @router.patch(
+        "/{domain}/users/{user}",
+        dependencies=[
+            Depends(PermissionChecker(permission_scope=schemas.PermissionScope.DOMAIN))
+        ],
+    )
+    async def update_domain_user(
+            self,
+            domain: models.Domain = Depends(get_path_domain),
+            user: models.User = Depends(get_path_user),
+            domain_user_update: schemas.DomainUserUpdate = Body(...),
+    ) -> schemas.StandardResponse[schemas.DomainUserRead]:
+        domain_user = await get_domain_user(domain, user)
+        if domain_user is None:
+            raise BizError(ErrorCode.DomainUserNotFoundError)
+
+        if domain_user_update.is_admin is not None:
+            domain_user.is_admin = domain_user_update.is_admin
+            await domain_user.save()
+
+        domain_user.domain = domain
+        domain_user.user = user
+        return schemas.DomainUserRead.model_validate(domain_user.dict()).to_response()
+
+    @router.delete(
+        "/{domain}/users/{user}",
+        dependencies=[
+            Depends(PermissionChecker(permission_scope=schemas.PermissionScope.DOMAIN))
+        ],
+    )
+    async def delete_domain_user(
+            self,
+            domain: models.Domain = Depends(get_path_domain),
+            user: models.User = Depends(get_path_user),
+    ) -> schemas.StandardResponse[schemas.Empty]:
+        domain_user = await get_domain_user(domain, user)
+        if domain_user is None:
+            raise BizError(ErrorCode.DomainUserNotFoundError)
+        await domain_user.delete()
+        return schemas.StandardResponse()
+
     @router.get(
         "/{domain}/users/{user}",
         dependencies=[

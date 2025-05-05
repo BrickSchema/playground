@@ -10,6 +10,7 @@ import {
   usersStopAppContainerBrickapiV1UsersDomainsDomainAppsAppStopPost,
 } from '@/services/brick-server-playground/users';
 import {
+  CloseCircleOutlined,
   ExportOutlined,
   PauseCircleOutlined,
   PlayCircleOutlined,
@@ -217,20 +218,23 @@ const Dashboard: React.FC = () => {
       // history.push(`/domain/${domainUserApp.domain.name}/app/${domainUserApp.app.name}`);
     };
 
+    const actions = [
+      <SettingOutlined key="setting" onClick={onClickSettings} />,
+    ];
+    if (domainUserApp.status !== 'running') {
+      actions.push(<PlayCircleOutlined key="start" onClick={onClickStart} />);
+      actions.push(<CloseCircleOutlined key="app" onClick={() => message.error("App is not running!") } />);
+    } else {
+      actions.push(<PauseCircleOutlined key="stop" onClick={onClickStop} />);
+      actions.push(<ExportOutlined key="app" onClick={onClickApp} />);
+    }
+
     return (
       <Col xxl={6} xl={8} lg={8} md={8} sm={12} xs={24} key={domainUserApp.app.id}>
         <ProCard
           title={domainUserApp.app.name}
           bordered={false}
-          actions={[
-            <SettingOutlined key="setting" onClick={onClickSettings} />,
-            domainUserApp.status !== 'running' ? (
-              <PlayCircleOutlined key="start" onClick={onClickStart} />
-            ) : (
-              <PauseCircleOutlined key="stop" onClick={onClickStop} />
-            ),
-            <ExportOutlined key="app" onClick={onClickApp} />,
-          ]}
+          actions={actions}
         >
           Status: {domainUserApp?.status}
         </ProCard>

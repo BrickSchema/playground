@@ -73,7 +73,6 @@ declare namespace API {
     name: string;
     /** Description */
     description: string;
-    developer: UserRead | null;
     /** Approved */
     approved: boolean;
   };
@@ -108,7 +107,6 @@ declare namespace API {
     name: string;
     /** Description */
     description: string;
-    developer: UserRead | null;
     /** Approved */
     approved: boolean;
     approvedData?: AppData | null;
@@ -130,7 +128,6 @@ declare namespace API {
     name: string;
     /** Description */
     description: string;
-    developer: UserRead | null;
     /** Approved */
     approved: boolean;
     approvedData?: AppData | null;
@@ -144,27 +141,27 @@ declare namespace API {
     data?: AppReadWithApprovedData | null;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathPutParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathPutParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathPutParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathPutParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathPutParams = {
     /** Api endpoint in the app */
     path: string;
   };
@@ -324,6 +321,11 @@ declare namespace API {
     domain: string;
     /** ObjectId of the domain pre actuation policy */
     policy: string;
+  };
+
+  type deleteDomainUserBrickapiV1DomainsDomainUsersUserDeleteParams = {
+    domain: string;
+    user: string;
   };
 
   type deleteDomainUserProfileBrickapiV1DomainsDomainUsersUserProfilesProfileDeleteParams = {
@@ -600,6 +602,11 @@ declare namespace API {
     errorMessage?: string;
     showType?: ErrorShowType;
     data?: DomainUserRead | null;
+  };
+
+  type DomainUserUpdate = {
+    /** Isadmin */
+    isAdmin?: boolean | null;
   };
 
   type Empty = {};
@@ -899,6 +906,11 @@ declare namespace API {
     domain: string;
     /** ObjectId of the domain pre actuation policy */
     policy: string;
+  };
+
+  type updateDomainUserBrickapiV1DomainsDomainUsersUserPatchParams = {
+    domain: string;
+    user: string;
   };
 
   type updateDomainUserProfileBrickapiV1DomainsDomainUsersUserProfilesProfilePatchParams = {

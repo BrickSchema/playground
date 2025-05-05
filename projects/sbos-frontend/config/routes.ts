@@ -24,6 +24,7 @@ export default [
   },
   {
     path: '/welcome',
+    layout: true,
     name: 'welcome',
     icon: 'smile',
     component: './Welcome',
@@ -31,6 +32,7 @@ export default [
   {
     // path: '/domain',
     name: 'domain',
+    layout: true,
     icon: 'smile',
     // component: './Domain/DomainList',
     routes: [
@@ -94,6 +96,7 @@ export default [
   },
   {
     name: 'developer',
+    layout: true,
     routes: [
       {
         name: 'apps',
@@ -104,6 +107,7 @@ export default [
   },
   {
     name: 'admin',
+    layout: true,
     routes: [
       {
         name: 'apps',
@@ -118,29 +122,6 @@ export default [
         access: 'isSiteAdmin',
       },
     ]
-  },
-  {
-    path: '/admin',
-    name: 'admin',
-    icon: 'crown',
-    access: 'isSiteAdmin',
-    routes: [
-      {
-        path: '/admin',
-        redirect: '/admin/sub-page',
-      },
-      {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        component: './Admin',
-      },
-    ],
-  },
-  {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
   },
   {
     path: '/',

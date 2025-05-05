@@ -28,6 +28,7 @@ from sbos.playground.schemas.domain import (
     DomainUserProfileRead,
     DomainUserProfileUpdate,
     DomainUserRead,
+    DomainUserUpdate,
 )
 from sbos.playground.schemas.permission import (
     AuthorizedEntities,

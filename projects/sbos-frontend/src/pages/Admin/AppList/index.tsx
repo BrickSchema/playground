@@ -63,13 +63,9 @@ const AppList: React.FC = () => {
         <Card title={app.name} bordered={false}>
           <Typography.Paragraph>{app.description}</Typography.Paragraph>
           <Flex gap="middle" wrap>
-            {app.approved ? (
-              <Button disabled>Approved</Button>
-            ) : (
-              <Button type="primary" onClick={handleApproveApp}>
-                Approve
-              </Button>
-            )}
+            <Button type="primary" onClick={handleApproveApp}>
+              Approve
+            </Button>
             <Button type="primary" onClick={handleBuildApp}>
               Build
             </Button>

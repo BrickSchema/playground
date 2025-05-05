@@ -193,20 +193,22 @@ const Layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
           ],
           icon: <CodeOutlined />,
         });
-        menu.push({
-          name: 'admin',
-          children: [
-            {
-              path: '/admin/apps',
-              name: 'apps'
-            },
-             {
-              path: '/admin/domains',
-              name: 'domains'
-            }
-          ],
-          icon: <ThunderboltOutlined />,
-        });
+        if (access.isSiteAdmin) {
+          menu.push({
+            name: 'admin',
+            children: [
+              {
+                path: '/admin/apps',
+                name: 'apps'
+              },
+              {
+                path: '/admin/domains',
+                name: 'domains'
+              }
+            ],
+            icon: <ThunderboltOutlined/>,
+          });
+        }
         return menu;
       },
     },
@@ -225,7 +227,7 @@ const Layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
         </Flex>
       );
     },
-    actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
+    // actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
     avatarProps: {
       // src: initialState?.currentUser?.avatar,
       title: <AvatarName />,

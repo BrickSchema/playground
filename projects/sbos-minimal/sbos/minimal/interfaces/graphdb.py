@@ -180,7 +180,9 @@ class GraphDB:
     def parse_entity_with_prefixes(value: str, prefixes: dict[str, str]) -> str:
         for full_url, prefix in prefixes.items():
             if value.startswith(full_url):
-                return f"{prefix}:{value[len(full_url):]}"
+                new_value = f"{prefix}:{value[len(full_url):]}"
+                logger.debug("parse prefix: {} -> {}", value, new_value)
+                return new_value
         return value
 
     @staticmethod
@@ -195,6 +197,26 @@ class GraphDB:
                 value = GraphDB.parse_entity_with_prefixes(value, prefixes)
                 d[key].append(value)
         return d
+
+    async def get_repository_prefixes(self, repository: str):
+        headers = {
+            "Accept": "application/x-sparqlstar-results+json, application/sparql-results+json"
+        }
+        resp = await self.client.get(
+            f"/repositories/{repository}/namespaces",
+            headers=headers,
+        )
+        result = resp.json()
+        d = {}
+        for row in result["results"]["bindings"]:
+            prefix = row["prefix"]["value"]
+            if prefix == repository:
+                namespace = row["namespace"]["value"]
+                d[namespace] = prefix
+                break
+        return d
+        # logger.debug(query_str)
+        # return self.parse_prefix(query_str)
 
     async def query(
         self,
@@ -241,6 +263,7 @@ class GraphDB:
         result = resp.json()
         if parse_prefix:
             prefixes = self.parse_prefix(query_str)
+            prefixes.update(await self.get_repository_prefixes(repository))
         else:
             prefixes = {}
         logger.debug(result)

@@ -664,6 +664,72 @@ export async function addDomainUserBrickapiV1DomainsDomainUsersUserPost2(
   });
 }
 
+/** Delete Domain User DELETE /brickapi/v1/domains/${param0}/users/${param1} */
+export async function deleteDomainUserBrickapiV1DomainsDomainUsersUserDelete(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.deleteDomainUserBrickapiV1DomainsDomainUsersUserDeleteParams,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, user: param1, ...queryParams } = params;
+  return request<API.EmptyResp>(`/brickapi/v1/domains/${param0}/users/${param1}`, {
+    method: 'DELETE',
+    params: { ...queryParams },
+    ...(options || {}),
+  });
+}
+
+/** Delete Domain User DELETE /brickapi/v1/domains/${param0}/users/${param1} */
+export async function deleteDomainUserBrickapiV1DomainsDomainUsersUserDelete2(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.deleteDomainUserBrickapiV1DomainsDomainUsersUserDeleteParams,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, user: param1, ...queryParams } = params;
+  return request<API.EmptyResp>(`/brickapi/v1/domains/${param0}/users/${param1}`, {
+    method: 'DELETE',
+    params: { ...queryParams },
+    ...(options || {}),
+  });
+}
+
+/** Update Domain User PATCH /brickapi/v1/domains/${param0}/users/${param1} */
+export async function updateDomainUserBrickapiV1DomainsDomainUsersUserPatch(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.updateDomainUserBrickapiV1DomainsDomainUsersUserPatchParams,
+  body: API.DomainUserUpdate,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, user: param1, ...queryParams } = params;
+  return request<API.DomainUserReadResp>(`/brickapi/v1/domains/${param0}/users/${param1}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** Update Domain User PATCH /brickapi/v1/domains/${param0}/users/${param1} */
+export async function updateDomainUserBrickapiV1DomainsDomainUsersUserPatch2(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.updateDomainUserBrickapiV1DomainsDomainUsersUserPatchParams,
+  body: API.DomainUserUpdate,
+  options?: { [key: string]: any },
+) {
+  const { domain: param0, user: param1, ...queryParams } = params;
+  return request<API.DomainUserReadResp>(`/brickapi/v1/domains/${param0}/users/${param1}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** List Domain User Profile GET /brickapi/v1/domains/${param0}/users/${param1}/profiles */
 export async function listDomainUserProfileBrickapiV1DomainsDomainUsersUserProfilesGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)

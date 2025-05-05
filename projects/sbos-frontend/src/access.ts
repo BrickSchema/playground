@@ -5,8 +5,8 @@ export default function access(
   initialState: { currentUser?: API.UserRead; currentDomainUser?: API.DomainUserRead } | undefined,
 ) {
   const { currentUser, currentDomainUser } = initialState ?? {};
-  const isSiteAdmin = currentUser && currentUser.isSuperuser;
-  const isDomainAdmin = isSiteAdmin || (currentDomainUser && currentDomainUser.isAdmin);
+  const isSiteAdmin: boolean = currentUser && currentUser.isSuperuser || false;
+  const isDomainAdmin: boolean = isSiteAdmin || (currentDomainUser && currentDomainUser.isAdmin) || false;
   return {
     isSiteAdmin,
     isDomainAdmin,

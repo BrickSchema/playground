@@ -4,8 +4,10 @@ import {
   addDomainUserBrickapiV1DomainsDomainUsersUserPost,
   addDomainUserProfileBrickapiV1DomainsDomainUsersUserProfilesPost,
   deleteDomainUserProfileBrickapiV1DomainsDomainUsersUserProfilesProfileDelete,
+  deleteDomainUserBrickapiV1DomainsDomainUsersUserDelete,
   listDomainUserBrickapiV1DomainsDomainUsersGet,
   updateDomainUserProfileBrickapiV1DomainsDomainUsersUserProfilesProfilePatch,
+  updateDomainUserBrickapiV1DomainsDomainUsersUserPatch,
 } from '@/services/brick-server-playground/domains';
 import { listProfilesBrickapiV1ProfilesGet } from '@/services/brick-server-playground/profiles';
 import { usersListUsersBrickapiV1UsersGet } from '@/services/brick-server-playground/users';
@@ -18,7 +20,7 @@ import {
   ProColumns,
   ProFormGroup,
   ProFormList,
-  ProFormSelect,
+  ProFormSelect, ProFormSwitch,
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
@@ -26,8 +28,10 @@ import { Button, Col, Popconfirm, Row, message } from 'antd';
 import hljs from 'highlight.js/lib/core';
 import { filter, fromPairs, map } from 'lodash';
 import React, { RefObject, useRef, useState } from 'react';
+import { useAccess, Access } from 'umi';
 
 const UserList: React.FC = () => {
+  const access = useAccess();
   const domainName = useDomainName();
   const actionRef = useRef<ActionType>();
   const [isAddUserOpen, setIsAddUserOpen] = useState<boolean>(false);
@@ -44,14 +48,29 @@ const UserList: React.FC = () => {
   );
 
   const onClickAddUser = async () => {
+    setCurrentDomainUser(undefined);
     setIsAddUserOpen(true);
   };
 
-  const onFinishAddUser = async (params: { user: string }) => {
-    const result = await addDomainUserBrickapiV1DomainsDomainUsersUserPost({
-      domain: domainName,
-      user: params.user,
-    });
+
+  const onClickEditUser = async (domainUser: API.DomainUserRead) => {
+    setCurrentDomainUser(domainUser);
+    setIsAddUserOpen(true);
+  }
+
+  const onFinishAddUser = async (params: { user: string, is_admin: boolean }) => {
+    let result;
+    if (currentDomainUser) {
+      result = await updateDomainUserBrickapiV1DomainsDomainUsersUserPatch({
+        domain: domainName,
+        user: params.user,
+      }, {isAdmin: params.is_admin});
+    } else {
+      result = await addDomainUserBrickapiV1DomainsDomainUsersUserPost({
+        domain: domainName,
+        user: params.user,
+      });
+    }
     if (result.errorCode !== 'Success') {
       message.error(`Error: ${result.errorCode}`);
     }
@@ -62,6 +81,18 @@ const UserList: React.FC = () => {
   const onCancelAddUser = async () => {
     setIsAddUserOpen(false);
   };
+
+  const onClickDeleteUser = async (domainUser: API.DomainUserRead) => {
+    const result = await deleteDomainUserBrickapiV1DomainsDomainUsersUserDelete({
+      domain: domainName,
+      user: domainUser.user.name,
+    });
+    if (result.errorCode !== 'Success') {
+      message.error(`Error: ${result.errorCode}`);
+    }
+    actionRef.current?.reload();
+  };
+
   const onClickEditProfile = async (
     profile: API.DomainUserProfileRead,
     profileActionRef: RefObject<ActionType>,
@@ -75,11 +106,14 @@ const UserList: React.FC = () => {
     profile: API.DomainUserProfileRead,
     profileActionRef: RefObject<ActionType>,
   ) => {
-    await deleteDomainUserProfileBrickapiV1DomainsDomainUsersUserProfilesProfileDelete({
+    const result = await deleteDomainUserProfileBrickapiV1DomainsDomainUsersUserProfilesProfileDelete({
       domain: domainName,
       user: profile.user.name,
       profile: profile.profile.id,
     });
+    if (result.errorCode !== 'Success') {
+      message.error(`Error: ${result.errorCode}`);
+    }
     profileActionRef?.current?.reload();
   };
   const onFinishEditProfile = async (values: any) => {
@@ -139,12 +173,14 @@ const UserList: React.FC = () => {
       title: 'Operations',
       valueType: 'option',
       render: (text, record, _, action) => [
-        // <a key="add_profile" onClick={() => onClickAddProfile(record)}>Add Profile</a>,
+        <Access accessible={access.isSiteAdmin}>
+          <a key="edit_user" onClick={() => onClickEditUser(record)}>Edit</a>
+        </Access>,
         <Popconfirm
           key="delete"
           title="Delete the user"
           description="Are you sure to delete this user?"
-          onConfirm={async () => {}}
+          onConfirm={async () => onClickDeleteUser(record)}
         >
           <a>Delete</a>
         </Popconfirm>,
@@ -195,7 +231,7 @@ const UserList: React.FC = () => {
         ]}
       />
       <ModalForm
-        title={'Add User to Domain'}
+        title={currentDomainUser ? 'Edit User in Domain' : 'Add User to Domain'}
         open={isAddUserOpen}
         onFinish={onFinishAddUser}
         modalProps={{
@@ -203,7 +239,21 @@ const UserList: React.FC = () => {
           onCancel: onCancelAddUser,
         }}
       >
-        <ProFormSelect
+        {currentDomainUser ? <>
+          <ProFormText
+            label="User"
+            name="user"
+            width="md"
+            disabled
+            initialValue={currentDomainUser?.user?.name || ""}
+          />
+          <ProFormSwitch
+            label="Is Domain Admin"
+            name="is_admin"
+            width="md"
+            initialValue={currentDomainUser?.isAdmin || false}
+          />
+        </> : <ProFormSelect
           label="Select a user"
           name="user"
           request={async () => {
@@ -220,6 +270,8 @@ const UserList: React.FC = () => {
             },
           ]}
         />
+        }
+
       </ModalForm>
       <ModalForm
         title="Set Profile Arguments"

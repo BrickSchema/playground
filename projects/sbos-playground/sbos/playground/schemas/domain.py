@@ -1,3 +1,5 @@
+from typing import Optional
+
 from beanie import PydanticObjectId
 from sbos.minimal.schemas.base import BaseModel
 from sbos.minimal.schemas.domain import DomainRead
@@ -18,6 +20,10 @@ class DomainUserRead(BaseModel):
     domain: DomainRead
     user: UserRead
     is_admin: bool = False
+
+
+class DomainUserUpdate(BaseModel):
+    is_admin: Optional[bool] = None
 
 
 class DomainUserAppArguments(BaseModel):
