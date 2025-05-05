@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Entity Reader/Writer</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .controls { display: flex; align-items: center; gap: 20px; margin: 20px; }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <select id="select_read">
+      <option value="" disabled selected>Loading…</option>
+    </select>
+    <input id="input_read" type="text" disabled/>
+    <button id="button_read">Read</button>
+  </div>
+  <div class="controls">
+    <select id="select_write">
+      <option value="" disabled selected>Loading…</option>
+    </select>
+    <input id="input_write" type="text"/>
+    <button id="button_write">Write</button>
+  </div>
+
+  <script>
+    // Populate dropdown on page load
+    const baseURL = "https://brickserver.ucsd.edu/brickapi/v1/apps/api";
+    const params = new URL(document.location).searchParams;
+    const token = params.get("token");
+    const headers = {
+      "Authorization": `Bearer ${token}`
+    };
+
+    function initSelect(id, entities) {
+      const sel = document.getElementById(id);
+        sel.innerHTML = ''; // clear "Loading…" placeholder
+        entities.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e;
+          opt.textContent = e;
+          sel.appendChild(opt);
+        });
+    }
+
+    async function loadEntities() {
+      try {
+        const resp = await fetch(`${baseURL}/list`, {headers: headers});
+        if (!resp.ok) throw new Error('Network response was not ok');
+        const result = await resp.json(); // expect ["ent1", "ent2", ...]
+        initSelect("select_read", result.data.read[""].concat(result.data.write[""]));
+        initSelect("select_write", result.data.write[""]);
+
+      } catch (err) {
+        console.error(err);
+        alert('Failed to load entities.');
+      }
+    }
+
+    // Call read or write API with the selected entity
+    async function callApi(action) {
+      const entity = document.getElementById(`select_${action}`).value;
+      if (!entity) {
+        alert('Select an entity first.');
+        return;
+      }
+      try {
+        let url = `${baseURL}/${action}?entity_id=${entity}`;
+        if (action === "write") {
+          const value = document.getElementById("input_write").value;
+          url += `&value=${value}`;
+        }
+        const resp = await fetch(url, {headers: headers});
+        if (!resp.ok) throw new Error(`${action} failed`);
+        const result = await resp.json();
+        console.log(result);
+        if (action === "read") {
+          document.getElementById("input_read").value = result.data.results[0].detail;
+        }
+        alert(`${action} succeeded: ${JSON.stringify(result)}`);
+      } catch (err) {
+        console.error(err);
+        alert(`${action} error: ${err.message}`);
+      }
+    }
+
+    document.getElementById('button_read').addEventListener('click', () => callApi('read'));
+    document.getElementById('button_write').addEventListener('click', () => callApi('write'));
+    window.addEventListener('DOMContentLoaded', loadEntities);
+  </script>
+</body>
+</html>
