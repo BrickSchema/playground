@@ -1,0 +1,1408 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../deployment/">
+      
+      
+        <link rel="next" href="../config/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>Initialization - SBOS Playground</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#initialization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="SBOS Playground" class="md-header__button md-logo" aria-label="SBOS Playground" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SBOS Playground
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Initialization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../deployment/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorial/cpsiot25/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="SBOS Playground" class="md-nav__button md-logo" aria-label="SBOS Playground" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SBOS Playground
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Getting started
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Initialization
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Initialization
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup User
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup User">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#register-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Register User
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-superuser" class="md-nav__link">
+    <span class="md-ellipsis">
+      Set Superuser
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup Domain
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup Domain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create Domain
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-user-to-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add User to Domain
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-user-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create User Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assign-profile-to-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assign Profile to User
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup App
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create App
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-app-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upload App Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approve-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Approve App
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-app-by-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build App (by Docker)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-app-to-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add App to Domain
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use App
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install App
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-app-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Set App Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Start App
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../config/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config/db/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Database
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config/auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Authorization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../config/backend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Backend
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tutorials
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/cpsiot25/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Tutorial@CPSIoT25!
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/write_an_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Write a Brick based building app
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/write_a_permission_profile/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Write a Permission Profile
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#setup-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup User
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup User">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#register-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Register User
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-superuser" class="md-nav__link">
+    <span class="md-ellipsis">
+      Set Superuser
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup Domain
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup Domain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create Domain
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-user-to-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add User to Domain
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-user-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create User Profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assign-profile-to-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Assign Profile to User
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Setup App
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create App
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-app-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upload App Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#approve-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Approve App
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-app-by-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build App (by Docker)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-app-to-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add App to Domain
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use App
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Use App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install App
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set-app-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Set App Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      Start App
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">&para;</a></h1>
+<p>In this guide, most of the operations should be done on the swagger API page.
+If you do not change port settings, it should be on <a href="http://localhost:9000/brickapi/v1/docs">http://localhost:9000/brickapi/v1/docs</a>.</p>
+<h2 id="setup-user">Setup User<a class="headerlink" href="#setup-user" title="Permanent link">&para;</a></h2>
+<h3 id="register-user">Register User<a class="headerlink" href="#register-user" title="Permanent link">&para;</a></h3>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Username / Password</label><label for="__tabbed_1_2">Google OAuth2</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>
+<p>Use the API <code>POST /brickapi/v1/auth/register</code> to register user.</p>
+<p><code>email</code>, <code>password</code> and <code>name</code> can be set in the request body.</p>
+<div class="language-json highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user@example.com&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
+</code></pre></div>
+</li>
+<li>
+<p>Use the API <code>POST /brickapi/v1/auth/cookie/login</code> to login the registered user with cookie.</p>
+<p>The <code>username</code> is same as the <code>email</code> set in the last step.</p>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<p>Before using this, ensure that <a href="../config/auth/">Google OAuth2</a> has been setup in the configuration.</p>
+<p>Use the API <code>GET /brickapi/v1/auth/cookie/google/authorize</code> and it will return a json response in the format</p>
+<div class="language-json highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;authorization_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/o/oauth2/v2/auth?foo=bar&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">}</span>
+</code></pre></div>
+<p>Open <code>authorization_url</code> in the browser and authorize with Google Account.
+The page will be redirected back to the <a href="../config/backend/#frontend_url">FRONTEND_URL</a> entry in configuration.
+By default, it is the url of the Swagger API if not set in configuration.</p>
+</div>
+</div>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Use the API <code>GET /brickapi/v1/users/me</code> to check user is successfully registered and logined.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>User can also be registered in the frontend.
+However, it is recommanded to use the Swagger API for convenience of debugging the setup.</p>
+</div>
+<h3 id="set-superuser">Set Superuser<a class="headerlink" href="#set-superuser" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/users/init_superuser</code> to set the current user as superuser.
+This API can only be called when no superuser exist in the system.</p>
+<h2 id="setup-domain">Setup Domain<a class="headerlink" href="#setup-domain" title="Permanent link">&para;</a></h2>
+<h3 id="create-domain">Create Domain<a class="headerlink" href="#create-domain" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>Use the API <code>POST /brickapi/v1/domains/{domain}</code> to create a new domain.</p>
+<p><code>domain</code> should be set to the name of the domain.</p>
+</li>
+<li>
+<p>Use the API <code>GET /brickapi/v1/domains/{domain}/init</code> to init the domain.</p>
+<p><code>domain</code> should be set to the name set in step 1.</p>
+</li>
+<li>
+<p>Use the API <code>GET /brickapi/v1/domains/{domain}/upload</code> to upload a <code>.ttl</code> file.</p>
+<p>An example file <code>center_hall.ttl</code> can be found in <code>projects/sbos-playground/examples/data/</code>.</p>
+</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The uploaded brick schema can be examined in the GraphDB GUI.
+By default, <a href="http://127.0.0.1:37200/">http://127.0.0.1:37200/</a>.</p>
+</div>
+<h3 id="add-user-to-domain">Add User to Domain<a class="headerlink" href="#add-user-to-domain" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/domains/{domain}/users/{user}</code> to add a user to a domain.</p>
+<p><code>domain</code> should be set to the domain name.</p>
+<p><code>user</code> should be set to the email of the user.</p>
+<h3 id="create-user-profile">Create User Profile<a class="headerlink" href="#create-user-profile" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/profiles/</code> to create a user profile.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="language-json highlight"><span class="filename">Request Body</span><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;profile1&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;read&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT ?p WHERE {{ ?e brick:feeds {room} . ?e brick:hasPoint ?p . ?p a ?o . FILTER (?o IN (brick:Temperature_Sensor, brick:Occupancy_Sensor, brick:On_Off_Command, brick:CO2_Sensor, brick:Warm_Cool_Adjust_Sensor)) }}&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">&quot;write&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT ?p WHERE {{ ?e brick:feeds {room} . ?p brick:isPointOf ?e . ?p a brick:Warm_Cool_Adjust_Sensor .}}&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">&quot;arguments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">&quot;room&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brick:Room&quot;</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">}</span>
+</code></pre></div>
+<p>A profile "profile1" will be created. The API will return </p>
+<div class="language-json highlight"><span class="filename">Response Body</span><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;errorCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Success&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;errorMessage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">&quot;showType&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;ObjectId&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;profile1&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nt">&quot;read&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT ?p WHERE {{ ?e brick:feeds {room} . ?e brick:hasPoint ?p . ?p a ?o . FILTER (?o IN (brick:Temperature_Sensor, brick:Occupancy_Sensor, brick:On_Off_Command, brick:CO2_Sensor, brick:Warm_Cool_Adjust_Sensor)) }}&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nt">&quot;write&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT ?p WHERE {{ ?e brick:feeds {room} . ?p brick:isPointOf ?e . ?p a brick:Warm_Cool_Adjust_Sensor .}}&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="nt">&quot;arguments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">      </span><span class="nt">&quot;room&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brick:Room&quot;</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p">}</span>
+</code></pre></div>
+<p>Note that a profile is identified by its <code>id</code> (ObjectId), not by its <code>name</code>
+because there may exist duplicate profile names in the system.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Currently, user profiles are shared among domains. It may be changed in future updates.</p>
+</div>
+<h3 id="assign-profile-to-user">Assign Profile to User<a class="headerlink" href="#assign-profile-to-user" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/domains/{domain}/users/{user}/profiles</code> to assign a user profile to a domain user.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="language-json highlight"><span class="filename">Request Body</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;ObjectId&gt;&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;arguments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">&quot;room&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Center_Hall:101&quot;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>Remember to use the profile id created in the last step.</p>
+</div>
+<h2 id="setup-app">Setup App<a class="headerlink" href="#setup-app" title="Permanent link">&para;</a></h2>
+<h3 id="create-app">Create App<a class="headerlink" href="#create-app" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/apps</code> to create an app.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="language-json highlight"><span class="filename">Request Body</span><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;genie&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">}</span>
+</code></pre></div>
+<p>An app "genie" will be created.</p>
+</div>
+<h3 id="upload-app-data">Upload App Data<a class="headerlink" href="#upload-app-data" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/apps/{app}/submit</code> 
+to submit frontend, backend, permission profile and permission model of an app.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<table>
+<thead>
+<tr>
+<th>Form Argument</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>frontend_file</td>
+<td>An archive (zip, tar) of the frontend files</td>
+</tr>
+<tr>
+<td>backend_file</td>
+<td>An archive (zip, tar) of the backend files</td>
+</tr>
+<tr>
+<td>permission_profile_read</td>
+<td><code>SELECT ?p WHERE {{ ?e brick:feeds {room} . ?e brick:hasPoint ?p . ?p a ?o . FILTER (?o IN (brick:Temperature_Sensor, brick:Occupancy_Sensor, brick:CO2_Sensor, brick:Warm_Cool_Adjust_Sensor)) }}</code></td>
+</tr>
+<tr>
+<td>permission_profile_write</td>
+<td><code>SELECT ?p WHERE {{ ?e brick:feeds {room} . ?e brick:hasPoint ?p . ?p a ?o . FILTER (?o IN (brick:On_Off_Command, brick:Warm_Cool_Adjust_Sensor)) }}</code></td>
+</tr>
+<tr>
+<td>permission_profile_arguments</td>
+<td><code>{"room": "brick:Room",         "sensor": "brick:Temperature_Sensor", "setpoint": "brick:Temperature_Setpoint"}</code></td>
+</tr>
+<tr>
+<td>permission_model</td>
+<td>intersection</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="approve-app">Approve App<a class="headerlink" href="#approve-app" title="Permanent link">&para;</a></h3>
+<p>An app need to be approved before it can be installed by users.</p>
+<p>Use the API <code>POST /brickapi/v1/apps/{app}/approve</code> to approve it.</p>
+<h3 id="build-app-by-docker">Build App (by Docker)<a class="headerlink" href="#build-app-by-docker" title="Permanent link">&para;</a></h3>
+<p>The backend files of an app submitted before should contain a <code>Dockerfile</code>. </p>
+<p>Use the API <code>/brickapi/v1/apps/{app}/build</code> to build the app backend with the <code>Dockerfile</code>.</p>
+<p>Please wait for a while because it takes some time to build the docker image.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A detailed build log is returned by the API. It can be used to verify whether the build succedded.</p>
+</div>
+<h3 id="add-app-to-domain">Add App to Domain<a class="headerlink" href="#add-app-to-domain" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/domains/{domain}/apps/{app}</code> to approve the app in a domain 
+(usually this step is done by a domain admin).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Use the API <code>GET /brickapi/v1/domains/{domain}/apps</code> to list all approved apps in a domain 
+and find whether the app is successfully added.</p>
+</div>
+<h2 id="use-app">Use App<a class="headerlink" href="#use-app" title="Permanent link">&para;</a></h2>
+<h3 id="install-app">Install App<a class="headerlink" href="#install-app" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/users/domains/{domain}/apps/{app}</code> to install an app for a user.</p>
+<h3 id="set-app-arguments">Set App Arguments<a class="headerlink" href="#set-app-arguments" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>/brickapi/v1/users/domains/{domain}/apps/{app}</code> to set the arguments of an app for a user.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<div class="language-json highlight"><span class="filename">Request Body</span><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;room&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Center_Hall:101&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">&quot;sensor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Center_Hall:AH-6.RA-T&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">&quot;setpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Center_Hall:AH-6.EFFHTG-SP&quot;</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="p">}</span>
+</code></pre></div>
+</div>
+<h3 id="start-app">Start App<a class="headerlink" href="#start-app" title="Permanent link">&para;</a></h3>
+<p>Use the API <code>POST /brickapi/v1/users/domains/{domain}/apps/{app}/start</code> to start an app for a user.</p>
+<p>A container named <code>sbos-playground-&lt;app&gt;-&lt;user&gt;-&lt;id&gt;</code> will be created and started. 
+It should be listed in the <code>docker ps</code> command.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "content.code.annotate", "navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.path", "navigation.top", "navigation.sections", "navigation.indexes", "navigation.expand", "toc.follow"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>
