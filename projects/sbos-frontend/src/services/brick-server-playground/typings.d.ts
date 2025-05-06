@@ -75,6 +75,8 @@ declare namespace API {
     description: string;
     /** Approved */
     approved: boolean;
+    /** Updated */
+    updated?: boolean;
   };
 
   type AppReadList = {
@@ -109,6 +111,8 @@ declare namespace API {
     description: string;
     /** Approved */
     approved: boolean;
+    /** Updated */
+    updated?: boolean;
     approvedData?: AppData | null;
     submittedData?: AppData | null;
   };
@@ -130,6 +134,8 @@ declare namespace API {
     description: string;
     /** Approved */
     approved: boolean;
+    /** Updated */
+    updated?: boolean;
     approvedData?: AppData | null;
   };
 
@@ -141,27 +147,27 @@ declare namespace API {
     data?: AppReadWithApprovedData | null;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathHeadParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathHeadParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathHeadParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathHeadParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathOptionsParams = {
+  type appsApiBrickapiV1AppsApiPathHeadParams = {
     /** Api endpoint in the app */
     path: string;
   };

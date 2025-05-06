@@ -255,6 +255,7 @@ class AppRoute:
             db: AsyncDatabase = Depends(get_mongodb),
     ) -> schemas.StandardResponse[schemas.AppReadWithAllData]:
         permission_profile_arguments = json.loads(permission_profile_arguments)
+        app.updated = True
         if app.submitted_data is None:
             app.submitted_data = models.AppData()
         if app.submitted_data.permission_profile is None:
@@ -362,6 +363,7 @@ class AppRoute:
             )
             await approved_permission_profile.save()
 
+        app.updated = False
         app.approved_data.frontend = app.submitted_data.frontend
         app.approved_data.backend = app.submitted_data.backend
         app.approved_data.permission_model = app.submitted_data.permission_model

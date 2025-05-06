@@ -18,6 +18,7 @@ class App(Document):
     description: str = ""
     developer: Link[User] | None = None
     approved: bool = False
+    updated: bool = False
     approved_data: AppData | None = None
     submitted_data: AppData | None = None
 

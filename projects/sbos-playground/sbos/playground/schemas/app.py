@@ -23,6 +23,8 @@ class AppRead(BaseModel):
     name: str
     description: str
     approved: bool
+    updated: bool = False
+
 
 class AppReadWithDeveloper(AppRead):
     developer: UserRead | None
