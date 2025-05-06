@@ -151,7 +151,7 @@ const ProfileList: React.FC = () => {
         pagination={false}
         search={false}
         request={async (params, sort, filter) => {
-          const result = await listProfilesBrickapiV1ProfilesGet();
+          const result = await listProfilesBrickapiV1ProfilesGet({type: "user"});
           return {
             data: result.data?.results || [],
             success: true,

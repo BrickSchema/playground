@@ -1,6 +1,7 @@
 import asyncio
+from typing import Literal
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, Query
 from fastapi_restful.cbv import cbv
 from loguru import logger
 from sbos.minimal.interfaces import AsyncpgTimeseries, GraphDB
@@ -49,8 +50,9 @@ class ProfileRoute:
     @router.get("/")
     async def list_profiles(
         self,
+        type: Literal["app", "user"] = Query("user"),
     ) -> schemas.StandardListResponse[schemas.PermissionProfileRead]:
-        profiles = await models.PermissionProfile.find_all().to_list()
+        profiles = await models.PermissionProfile.find_many(models.PermissionProfile.type == type).to_list()
         return schemas.StandardListResponse(
             results=[
                 schemas.PermissionProfileRead.model_validate(profile.dict())

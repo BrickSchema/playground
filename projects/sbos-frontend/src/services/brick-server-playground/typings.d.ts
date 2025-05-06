@@ -141,27 +141,27 @@ declare namespace API {
     data?: AppReadWithApprovedData | null;
   };
 
-  type appsApiBrickapiV1AppsApiPathPutParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathPutParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathPutParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathPutParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
 
-  type appsApiBrickapiV1AppsApiPathPutParams = {
+  type appsApiBrickapiV1AppsApiPathOptionsParams = {
     /** Api endpoint in the app */
     path: string;
   };
@@ -718,6 +718,10 @@ declare namespace API {
     user: string;
   };
 
+  type listProfilesBrickapiV1ProfilesGetParams = {
+    type?: 'app' | 'user';
+  };
+
   type listResourcesBrickapiV1DomainsDomainResourcesGetParams = {
     domain: string;
   };
@@ -771,6 +775,8 @@ declare namespace API {
     id: string;
     /** Name */
     name?: string;
+    /** Type */
+    type?: 'app' | 'user';
     /** Read */
     read: string;
     /** Write */

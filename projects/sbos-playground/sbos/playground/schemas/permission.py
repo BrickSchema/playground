@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 
 from beanie import PydanticObjectId
 from sbos.minimal.schemas.base import BaseModel, StrEnumMixin
@@ -19,6 +20,7 @@ class PermissionProfileCreate(BaseModel):
 class PermissionProfileRead(BaseModel):
     id: PydanticObjectId
     name: str = ""
+    type: Literal["app", "user"] = "user"
     read: str
     write: str
     arguments: dict[str, str]

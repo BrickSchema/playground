@@ -259,6 +259,7 @@ class AppRoute:
             app.submitted_data = models.AppData()
         if app.submitted_data.permission_profile is None:
             permission_profile_model = models.PermissionProfile(
+                name=f"{app.name}.submitted",
                 read=permission_profile_read,
                 write=permission_profile_write,
                 arguments=permission_profile_arguments,
@@ -342,6 +343,7 @@ class AppRoute:
         )
         if app.approved_data is None:
             approved_permission_profile = models.PermissionProfile(
+                name=f"{app.name}.approved",
                 read=submitted_permission_profile.read,
                 write=submitted_permission_profile.write,
                 arguments=submitted_permission_profile.arguments,

@@ -293,9 +293,9 @@ export async function appsSubmitDataBrickapiV1AppsAppSubmitPost2(
 }
 
 /** Apps:Api Call a backend api of an app. GET /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut(
+export async function appsApiBrickapiV1AppsApiPathOptions(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -307,9 +307,9 @@ export async function appsApiBrickapiV1AppsApiPathPut(
 }
 
 /** Apps:Api Call a backend api of an app. GET /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut2(
+export async function appsApiBrickapiV1AppsApiPathOptions2(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -321,9 +321,9 @@ export async function appsApiBrickapiV1AppsApiPathPut2(
 }
 
 /** Apps:Api Call a backend api of an app. PUT /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut3(
+export async function appsApiBrickapiV1AppsApiPathOptions3(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -335,9 +335,9 @@ export async function appsApiBrickapiV1AppsApiPathPut3(
 }
 
 /** Apps:Api Call a backend api of an app. PUT /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut4(
+export async function appsApiBrickapiV1AppsApiPathOptions4(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -349,9 +349,9 @@ export async function appsApiBrickapiV1AppsApiPathPut4(
 }
 
 /** Apps:Api Call a backend api of an app. POST /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut5(
+export async function appsApiBrickapiV1AppsApiPathOptions5(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -363,9 +363,9 @@ export async function appsApiBrickapiV1AppsApiPathPut5(
 }
 
 /** Apps:Api Call a backend api of an app. POST /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut6(
+export async function appsApiBrickapiV1AppsApiPathOptions6(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -377,9 +377,9 @@ export async function appsApiBrickapiV1AppsApiPathPut6(
 }
 
 /** Apps:Api Call a backend api of an app. DELETE /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut7(
+export async function appsApiBrickapiV1AppsApiPathOptions7(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -391,9 +391,9 @@ export async function appsApiBrickapiV1AppsApiPathPut7(
 }
 
 /** Apps:Api Call a backend api of an app. DELETE /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut8(
+export async function appsApiBrickapiV1AppsApiPathOptions8(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -405,9 +405,9 @@ export async function appsApiBrickapiV1AppsApiPathPut8(
 }
 
 /** Apps:Api Call a backend api of an app. PATCH /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut9(
+export async function appsApiBrickapiV1AppsApiPathOptions9(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;
@@ -419,9 +419,9 @@ export async function appsApiBrickapiV1AppsApiPathPut9(
 }
 
 /** Apps:Api Call a backend api of an app. PATCH /brickapi/v1/apps/api/${param0} */
-export async function appsApiBrickapiV1AppsApiPathPut10(
+export async function appsApiBrickapiV1AppsApiPathOptions10(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.appsApiBrickapiV1AppsApiPathPutParams,
+  params: API.appsApiBrickapiV1AppsApiPathOptionsParams,
   options?: { [key: string]: any },
 ) {
   const { path: param0, ...queryParams } = params;

@@ -335,7 +335,7 @@ const UserList: React.FC = () => {
           label="Select a profile"
           name="profile"
           request={async () => {
-            const result = await listProfilesBrickapiV1ProfilesGet();
+            const result = await listProfilesBrickapiV1ProfilesGet({type: "user"});
             return map(
               filter(result.data?.results || [], (x) => x.name),
               (profile: API.PermissionProfileRead) => ({
